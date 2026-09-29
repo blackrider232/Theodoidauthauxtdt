@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tiến độ Đấu thầu - SCE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
+
+    <!-- Màn hình Đăng nhập -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-blue-800">HỆ THỐNG ĐẤU THẦU SCE</h2>
+                <p class="text-sm text-gray-500 mt-1">Đăng nhập để quản lý và theo dõi tiến độ</p>
+            </div>
+            
+            <div id="loginError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-700 text-sm rounded"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản</label>
+                    <input type="text" id="loginUser" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập tên đăng nhập...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                    <input type="password" id="loginPass" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" onkeypress="if(event.key === 'Enter') handleLogin()">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="rememberMe" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
+                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                        Ghi nhớ đăng nhập
+                    </label>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-md shadow transition mt-2">
+                    Đăng nhập
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Màn hình Ứng dụng chính -->
+    <div id="appScreen" class="hidden">
+        <!-- Header (Sticky - Cố định ở trên cùng) -->
+        <header class="bg-blue-800 text-white shadow sticky top-0 z-40">
+            <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">HỆ THỐNG QUẢN LÝ TIẾN ĐỘ ĐẤU THẦU</h1>
+                    <p class="text-xs text-blue-200">Xúc tiến Đầu tư - SCE (Cập nhật Luật & NĐ mới)</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    
+                    <!-- Nút Khởi tạo đưa lên Header -->
+                    <button onclick="openCreateModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-sm font-bold shadow-md transition transform hover:scale-105" title="Khởi tạo lộ trình mới">
+                        <i class="fas fa-plus-circle"></i> Tạo lộ trình
+                    </button>
+
+                    <button onclick="forceSync()" id="syncStatus" class="hidden items-center gap-1.5 bg-blue-900 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow-inner" title="Bấm để đồng bộ thủ công">
+                        <i class="fas fa-cloud text-blue-300"></i> <span id="syncText">Đã đồng bộ</span>
+                    </button>
+                    
+                    <span id="userBadge" class="bg-blue-900 border border-blue-700 px-3 py-1.5 rounded text-sm font-medium shadow-inner"></span>
+                    <button onclick="handleLogout()" class="text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow">Thoát</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            
+            <!-- Thanh điều hướng Tabs -->
+            <div class="flex border-b mb-6 gap-2 overflow-x-auto">
+                <button onclick="switchTab('projects')" id="tab-projects" class="py-2.5 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">
+                    <i class="fas fa-list-check mr-1.5"></i>Danh sách Lộ trình
+                </button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
+                    <i class="fas fa-sliders mr-1.5"></i>Cấu hình Quy trình
+                </button>
+                <button onclick="switchTab('docs')" id="tab-docs" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
+                    <i class="fas fa-book mr-1.5"></i>Căn cứ triển khai
+                </button>
+                <button onclick="switchTab('users')" id="tab-users" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
+                    <i class="fas fa-users-gear mr-1.5"></i>Quản lý Tài khoản
+                </button>
+            </div>
+
+            <!-- Tab 1: Quản lý Dự án -->
+            <div id="view-projects">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Danh sách các lộ trình đang thực hiện</h2>
+                </div>
+                <div id="projectList" class="space-y-6"></div>
+            </div>
+
+            <!-- Tab 2: Cấu hình Quy trình (Chỉ Admin) -->
+            <div id="view-settings" class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Quản lý các loại Quy trình (Cập nhật Luật Đấu thầu & NĐ 214, NĐ 349)</h2>
+                    <p class="text-xs text-gray-500">Tạo mới, chỉnh sửa hoặc xóa các biểu mẫu quy trình áp dụng tại SCE</p>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded border border-blue-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="flex w-full md:w-auto gap-2">
+                        <select id="configProcessSelector" onchange="renderConfig()" class="border p-2 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white font-bold text-blue-800 min-w-[250px]">
+                        </select>
+                        <button onclick="deleteProcessTemplate()" class="bg-white border border-red-300 text-red-600 hover:bg-red-50 px-3 py-2 rounded text-sm transition" title="Xóa quy trình này"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    <div class="flex w-full md:w-auto gap-2 md:border-l md:pl-4 border-blue-200">
+                        <input type="text" id="newProcessTitle" placeholder="Nhập tên quy trình mới..." class="border p-2 rounded text-sm outline-none w-full md:w-64">
+                        <button onclick="addNewProcessTemplate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition">
+                            <i class="fas fa-plus-circle mr-1"></i>Tạo quy trình
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="configSteps" class="space-y-2 mb-4"></div>
+
+                <div class="flex gap-2 p-3 bg-gray-50 rounded border border-gray-200 mb-6 mt-6">
+                    <input type="text" id="newStepName" placeholder="Tên bước thực hiện mới..." class="border p-2 rounded text-sm flex-1 outline-none">
+                    <input type="number" id="newStepDays" placeholder="Số ngày" class="border p-2 rounded text-sm w-24 text-center outline-none">
+                    <select id="newStepDayType" class="border p-2 rounded text-sm outline-none bg-white w-36">
+                        <option value="calendar">Ngày lịch</option>
+                        <option value="workday">Ngày làm việc</option>
+                    </select>
+                    <button onclick="addConfigStep()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i>Thêm bước</button>
+                </div>
+            </div>
+
+            <!-- Tab 3: Căn cứ triển khai (Chỉ Admin) -->
+            <div id="view-docs" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">Quản lý Căn cứ triển khai</h2>
+                    <p class="text-xs text-gray-500 mb-6">Cấu hình các văn bản pháp quy cập nhật mới nhất (Luật Đấu thầu sửa đổi, NĐ 214/2025/NĐ-CP, NĐ 349/2026/NĐ-CP).</p>
+                    
+                    <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+                        <input type="text" id="newDocNumber" placeholder="Số hiệu (VD: 349/2026/NĐ-CP)" class="border p-2 rounded text-sm outline-none flex-1 focus:ring-1 focus:ring-blue-500">
+                        <input type="text" id="newDocTitle" placeholder="Trích yếu / Tên văn bản" class="border p-2 rounded text-sm outline-none flex-[2] focus:ring-1 focus:ring-blue-500">
+                        <input type="url" id="newDocLink" placeholder="Link tra cứu (tùy chọn)" class="border p-2 rounded text-sm outline-none flex-1 focus:ring-1 focus:ring-blue-500">
+                        <button onclick="addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition"><i class="fas fa-plus mr-1"></i>Thêm văn bản</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3 w-40">Số hiệu / Ký hiệu</th>
+                                    <th class="p-3">Tên văn bản / Trích yếu</th>
+                                    <th class="p-3 w-48">Link tra cứu</th>
+                                    <th class="p-3 w-16 text-center">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Quản lý Tài khoản (Chỉ Admin) -->
+            <div id="view-users" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Tạo tài khoản mới</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                        <input type="text" id="newUserUsername" placeholder="Tên đăng nhập (ID)" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
+                        <input type="password" id="newUserPassword" placeholder="Mật khẩu" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
+                        <input type="text" id="newUserFullname" placeholder="Họ và tên cán bộ" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
+                        <select id="newUserRole" class="border p-2 rounded text-sm outline-none bg-white focus:ring-1 focus:ring-blue-500">
+                            <option value="user">Cán bộ thực hiện</option>
+                            <option value="admin">Quản trị viên (Admin)</option>
+                        </select>
+                    </div>
+                    <button onclick="addNewUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow-sm transition">
+                        <i class="fas fa-user-plus mr-1"></i> Tạo tài khoản
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b">
+                        <h3 class="font-bold text-gray-700 text-sm">Danh sách tài khoản hệ thống</h3>
+                    </div>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Tài khoản (ID)</th>
+                                <th class="p-3">Họ và tên</th>
+                                <th class="p-3">Vai trò</th>
+                                <th class="p-3 text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tạo Dự Án Mới -->
+    <div id="createProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-blue-800">Tạo lộ trình đấu thầu mới</h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Loại quy trình áp dụng</label>
+                    <select id="projType" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên gói thầu / Dự án</label>
+                    <input type="text" id="projName" placeholder="VD: Gói thầu mua sắm trang thiết bị..." class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu thực hiện</label>
+                    <input type="date" id="projStartDate" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                
+                <div class="pt-4 flex justify-end gap-3">
+                    <button onclick="closeCreateModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-5 py-2.5 rounded text-sm font-medium transition">Hủy bỏ</button>
+                    <button onclick="createProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded text-sm font-medium shadow-sm transition">Khởi tạo ngay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo tải dữ liệu -->
+    <div id="loader" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white px-5 py-4 rounded-lg shadow-lg font-medium text-blue-800 flex items-center gap-3">
+            <i class="fas fa-circle-notch fa-spin text-2xl"></i> <span id="loaderText" class="text-base">Đang xác thực và tải dữ liệu...</span>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
+
+        // Cập nhật các bộ quy trình mẫu chuẩn theo NĐ 214/2025/NĐ-CP và NĐ 349/2026/NĐ-CP
+        const defaultTemplates = {
+            duoi100: {
+                title: "Mua sắm giá trị nhỏ (Dưới 100 triệu theo NĐ 349/2026)",
+                steps: [
+                    { name: "Lập và phê duyệt dự toán, nhu cầu mua sắm", days: 2, dayType: "workday" },
+                    { name: "Lựa chọn nhà thầu, thu thập báo giá trực tiếp", days: 3, dayType: "workday" },
+                    { name: "Phê duyệt kết quả và Ký kết hợp đồng/Hóa đơn chứng từ", days: 2, dayType: "workday" }
+                ]
+            },
+            chidinh: {
+                title: "Quy trình Chỉ định thầu rút gọn (Cập nhật mới)",
+                steps: [
+                    { name: "Lập, thẩm định và phê duyệt KHLCNT", days: 3, dayType: "workday" },
+                    { name: "Đăng tải yêu cầu báo giá trên Hệ thống mạng đấu thầu", days: 3, dayType: "workday" },
+                    { name: "Hoàn thiện và thương thảo hợp đồng với nhà thầu", days: 3, dayType: "workday" },
+                    { name: "Phê duyệt kết quả chỉ định thầu", days: 2, dayType: "workday" },
+                    { name: "Ký kết hợp đồng", days: 2, dayType: "workday" }
+                ]
+            },
+            rongrai: {
+                title: "Đấu thầu rộng rãi (Phi tư vấn / Hàng hóa)",
+                steps: [
+                    { name: "Lập, thẩm định và phê duyệt KHLCNT", days: 7, dayType: "workday" },
+                    { name: "Lập E-HSMT", days: 5, dayType: "workday" },
+                    { name: "Thẩm định và phê duyệt E-HSMT", days: 5, dayType: "workday" },
+                    { name: "Đăng tải Thông báo mời thầu (Chuẩn bị E-HSDT)", days: 10, dayType: "calendar" },
+                    { name: "Mở thầu và Đánh giá E-HSDT", days: 15, dayType: "workday" },
+                    { name: "Thương thảo hợp đồng", days: 3, dayType: "workday" },
+                    { name: "Thẩm định, phê duyệt và công khai kết quả", days: 5, dayType: "workday" },
+                    { name: "Ký kết hợp đồng", days: 3, dayType: "workday" }
+                ]
+            },
+            rongrai_cntt: {
+                title: "Đấu thầu rộng rãi (Gói CNTT đặc thù)",
+                steps: [
+                    { name: "Lập, thẩm định và phê duyệt KHLCNT", days: 7, dayType: "workday" },
+                    { name: "Lập E-HSMT kỹ thuật CNTT", days: 7, dayType: "workday" },
+                    { name: "Thẩm định và phê duyệt E-HSMT", days: 5, dayType: "workday" },
+                    { name: "Đăng tải Thông báo mời thầu", days: 15, dayType: "calendar" },
+                    { name: "Mở thầu và Đánh giá E-HSDT (Chấm điểm kỹ thuật)", days: 20, dayType: "workday" },
+                    { name: "Thương thảo hợp đồng", days: 3, dayType: "workday" },
+                    { name: "Thẩm định, phê duyệt và công khai kết quả", days: 5, dayType: "workday" },
+                    { name: "Ký kết hợp đồng", days: 3, dayType: "workday" }
+                ]
+            }
+        };
+
+        // Căn cứ pháp lý cập nhật mới nhất
+        const defaultDocs = [
+            { number: "22/2023/QH15", title: "Luật Đấu thầu (và các Luật sửa đổi, bổ sung liên quan)", link: "" },
+            { number: "214/2025/NĐ-CP", title: "Nghị định quy định chi tiết một số điều và biện pháp thi hành Luật Đấu thầu về lựa chọn nhà thầu", link: "" },
+            { number: "349/2026/NĐ-CP", title: "Nghị định sửa đổi, bổ sung một số điều của các Nghị định quy định chi tiết thi hành Luật Đấu thầu", link: "" }
+        ];
+
+        let db = {
+            users: [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }],
+            processTemplates: {},
+            projects: [],
+            regulatoryDocs: []
+        };
+
+        let currentUser = null;
+        let syncTimeout = null;
+
+        // --- XỬ LÝ KHỞI ĐỘNG & ĐĂNG NHẬP ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedUser = localStorage.getItem('bidAppUser');
+            if (savedUser) {
+                document.getElementById('loaderText').innerText = "Đang đăng nhập tự động...";
+                document.getElementById('loader').style.display = 'flex';
+                
+                await loadDataFromGAS();
+                
+                const parsedUser = JSON.parse(savedUser);
+                const found = db.users.find(u => u.username === parsedUser.username && u.password === parsedUser.password);
+                
+                document.getElementById('loader').style.display = 'none';
+                
+                if (found) {
+                    currentUser = found;
+                    openAppScreen();
+                } else {
+                    localStorage.removeItem('bidAppUser');
+                }
+            }
+        });
+
+        function openAppScreen() {
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            
+            document.getElementById('userBadge').innerHTML = `
+                <i class="fas fa-user-circle mr-1"></i> ${currentUser.fullname} 
+                <span class="text-xs bg-blue-700 px-1.5 py-0.5 rounded ml-1">${currentUser.role === 'admin' ? 'Admin' : 'Cán bộ'}</span>
+            `;
+
+            document.getElementById('syncStatus').classList.replace('hidden', 'flex');
+            document.getElementById('btnCreateProject').classList.replace('hidden', 'flex');
+
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (currentUser.role === 'admin') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            populateProcessDropdowns();
+            switchTab('projects');
+            renderProjects();
+        }
+
+        async function handleLogin() {
+            const userIn = document.getElementById('loginUser').value.trim();
+            const passIn = document.getElementById('loginPass').value.trim();
+            const errBox = document.getElementById('loginError');
+
+            if (!userIn || !passIn) {
+                errBox.innerText = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('loaderText').innerText = "Đang xác thực và tải dữ liệu...";
+            document.getElementById('loader').style.display = 'flex';
+            
+            await loadDataFromGAS();
+
+            const found = db.users.find(u => u.username === userIn && u.password === passIn);
+            document.getElementById('loader').style.display = 'none';
+
+            if (found) {
+                currentUser = found;
+                const rememberMe = document.getElementById('rememberMe').checked;
+                if (rememberMe) {
+                    localStorage.setItem('bidAppUser', JSON.stringify(found));
+                } else {
+                    localStorage.removeItem('bidAppUser');
+                }
+                openAppScreen();
+            } else {
+                errBox.innerText = "Tên đăng nhập hoặc mật khẩu không chính xác.";
+                errBox.classList.add('hidden');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('bidAppUser'); 
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('rememberMe').checked = false;
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('syncStatus').classList.replace('flex', 'hidden');
+            document.getElementById('btnCreateProject').classList.replace('flex', 'hidden');
+        }
+
+        // --- CÁC HÀM XỬ LÝ MODAL TẠO DỰ ÁN ---
+        function openCreateModal() {
+            document.getElementById('projStartDate').valueAsDate = new Date(); 
+            document.getElementById('createProjectModal').classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createProjectModal').classList.add('hidden');
+        }
+
+        function populateProcessDropdowns() {
+            const createSelect = document.getElementById('projType');
+            const configSelect = document.getElementById('configProcessSelector');
+            
+            createSelect.innerHTML = '';
+            configSelect.innerHTML = '';
+
+            for (const key in db.processTemplates) {
+                const title = db.processTemplates[key].title;
+                createSelect.innerHTML += `<option value="${key}">${title}</option>`;
+                configSelect.innerHTML += `<option value="${key}">${title}</option>`;
+            }
+        }
+
+        function switchTab(tab) {
+            ['projects', 'settings', 'docs', 'users'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (view) view.classList.add('hidden');
+                if (btn) btn.className = "py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap";
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).className = "py-2.5 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap";
+
+            if (tab === 'settings') renderConfig();
+            if (tab === 'docs') renderDocs();
+            if (tab === 'users') renderUsers();
+        }
+
+        // --- ĐỒNG BỘ DỮ LIỆU ---
+        async function loadDataFromGAS() {
+            try {
+                const response = await fetch(GAS_URL);
+                const data = await response.json();
+                if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                    db = data;
+                    
+                    if (!db.processTemplates || Object.keys(db.processTemplates).length === 0) {
+                        db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
+                    }
+                    if (!db.users || db.users.length === 0) {
+                        db.users = [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }];
+                    }
+                    if (!db.regulatoryDocs || db.regulatoryDocs.length === 0) {
+                        db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+                    }
+                }
+            } catch (err) {
+                console.error("Lỗi nạp dữ liệu:", err);
+            }
+        }
+
+        async function saveDataToGAS(alertSuccess = false) {
+            const syncIcon = document.querySelector('#syncStatus i');
+            const syncText = document.getElementById('syncText');
+            
+            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-yellow-400";
+            if (syncText) syncText.innerText = "Đang lưu ngầm...";
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(db),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    redirect: 'follow'
+                });
+
+                if (syncIcon) syncIcon.className = "fas fa-check-circle text-green-400";
+                if (syncText) syncText.innerText = "Đã lưu thành công";
+                
+                clearTimeout(syncTimeout);
+                syncTimeout = setTimeout(() => {
+                    if (syncText && syncText.innerText === "Đã lưu thành công") {
+                        syncIcon.className = "fas fa-cloud text-blue-300";
+                        syncText.innerText = "Đã đồng bộ";
+                    }
+                }, 3000);
+
+                if (alertSuccess) alert("Đã đồng bộ dữ liệu thành công!");
+            } catch (err) {
+                console.error("Lỗi khi lưu:", err);
+                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
+                if (syncText) syncText.innerText = "Lỗi mạng (Lưu thất bại)";
+                if (alertSuccess) alert("Có lỗi kết nối hệ thống!");
+            }
+        }
+
+        function forceSync(alertSuccess = false) {
+            saveDataToGAS(alertSuccess);
+        }
+
+        function addCustomDays(dateObj, days, type) {
+            let result = new Date(dateObj);
+            if (type === 'workday') {
+                let added = 0;
+                while (added < days) {
+                    result.setDate(result.getDate() + 1);
+                    if (result.getDay() !== 0 && result.getDay() !== 6) {
+                        added++;
+                    }
+                }
+            } else {
+                result.setDate(result.getDate() + days);
+            }
+            return result;
+        }
+
+        function formatDate(dateInput) {
+            if (!dateInput) return '';
+            let dt;
+            if (dateInput.includes('T')) {
+                dt = new Date(dateInput);
+            } else {
+                const [y, m, d] = dateInput.split('-');
+                dt = new Date(y, m - 1, d);
+            }
+            return `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear()}`;
+        }
+
+        function formatForDateInput(dateInput) {
+            if (!dateInput) return '';
+            let dt;
+            if (dateInput.includes('T')) {
+                dt = new Date(dateInput);
+            } else {
+                return dateInput; 
+            }
+            return `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`;
+        }
+
+        // --- QUẢN LÝ CĂN CỨ TRIỂN KHAI ---
+        function renderDocs() {
+            const tbody = document.getElementById('docsTableBody');
+            tbody.innerHTML = '';
+            if(!db.regulatoryDocs) db.regulatoryDocs = [];
+            
+            if(db.regulatoryDocs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400 italic">Chưa có văn bản pháp quy nào được cấu hình.</td></tr>`;
+                return;
+            }
+
+            db.regulatoryDocs.forEach((doc, index) => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-3">
+                            <input type="text" value="${doc.number}" onchange="updateDoc(${index}, 'number', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm font-medium">
+                        </td>
+                        <td class="p-3">
+                            <input type="text" value="${doc.title}" onchange="updateDoc(${index}, 'title', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm">
+                        </td>
+                        <td class="p-3">
+                            <input type="url" value="${doc.link || ''}" onchange="updateDoc(${index}, 'link', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm" placeholder="https://...">
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteDoc(${index})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addNewDoc() {
+            const number = document.getElementById('newDocNumber').value.trim();
+            const title = document.getElementById('newDocTitle').value.trim();
+            const link = document.getElementById('newDocLink').value.trim();
+
+            if (!number || !title) return alert("Vui lòng nhập Số hiệu và Tên văn bản!");
+            
+            if(!db.regulatoryDocs) db.regulatoryDocs = [];
+            db.regulatoryDocs.push({ number, title, link });
+            
+            document.getElementById('newDocNumber').value = '';
+            document.getElementById('newDocTitle').value = '';
+            document.getElementById('newDocLink').value = '';
+            
+            renderDocs();
+            saveDataToGAS();
+        }
+
+        function updateDoc(index, field, value) {
+            db.regulatoryDocs[index][field] = value;
+            saveDataToGAS();
+        }
+
+        function deleteDoc(index) {
+            if(confirm("Xác nhận xóa văn bản pháp quy này khỏi hệ thống?")) {
+                db.regulatoryDocs.splice(index, 1);
+                renderDocs();
+                saveDataToGAS();
+            }
+        }
+
+        // --- XUẤT EXCEL & IN ẤN ---
+        function exportExcel(pIndex) {
+            const proj = db.projects[pIndex];
+            const processLabel = proj.processTitle || "Quy trình đấu thầu";
+            
+            let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"></head><body>`;
+            
+            tableHtml += `<h3>LỘ TRÌNH THỰC HIỆN: ${proj.name}</h3>`;
+            tableHtml += `<p>Quy trình: ${processLabel} | Phụ trách: ${proj.owner}</p>`;
+            
+            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
+                tableHtml += `<h4>Căn cứ triển khai chung:</h4><ul>`;
+                db.regulatoryDocs.forEach(d => {
+                    tableHtml += `<li><b>${d.number}</b>: ${d.title}</li>`;
+                });
+                tableHtml += `</ul><br>`;
+            }
+            
+            tableHtml += `<table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th style="background-color: #4CAF50; color: white;">STT</th>
+                        <th style="background-color: #4CAF50; color: white;">Nội dung công việc</th>
+                        <th style="background-color: #4CAF50; color: white;">Định mức</th>
+                        <th style="background-color: #4CAF50; color: white;">Hạn chót</th>
+                        <th style="background-color: #4CAF50; color: white;">Trạng thái</th>
+                        <th style="background-color: #4CAF50; color: white;">Tài liệu / Văn bản</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+                
+            proj.steps.forEach((step, idx) => {
+                let timeBudget = "-";
+                if (step.originalDays !== undefined && step.originalDays > 0) {
+                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'Ngày LV' : 'Ngày lịch'}`;
+                }
+                const status = step.completed ? `Đã xong (${step.completedBy})` : 'Chưa xong';
+                
+                let linkText = "";
+                if (step.links && step.links.length > 0) {
+                    linkText = step.links.map(l => `${l.name} (${l.url})`).join(" \n ");
+                } else if (step.link) {
+                    linkText = `Tài liệu (${step.link})`;
+                }
+
+                tableHtml += `
+                    <tr>
+                        <td align="center">${idx + 1}</td>
+                        <td>${step.name}</td>
+                        <td align="center">${timeBudget}</td>
+                        <td align="center">${formatDate(step.deadline)}</td>
+                        <td>${status}</td>
+                        <td>${linkText}</td>
+                    </tr>`;
+            });
+            
+            tableHtml += `</tbody></table></body></html>`;
+
+            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safeName = proj.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+            a.download = `TienDo_${safeName}.xls`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function printProject(pIndex) {
+            const proj = db.projects[pIndex];
+            const processLabel = proj.processTitle || "Quy trình đấu thầu";
+            
+            let html = `<html><head><title>In Tiến độ - ${proj.name}</title>`;
+            html += `<style>
+                body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; }
+                h1 { text-align: center; font-size: 20px; text-transform: uppercase; margin-bottom: 5px; }
+                h2 { text-align: center; font-size: 16px; font-weight: normal; margin-top: 0; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+                th, td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
+                th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
+                .text-center { text-align: center; }
+                .status-done { font-weight: bold; color: #000; }
+                .docs-section { margin-bottom: 15px; font-size: 13px; border-left: 3px solid #666; padding-left: 10px; }
+                .docs-section ul { margin: 5px 0 0 0; padding-left: 20px; }
+            </style></head><body>`;
+            
+            html += `<h1>LỘ TRÌNH THỰC HIỆN ĐẤU THẦU</h1>`;
+            html += `<h2>Tên gói thầu/dự án: <b>${proj.name}</b><br>Loại: ${processLabel} | Phụ trách: ${proj.owner}</h2>`;
+            
+            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
+                html += `<div class="docs-section"><b>Căn cứ triển khai chung:</b><ul>`;
+                db.regulatoryDocs.forEach(d => {
+                    html += `<li style="margin-bottom: 3px;"><b>${d.number}</b> - ${d.title}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+
+            html += `<table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px">STT</th>
+                        <th>Nội dung công việc</th>
+                        <th style="width: 80px">Định mức</th>
+                        <th style="width: 90px">Hạn chót</th>
+                        <th style="width: 140px">Trạng thái</th>
+                        <th style="width: 200px">Văn bản</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            proj.steps.forEach((step, idx) => {
+                let timeBudget = "-";
+                if (step.originalDays !== undefined && step.originalDays > 0) {
+                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}`;
+                }
+                const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:12px">(${step.completedBy})</span>` : 'Chưa xong';
+                
+                let linkText = "";
+                if (step.links && step.links.length > 0) {
+                    linkText = step.links.map(l => `- ${l.name}`).join("<br>");
+                } else if (step.link) {
+                    linkText = `- Tài liệu đính kèm`;
+                }
+
+                html += `
+                    <tr>
+                        <td class="text-center">${idx + 1}</td>
+                        <td>${step.name}</td>
+                        <td class="text-center">${timeBudget}</td>
+                        <td class="text-center">${formatDate(step.deadline)}</td>
+                        <td class="text-center">${status}</td>
+                        <td>${linkText}</td>
+                    </tr>`;
+            });
+            
+            html += `</tbody></table>
+            <div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 13px;">
+                Ngày trích xuất: ${formatDate(new Date().toISOString())}
+            </div>
+            </body></html>`;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 300);
+        }
+
+        // --- QUẢN LÝ LINK ĐÍNH KÈM NHIỀU FILE ---
+        function toggleLinkForm(pIndex, sIndex) {
+            const form = document.getElementById(`link_form_${pIndex}_${sIndex}`);
+            form.classList.toggle('hidden');
+        }
+
+        function addLink(pIndex, sIndex) {
+            const nameInput = document.getElementById(`link_label_${pIndex}_${sIndex}`).value.trim();
+            const urlInput = document.getElementById(`link_url_${pIndex}_${sIndex}`).value.trim();
+
+            if (!urlInput) return alert("Vui lòng nhập đường dẫn (URL) hợp lệ!");
+            const displayName = nameInput || "Tài liệu đính kèm";
+
+            if (!db.projects[pIndex].steps[sIndex].links) db.projects[pIndex].steps[sIndex].links = [];
+
+            db.projects[pIndex].steps[sIndex].links.push({ name: displayName, url: urlInput });
+            renderProjects();
+            saveDataToGAS();
+        }
+
+        function removeLink(pIndex, sIndex, lIndex) {
+            if (confirm("Xác nhận xóa tài liệu đính kèm này?")) {
+                db.projects[pIndex].steps[sIndex].links.splice(lIndex, 1);
+                renderProjects();
+                saveDataToGAS();
+            }
+        }
+
+        // --- RENDER DỮ LIỆU TÀI KHOẢN VÀ CẤU HÌNH ---
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            
+            db.users.forEach((u, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-gray-800">${u.username}</td>
+                    <td class="p-3 text-gray-700">${u.fullname}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-xs ${u.role === 'admin' ? 'bg-purple-100 text-purple-700 font-bold' : 'bg-gray-100 text-gray-600'}">
+                            ${u.role === 'admin' ? 'Quản trị viên' : 'Cán bộ'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right">
+                        ${u.username !== 'admin' ? `
+                            <button onclick="deleteUser(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-trash"></i></button>
+                        ` : '<span class="text-xs text-gray-400 italic">Mặc định</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addNewUser() {
+            const username = document.getElementById('newUserUsername').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            const fullname = document.getElementById('newUserFullname').value.trim();
+            const role = document.getElementById('newUserRole').value;
+
+            if (!username || !password || !fullname) return alert("Vui lòng điền đầy đủ thông tin!");
+            if (db.users.some(u => u.username === username)) return alert("Tên đăng nhập này đã tồn tại!");
+
+            db.users.push({ username, password, fullname, role });
+            
+            document.getElementById('newUserUsername').value = '';
+            document.getElementById('newUserPassword').value = '';
+            document.getElementById('newUserFullname').value = '';
+
+            renderUsers();
+            saveDataToGAS();
+        }
+
+        function deleteUser(index) {
+            if (confirm(`Bạn có chắc muốn xóa tài khoản "${db.users[index].username}"?`)) {
+                db.users.splice(index, 1);
+                renderUsers();
+                saveDataToGAS();
+            }
+        }
+
+        function renderConfig() {
+            const activeType = document.getElementById('configProcessSelector').value;
+            const container = document.getElementById('configSteps');
+            container.innerHTML = '';
+            
+            if (!activeType || !db.processTemplates[activeType]) return;
+            
+            const steps = db.processTemplates[activeType].steps;
+            
+            steps.forEach((step, index) => {
+                const isWorkday = step.dayType === 'workday';
+                container.innerHTML += `
+                    <div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm hover:shadow-md transition">
+                        <span class="font-bold w-6 text-gray-400 text-sm text-center">${index + 1}.</span>
+                        <input type="text" value="${step.name}" onchange="updateConfigStep('${activeType}', ${index}, 'name', this.value)" class="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-sm">
+                        <input type="number" value="${step.days}" onchange="updateConfigStep('${activeType}', ${index}, 'days', this.value)" class="w-16 bg-gray-50 border border-gray-300 rounded p-1 text-center outline-none text-sm font-semibold text-blue-700"> 
+                        <select onchange="updateConfigStep('${activeType}', ${index}, 'dayType', this.value)" class="border-b border-gray-300 bg-transparent text-sm text-gray-600 outline-none p-1">
+                            <option value="calendar" ${!isWorkday ? 'selected' : ''}>Ngày lịch</option>
+                            <option value="workday" ${isWorkday ? 'selected' : ''}>Ngày làm việc</option>
+                        </select>
+                        <button onclick="removeConfigStep('${activeType}', ${index})" class="text-gray-400 hover:text-red-500 ml-2 px-2" title="Xóa bước này"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            });
+            
+            saveDataToGAS();
+        }
+
+        function addNewProcessTemplate() {
+            const title = document.getElementById('newProcessTitle').value.trim();
+            if (!title) return alert("Vui lòng nhập tên quy trình mới!");
+            
+            const newId = 'proc_' + Date.now();
+            db.processTemplates[newId] = { title: title, steps: [] };
+            
+            document.getElementById('newProcessTitle').value = '';
+            populateProcessDropdowns();
+            document.getElementById('configProcessSelector').value = newId;
+            renderConfig();
+        }
+
+        function deleteProcessTemplate() {
+            const activeType = document.getElementById('configProcessSelector').value;
+            if (!activeType) return;
+            
+            const title = db.processTemplates[activeType].title;
+            if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn quy trình "${title}" không?`)) {
+                delete db.processTemplates[activeType];
+                populateProcessDropdowns();
+                renderConfig();
+                saveDataToGAS();
+            }
+        }
+
+        function updateConfigStep(typeKey, index, field, value) {
+            db.processTemplates[typeKey].steps[index][field] = field === 'days' ? (parseInt(value) || 0) : value;
+            saveDataToGAS();
+        }
+
+        function removeConfigStep(typeKey, index) {
+            db.processTemplates[typeKey].steps.splice(index, 1);
+            renderConfig();
+        }
+
+        function addConfigStep() {
+            const activeType = document.getElementById('configProcessSelector').value;
+            if (!activeType) return alert("Vui lòng tạo hoặc chọn một quy trình trước!");
+            
+            const name = document.getElementById('newStepName').value.trim();
+            const days = parseInt(document.getElementById('newStepDays').value);
+            const dayType = document.getElementById('newStepDayType').value;
+            
+            if (name && !isNaN(days)) {
+                db.processTemplates[activeType].steps.push({ name, days, dayType });
+                document.getElementById('newStepName').value = '';
+                document.getElementById('newStepDays').value = '';
+                renderConfig();
+            } else {
+                alert("Vui lòng nhập đủ tên bước và số ngày!");
+            }
+        }
+
+        function createProject() {
+            const name = document.getElementById('projName').value.trim();
+            const startDateStr = document.getElementById('projStartDate').value;
+            const typeKey = document.getElementById('projType').value;
+            
+            if (!name || !startDateStr || !typeKey) return alert("Vui lòng điền đủ thông tin dự án!");
+
+            const selectedTemplate = db.processTemplates[typeKey];
+            const [y, m, d] = startDateStr.split('-');
+            let currentDt = new Date(y, m - 1, d);
+            
+            let steps = selectedTemplate.steps.map(tmpl => {
+                const dType = tmpl.dayType || 'calendar'; 
+                currentDt = addCustomDays(currentDt, tmpl.days, dType);
+                return {
+                    name: tmpl.name,
+                    deadline: currentDt.toISOString(),
+                    completed: false,
+                    links: [], 
+                    completedBy: "",
+                    originalDays: tmpl.days,
+                    originalDayType: dType
+                };
+            });
+
+            db.projects.unshift({
+                id: Date.now(),
+                name: name,
+                processTitle: selectedTemplate.title,
+                startDate: new Date(y, m - 1, d).toISOString(),
+                owner: currentUser.fullname,
+                steps: steps
+            });
+
+            document.getElementById('projName').value = '';
+            closeCreateModal();
+            renderProjects();
+            saveDataToGAS();
+        }
+
+        function updateStepStatus(projIndex, stepIndex, checked) {
+            db.projects[projIndex].steps[stepIndex].completed = checked;
+            db.projects[projIndex].steps[stepIndex].completedBy = checked ? currentUser.fullname : "";
+            renderProjects();
+            saveDataToGAS();
+        }
+
+        function updateProjStep(pIndex, sIndex, field, value) {
+            if (field === 'deadline') {
+                if (!value) return; 
+                const [y, m, d] = value.split('-');
+                const newDeadline = new Date(y, m - 1, d);
+                
+                db.projects[pIndex].steps[sIndex].deadline = newDeadline.toISOString();
+                
+                let currentDt = new Date(newDeadline);
+                for (let k = sIndex + 1; k < db.projects[pIndex].steps.length; k++) {
+                    const step = db.projects[pIndex].steps[k];
+                    currentDt = addCustomDays(currentDt, step.originalDays || 0, step.originalDayType || 'calendar');
+                    step.deadline = currentDt.toISOString();
+                }
+            } else {
+                db.projects[pIndex].steps[sIndex][field] = value;
+            }
+            renderProjects();
+            saveDataToGAS();
+        }
+
+        function addProjStep(pIndex) {
+            const proj = db.projects[pIndex];
+            let newDeadline = new Date();
+            if (proj.steps.length > 0) {
+                newDeadline = new Date(proj.steps[proj.steps.length - 1].deadline);
+                newDeadline.setDate(newDeadline.getDate() + 1);
+            }
+            proj.steps.push({
+                name: "Công việc phát sinh",
+                deadline: newDeadline.toISOString(),
+                completed: false,
+                links: [],
+                completedBy: "",
+                originalDays: 0,
+                originalDayType: "calendar"
+            });
+            renderProjects();
+            saveDataToGAS();
+        }
+
+        function deleteProjStep(pIndex, sIndex) {
+            if (confirm("Xóa công việc này khỏi lộ trình dự án?")) {
+                db.projects[pIndex].steps.splice(sIndex, 1);
+                renderProjects();
+                saveDataToGAS();
+            }
+        }
+
+        function deleteProject(projIndex) {
+            if (confirm("Bạn có chắc chắn muốn xóa toàn bộ lộ trình dự án này?")) {
+                db.projects.splice(projIndex, 1);
+                renderProjects();
+                saveDataToGAS();
+            }
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projectList');
+            container.innerHTML = '';
+
+            if (!db.projects || db.projects.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gray-400 italic bg-white rounded-lg shadow-sm border border-gray-200">Chưa có dự án nào được tạo.</div>`;
+                return;
+            }
+
+            db.projects.forEach((proj, pIndex) => {
+                const isOwner = currentUser.role === 'admin' || currentUser.fullname === proj.owner;
+                const processLabel = proj.processTitle || "Quy trình đấu thầu";
+                const finalDate = proj.steps.length > 0 ? formatDate(proj.steps[proj.steps.length - 1].deadline) : "Chưa xác định";
+                
+                let stepsHtml = proj.steps.map((step, sIndex) => {
+                    const isOverdue = !step.completed && new Date(step.deadline) < new Date(new Date().setHours(0,0,0,0));
+                    const dateColor = step.completed ? 'text-green-600' : (isOverdue ? 'text-red-600 font-bold' : 'text-gray-700');
+                    
+                    const nameHtml = isOwner ? 
+                        `<input type="text" value="${step.name}" onchange="updateProjStep(${pIndex}, ${sIndex}, 'name', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm ${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'}">` : 
+                        `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-sm">${step.name}</div>`;
+                    
+                    // Hiển thị chuẩn DD/MM/YYYY nhưng mở được hộp thoại chọn lịch chuẩn
+                    const dateHtml = isOwner ? 
+                        `<div class="relative inline-flex items-center group cursor-pointer" onclick="try{this.querySelector('input[type=date]').showPicker()}catch(e){}">
+                            <span class="text-sm ${dateColor} whitespace-nowrap border-b border-dashed border-gray-400 pb-0.5" title="Bấm để đổi ngày">
+                                ${formatDate(step.deadline)} 
+                                <i class="fas fa-pencil-alt text-gray-300 group-hover:text-blue-500 text-xs ml-1"></i>
+                            </span>
+                            <input type="date" value="${formatForDateInput(step.deadline)}" onchange="updateProjStep(${pIndex}, ${sIndex}, 'deadline', this.value)" class="absolute w-full h-full opacity-0 cursor-pointer left-0 top-0 pointer-events-none">
+                        </div>` : 
+                        `<span class="text-sm ${dateColor} whitespace-nowrap">${formatDate(step.deadline)}</span>`;
+                    
+                    let timeBudget = "-";
+                    if (step.originalDays !== undefined && step.originalDays > 0) {
+                        const typeLabel = step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch';
+                        timeBudget = `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-medium border border-blue-100">${step.originalDays} ${typeLabel}</span>`;
+                    }
+
+                    if (!step.links) step.links = [];
+                    if (step.link) {
+                        step.links.push({ name: "Tài liệu", url: step.link });
+                        delete step.link;
+                    }
+
+                    let linksDisplayHtml = step.links.map((l, lIndex) => {
+                        return `
+                        <div class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded text-xs mr-1 mb-1 shadow-sm">
+                            <a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[150px]" title="${l.url}">
+                                <i class="fas fa-link mr-1"></i>${l.name}
+                            </a>
+                            ${isOwner ? `<button onclick="removeLink(${pIndex}, ${sIndex},${lIndex})" class="text-blue-300 hover:text-red-500 ml-1 transition" title="Xóa link"><i class="fas fa-times"></i></button>` : ''}
+                        </div>`;
+                    }).join('');
+
+                    const linkInputHtml = isOwner ? `
+                        <div class="mt-1">
+                            <button onclick="toggleLinkForm(${pIndex}, ${sIndex})" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                <i class="fas fa-plus mr-0.5"></i> Thêm tài liệu
+                            </button>
+                            <div id="link_form_${pIndex}_${sIndex}" class="hidden mt-2 p-2.5 bg-gray-50 rounded border border-gray-200 shadow-sm relative">
+                                <input type="text" id="link_label_${pIndex}_${sIndex}" placeholder="Tên hiển thị (VD: QĐ phê duyệt...)" class="w-full mb-1.5 p-1.5 border border-gray-300 rounded outline-none focus:border-blue-500 text-xs">
+                                <input type="url" id="link_url_${pIndex}_${sIndex}" placeholder="https://..." class="w-full mb-2 p-1.5 border border-gray-300 rounded outline-none focus:border-blue-500 text-xs">
+                                <div class="flex gap-2">
+                                    <button onclick="addLink(${pIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium">Lưu link</button>
+                                    <button onclick="toggleLinkForm(${pIndex}, ${sIndex})" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">Hủy</button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : '';
+                    
+                    const actionHtml = isOwner ? 
+                        `<td class="p-2 text-center align-top"><button onclick="deleteProjStep(${pIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 p-1.5 rounded" title="Xóa bước này"><i class="fas fa-trash"></i></button></td>` : '';
+                    
+                    return `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-3 w-12 text-center align-top">
+                            <input type="checkbox" class="w-4 h-4 cursor-pointer accent-blue-600 mt-1" 
+                                ${step.completed ? 'checked' : ''} 
+                                onchange="updateStepStatus(${pIndex}, ${sIndex}, this.checked)">
+                        </td>
+                        <td class="p-3 align-top">
+                            ${nameHtml}
+                            ${step.completedBy ? `<div class="text-xs text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Xác nhận: ${step.completedBy}</div>` : ''}
+                        </td>
+                        <td class="p-3 text-center whitespace-nowrap align-top">${timeBudget}</td>
+                        <td class="p-3 align-top">${dateHtml}</td>
+                        <td class="p-3 align-top">
+                            <div class="flex flex-wrap">${linksDisplayHtml}</div>
+                            ${linkInputHtml}
+                        </td>
+                        ${actionHtml}
+                    </tr>
+                    `;
+                }).join('');
+
+                const addBtnHtml = isOwner ? `
+                    <tr class="bg-blue-50 border-t border-blue-100">
+                        <td colspan="6" class="p-2 text-center">
+                            <button onclick="addProjStep(${pIndex})" class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="fas fa-plus-circle mr-1"></i> Thêm công việc mới vào dự án này</button>
+                        </td>
+                    </tr>
+                ` : '';
+
+                const deleteProjBtn = isOwner ? `
+                    <button onclick="deleteProject(${pIndex})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition bg-white border border-gray-200 shadow-sm ml-2" title="Xóa toàn bộ dự án">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                ` : '';
+
+                let docsHtml = "";
+                if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
+                    docsHtml = `<div class="mt-3 bg-indigo-50/50 p-2.5 rounded border border-indigo-100 text-xs">
+                        <span class="font-semibold text-indigo-800"><i class="fas fa-book mr-1"></i>Căn cứ triển khai chung:</span>
+                        <ul class="mt-1 space-y-0.5 text-gray-600 ml-4 list-disc">
+                            ${db.regulatoryDocs.map(d => `<li>${d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 hover:underline">` : ''}<b>${d.number}</b> - ${d.title}${d.link ? `</a>` : ''}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-blue-600 overflow-hidden">
+                        <div class="bg-gray-50 px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 gap-3">
+                            <div class="flex-1 w-full">
+                                <div class="flex justify-between items-start w-full">
+                                    <h3 class="font-bold text-base text-blue-900">${proj.name}</h3>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="inline-block bg-white border border-gray-300 text-gray-700 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${processLabel}</span>
+                                    Dự kiến ký HĐ: <span class="font-semibold text-gray-800">${finalDate}</span> 
+                                    | Phụ trách: <span class="text-gray-700 font-medium">${proj.owner}</span>
+                                </div>
+                                ${docsHtml}
+                            </div>
+                            <div class="flex items-center gap-1.5 self-end md:self-center mt-2 md:mt-0">
+                                <button onclick="printProject(${pIndex})" class="text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-3 py-1.5 rounded transition border border-blue-200 bg-white shadow-sm text-sm font-medium">
+                                    <i class="fas fa-print mr-1"></i> In
+                                </button>
+                                <button onclick="exportExcel(${pIndex})" class="text-green-600 hover:bg-green-50 hover:text-green-700 px-3 py-1.5 rounded transition border border-green-200 bg-white shadow-sm text-sm font-medium">
+                                    <i class="fas fa-file-excel mr-1"></i> Xuất Excel
+                                </button>
+                                ${deleteProjBtn}
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
+                                    <tr>
+                                        <th class="p-3 text-center w-12">Xong</th>
+                                        <th class="p-3">Nội dung công việc</th>
+                                        <th class="p-3 text-center w-28">Định mức</th>
+                                        <th class="p-3 w-36">Hạn chót</th>
+                                        <th class="p-3 min-w-[200px]">Hồ sơ đính kèm</th>
+                                        ${isOwner ? '<th class="p-3 w-12 text-center">Xóa</th>' : ''}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${stepsHtml}
+                                    ${addBtnHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
