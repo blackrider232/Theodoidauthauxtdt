@@ -3,183 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Tiến độ Đấu thầu - SCE</title>
+    <title>Quản trị Đấu thầu - SCE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Thư viện Kéo thả (SortableJS) -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
+<body class="bg-gray-100 min-h-screen text-gray-800 font-sans">
 
     <!-- Màn hình Đăng nhập -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-200 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-blue-800">HỆ THỐNG ĐẤU THẦU SCE</h2>
-                <p class="text-sm text-gray-500 mt-1">Đăng nhập để quản lý và theo dõi tiến độ</p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png" class="h-16 mx-auto mb-3 opacity-80" alt="Logo">
+                <h2 class="text-2xl font-bold text-blue-900">HỆ THỐNG SCE</h2>
+                <p class="text-sm text-gray-500 mt-1">Quản trị Tiến độ & Dữ liệu Đấu thầu</p>
             </div>
-            
             <div id="loginError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-700 text-sm rounded text-center font-medium"></div>
-
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản</label>
-                    <input type="text" id="loginUser" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập tên đăng nhập...">
+                    <input type="text" id="loginUser" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-                    <input type="password" id="loginPass" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" onkeypress="if(event.key === 'Enter') handleLogin()">
+                    <input type="password" id="loginPass" class="w-full border rounded-md p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.key === 'Enter') handleLogin()">
                 </div>
                 <div class="flex items-center">
                     <input type="checkbox" id="rememberMe" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">
-                        Ghi nhớ đăng nhập
-                    </label>
+                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">Ghi nhớ đăng nhập</label>
                 </div>
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-md shadow transition mt-2">
-                    Đăng nhập
-                </button>
+                <button onclick="handleLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 rounded-md shadow transition mt-2">Đăng nhập hệ thống</button>
             </div>
         </div>
     </div>
 
-    <!-- Màn hình Ứng dụng chính -->
+    <!-- Màn hình Ứng dụng -->
     <div id="appScreen" class="hidden">
-        <!-- Header (Sticky) -->
-        <header class="bg-blue-800 text-white shadow sticky top-0 z-40">
-            <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">HỆ THỐNG QUẢN LÝ TIẾN ĐỘ ĐẤU THẦU</h1>
-                    <p class="text-xs text-blue-200">Xúc tiến Đầu tư - SCE</p>
+                    <h1 class="text-lg font-bold leading-tight tracking-wide">QUẢN TRỊ ĐẤU THẦU <span class="bg-blue-700 px-2 py-0.5 rounded text-xs ml-2">PRO</span></h1>
+                    <p class="text-xs text-blue-200 mt-0.5">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-sm font-bold shadow-md transition transform hover:scale-105" title="Khởi tạo nhiệm vụ mới">
+                    <button onclick="openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded text-sm font-bold shadow transition">
                         <i class="fas fa-folder-plus"></i> Tạo Nhiệm vụ
                     </button>
-
-                    <button onclick="forceSync()" id="syncStatus" class="hidden items-center gap-1.5 bg-blue-900 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow-inner" title="Bấm để lưu thủ công">
+                    <button onclick="forceSync()" id="syncStatus" class="flex items-center gap-1 bg-blue-800 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer">
                         <i class="fas fa-cloud text-blue-300"></i> <span id="syncText">Đã đồng bộ</span>
                     </button>
-                    
-                    <button onclick="openProfileModal()" id="userBadge" class="bg-blue-900 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-sm font-medium shadow-inner transition cursor-pointer flex items-center gap-1.5 title='Đổi thông tin cá nhân'"></button>
-                    
-                    <button onclick="handleLogout()" class="text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow">Thoát</button>
+                    <button onclick="openProfileModal()" id="userBadge" class="bg-blue-800 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-sm font-medium transition flex items-center gap-1.5"></button>
+                    <button onclick="handleLogout()" class="text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </header>
 
-        <div class="max-w-6xl mx-auto px-4 py-6">
-            <!-- Tabs -->
-            <div class="flex border-b mb-6 gap-2 overflow-x-auto">
-                <button onclick="switchTab('projects')" id="tab-projects" class="py-2.5 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap">
-                    <i class="fas fa-tasks mr-1.5"></i>Tiến độ Nhiệm vụ
-                </button>
-                <button onclick="switchTab('settings')" id="tab-settings" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
-                    <i class="fas fa-sliders mr-1.5"></i>Cấu hình Quy trình
-                </button>
-                <button onclick="switchTab('docs')" id="tab-docs" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
-                    <i class="fas fa-book mr-1.5"></i>Căn cứ triển khai
-                </button>
-                <button onclick="switchTab('users')" id="tab-users" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap">
-                    <i class="fas fa-users-gear mr-1.5"></i>Quản lý Tài khoản
-                </button>
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            
+            <div class="flex border-b border-gray-300 mb-6 gap-2 overflow-x-auto">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="py-2.5 px-4 font-semibold text-blue-700 border-b-2 border-blue-700 whitespace-nowrap"><i class="fas fa-chart-pie mr-1.5"></i>Tổng quan</button>
+                <button onclick="switchTab('projects')" id="tab-projects" class="py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap"><i class="fas fa-tasks mr-1.5"></i>Tiến độ Dự án</button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap"><i class="fas fa-sliders mr-1.5"></i>Quy trình</button>
+                <button onclick="switchTab('docs')" id="tab-docs" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap"><i class="fas fa-book mr-1.5"></i>Căn cứ pháp lý</button>
+                <button onclick="switchTab('users')" id="tab-users" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 hover:text-blue-600 whitespace-nowrap"><i class="fas fa-users-gear mr-1.5"></i>Tài khoản</button>
             </div>
 
-            <!-- VIEW: DỰ ÁN -->
-            <div id="view-projects">
+            <!-- TAB: DASHBOARD -->
+            <div id="view-dashboard">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Báo cáo Giao ban</h2>
+                    <button onclick="exportGlobalExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2"><i class="fas fa-file-excel"></i> Xuất Báo cáo Excel</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Nhiệm vụ Đang chạy</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="dashActiveMissions">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Công việc Quá hạn</p>
+                        <h3 class="text-3xl font-bold text-red-600" id="dashOverdue">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Tổng Gói thầu Đã xong</p>
+                        <h3 class="text-3xl font-bold text-gray-800" id="dashCompletedPkgs">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-yellow-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Tổng Tiết kiệm đấu thầu</p>
+                        <h3 class="text-2xl font-bold text-green-700 mt-1" id="dashSavings">0 đ</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: QUẢN LÝ DỰ ÁN -->
+            <div id="view-projects" class="hidden">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="flex gap-2 w-full md:w-1/2">
+                        <div class="relative flex-1">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="searchInput" onkeyup="renderMissions()" placeholder="Tìm kiếm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50">
+                        </div>
+                        <select id="filterStatus" onchange="renderMissions()" class="border rounded-md px-3 py-2 text-sm outline-none bg-gray-50">
+                            <option value="active">Đang thực hiện</option>
+                            <option value="archived">Đã lưu trữ (Archive)</option>
+                            <option value="all">Tất cả</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="projectList" class="space-y-8"></div>
             </div>
 
-            <!-- VIEW: CẤU HÌNH -->
+            <!-- TAB: CẤU HÌNH -->
             <div id="view-settings" class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <div class="mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">Quản lý các loại Quy trình (Kéo thả để sắp xếp)</h2>
-                    <p class="text-xs text-gray-500">Tạo mới, chỉnh sửa, kéo thả sắp xếp hoặc xóa các biểu mẫu quy trình áp dụng tại SCE</p>
+                <!-- Nội dung giữ nguyên như cũ, chỉ làm đẹp CSS -->
+                <div class="mb-4 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">Quản lý các loại Quy trình</h2>
+                        <p class="text-xs text-gray-500">Tạo mới, chỉnh sửa, kéo thả sắp xếp quy trình</p>
+                    </div>
                 </div>
-                
-                <div class="bg-blue-50 p-4 rounded border border-blue-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
                     <div class="flex w-full md:w-auto gap-2">
-                        <select id="configProcessSelector" onchange="renderConfig()" class="border p-2 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white font-bold text-blue-800 min-w-[250px]"></select>
+                        <select id="configProcessSelector" onchange="renderConfig()" class="border border-gray-300 p-2 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white font-bold text-blue-800 min-w-[250px]"></select>
                         <button onclick="deleteProcessTemplate()" class="bg-white border border-red-300 text-red-600 hover:bg-red-50 px-3 py-2 rounded text-sm transition" title="Xóa quy trình này"><i class="fas fa-trash-alt"></i></button>
                     </div>
-                    <div class="flex w-full md:w-auto gap-2 md:border-l md:pl-4 border-blue-200">
-                        <input type="text" id="newProcessTitle" placeholder="Nhập tên quy trình mới..." class="border p-2 rounded text-sm outline-none w-full md:w-64">
-                        <button onclick="addNewProcessTemplate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition">
-                            <i class="fas fa-plus-circle mr-1"></i>Tạo quy trình
-                        </button>
+                    <div class="flex w-full md:w-auto gap-2 md:border-l md:pl-4 border-gray-300">
+                        <input type="text" id="newProcessTitle" placeholder="Nhập tên quy trình mới..." class="border border-gray-300 p-2 rounded text-sm outline-none w-full md:w-64">
+                        <button onclick="addNewProcessTemplate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition">Tạo quy trình</button>
                     </div>
                 </div>
-                
                 <div id="configSteps" class="space-y-2 mb-4"></div>
-
-                <div class="flex gap-2 p-3 bg-gray-50 rounded border border-gray-200 mb-6 mt-6">
-                    <input type="text" id="newStepName" placeholder="Tên bước thực hiện mới..." class="border p-2 rounded text-sm flex-1 outline-none">
-                    <input type="number" id="newStepDays" placeholder="Số ngày" class="border p-2 rounded text-sm w-24 text-center outline-none">
-                    <select id="newStepDayType" class="border p-2 rounded text-sm outline-none bg-white w-36">
+                <div class="flex gap-2 p-3 bg-blue-50 rounded border border-blue-100 mt-6">
+                    <input type="text" id="newStepName" placeholder="Tên bước thực hiện mới..." class="border border-white p-2 rounded text-sm flex-1 outline-none">
+                    <input type="number" id="newStepDays" placeholder="Số ngày" class="border border-white p-2 rounded text-sm w-24 text-center outline-none">
+                    <select id="newStepDayType" class="border border-white p-2 rounded text-sm outline-none w-36">
                         <option value="calendar">Ngày lịch</option>
                         <option value="workday">Ngày làm việc</option>
                     </select>
-                    <button onclick="addConfigStep()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"><i class="fas fa-plus mr-1"></i>Thêm bước</button>
+                    <button onclick="addConfigStep()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">Thêm bước</button>
                 </div>
             </div>
 
-            <!-- VIEW: CĂN CỨ TRIỂN KHAI -->
+            <!-- TAB: CĂN CỨ -->
             <div id="view-docs" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-2">Quản lý Căn cứ triển khai</h2>
-                    <p class="text-xs text-gray-500 mb-6">Cấu hình các văn bản pháp quy dùng chung (Luật, Nghị định).</p>
-                    
-                    <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
-                        <input type="text" id="newDocNumber" placeholder="Số hiệu (VD: 349/2026/NĐ-CP)" class="border p-2 rounded text-sm outline-none flex-1 focus:ring-1 focus:ring-blue-500">
-                        <input type="text" id="newDocTitle" placeholder="Trích yếu / Tên văn bản" class="border p-2 rounded text-sm outline-none flex-[2] focus:ring-1 focus:ring-blue-500">
-                        <input type="url" id="newDocLink" placeholder="Link tra cứu (tùy chọn)" class="border p-2 rounded text-sm outline-none flex-1 focus:ring-1 focus:ring-blue-500">
-                        <button onclick="addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition"><i class="fas fa-plus mr-1"></i>Thêm văn bản</button>
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">Căn cứ triển khai chung</h2>
+                    <div class="flex gap-3 mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+                        <input type="text" id="newDocNumber" placeholder="Số hiệu..." class="border p-2 rounded text-sm outline-none flex-1">
+                        <input type="text" id="newDocTitle" placeholder="Tên văn bản..." class="border p-2 rounded text-sm outline-none flex-[2]">
+                        <input type="url" id="newDocLink" placeholder="Link..." class="border p-2 rounded text-sm outline-none flex-1">
+                        <button onclick="addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"><i class="fas fa-plus"></i></button>
                     </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 w-40">Số hiệu</th>
-                                    <th class="p-3">Tên văn bản</th>
-                                    <th class="p-3 w-48">Link</th>
-                                    <th class="p-3 w-16 text-center">Xóa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="docsTableBody"></tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                            <tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link</th><th class="p-3 w-16 text-center">Xóa</th></tr>
+                        </thead>
+                        <tbody id="docsTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- VIEW: TÀI KHOẢN -->
+            <!-- TAB: USERS -->
             <div id="view-users" class="hidden space-y-6">
+                <!-- Giữ nguyên cấu trúc Tab Users của bản trước -->
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">Tạo tài khoản mới</h2>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Tạo tài khoản</h2>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                        <input type="text" id="newUserUsername" placeholder="Tên đăng nhập (ID)" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
-                        <input type="password" id="newUserPassword" placeholder="Mật khẩu" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
-                        <input type="text" id="newUserFullname" placeholder="Họ và tên cán bộ" class="border p-2 rounded text-sm outline-none focus:ring-1 focus:ring-blue-500">
-                        <select id="newUserRole" class="border p-2 rounded text-sm outline-none bg-white focus:ring-1 focus:ring-blue-500">
+                        <input type="text" id="newUserUsername" placeholder="Tên đăng nhập" class="border p-2 rounded text-sm outline-none">
+                        <input type="password" id="newUserPassword" placeholder="Mật khẩu" class="border p-2 rounded text-sm outline-none">
+                        <input type="text" id="newUserFullname" placeholder="Họ và tên cán bộ" class="border p-2 rounded text-sm outline-none">
+                        <select id="newUserRole" class="border p-2 rounded text-sm outline-none bg-white">
                             <option value="user">Cán bộ thực hiện</option>
                             <option value="leader">Lãnh đạo (Xem tất cả)</option>
                             <option value="admin">Quản trị viên (Admin)</option>
                         </select>
                     </div>
-                    <button onclick="addNewUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow-sm transition">
-                        <i class="fas fa-user-plus mr-1"></i> Tạo tài khoản
-                    </button>
+                    <button onclick="addNewUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow-sm">Tạo tài khoản</button>
                 </div>
-
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                            <tr>
-                                <th class="p-3">Tài khoản (ID)</th>
-                                <th class="p-3">Họ và tên</th>
-                                <th class="p-3">Vai trò</th>
-                                <th class="p-3 text-right">Thao tác</th>
-                            </tr>
+                            <tr><th class="p-3">ID</th><th class="p-3">Họ và tên</th><th class="p-3">Vai trò</th><th class="p-3 text-right">Thao tác</th></tr>
                         </thead>
                         <tbody id="userTableBody"></tbody>
                     </table>
@@ -188,115 +191,79 @@
         </div>
     </div>
 
-    <!-- MODAL TẠO NHIỆM VỤ (Cấp 1) -->
+    <!-- MODAL NHIỆM VỤ, GÓI THẦU, USER, LỊCH SỬ... (Chứa ở cuối) -->
+    <!-- (Đã tích hợp Modal Tài chính, Log vào hàm render trực tiếp để rút gọn HTML) -->
+    
+    <!-- Modal Lịch sử & Tài chính Gói thầu -->
+    <div id="financeLogModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-file-invoice-dollar mr-2 text-blue-600"></i>Tài chính & Lịch sử Gói thầu</h2>
+                <button onclick="closeFinanceLogModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">Giá Dự toán (VNĐ)</label>
+                    <input type="text" id="finEstimate" class="w-full border border-gray-300 p-2 rounded text-sm font-bold text-blue-700 outline-none focus:ring-1 focus:ring-blue-500" onkeyup="formatCurrencyInput(this)">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">Giá Trúng thầu (VNĐ)</label>
+                    <input type="text" id="finWinning" class="w-full border border-gray-300 p-2 rounded text-sm font-bold text-green-700 outline-none focus:ring-1 focus:ring-green-500" onkeyup="formatCurrencyInput(this)">
+                </div>
+                <div class="col-span-2 flex justify-end">
+                    <button onclick="saveFinance()" class="bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-700">Lưu Tài chính</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-bold text-gray-700 mb-2"><i class="fas fa-history mr-1"></i>Nhật ký thay đổi (Activity Log)</h3>
+                <div id="activityLogs" class="bg-gray-100 p-3 rounded-lg border border-gray-200 h-48 overflow-y-auto text-xs font-mono text-gray-600 space-y-1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Các Modal tạo Mới -->
     <div id="createMissionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-emerald-700"><i class="fas fa-folder-plus mr-2"></i>Tạo Nhiệm vụ mới</h2>
-                <button onclick="closeCreateMissionModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên Nhiệm vụ tổng</label>
-                    <input type="text" id="missionName" placeholder="VD: Triển khai ứng dụng phần mềm SCE..." class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Thời hạn hoàn thành nhiệm vụ</label>
-                    <input type="date" id="missionDeadline" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div class="pt-4 flex justify-end gap-3">
-                    <button onclick="closeCreateMissionModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded text-sm font-medium">Hủy bỏ</button>
-                    <button onclick="createMission()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded text-sm font-medium">Tạo Nhiệm vụ</button>
-                </div>
-            </div>
+            <h2 class="text-lg font-bold text-emerald-700 mb-4 pb-2 border-b">Tạo Nhiệm vụ mới</h2>
+            <input type="text" id="missionName" placeholder="Tên Nhiệm vụ..." class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="date" id="missionDeadline" class="w-full border p-2.5 rounded text-sm mb-4">
+            <div class="flex justify-end gap-3"><button onclick="closeCreateMissionModal()" class="px-4 py-2 border rounded text-sm">Hủy</button><button onclick="createMission()" class="px-4 py-2 bg-emerald-600 text-white rounded text-sm">Tạo</button></div>
         </div>
     </div>
 
-    <!-- MODAL TẠO GÓI THẦU (Cấp 2) -->
     <div id="createPackageModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-blue-800">Thêm Gói thầu vào Nhiệm vụ</h2>
-                <button onclick="closeCreatePackageModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Loại quy trình áp dụng</label>
-                    <select id="projType" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"></select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên gói thầu</label>
-                    <input type="text" id="projName" placeholder="VD: Gói thầu mua sắm máy chủ..." class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
-                    <input type="date" id="projStartDate" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="pt-4 flex justify-end gap-3">
-                    <button onclick="closeCreatePackageModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded text-sm font-medium">Hủy bỏ</button>
-                    <button onclick="createPackage()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded text-sm font-medium">Thêm gói thầu</button>
-                </div>
-            </div>
+            <h2 class="text-lg font-bold text-blue-800 mb-4 pb-2 border-b">Thêm Gói thầu</h2>
+            <select id="projType" class="w-full border p-2.5 rounded text-sm mb-3 bg-white"></select>
+            <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="date" id="projStartDate" class="w-full border p-2.5 rounded text-sm mb-3">
+            <select id="pkgOwner" class="w-full border p-2.5 rounded text-sm mb-4 bg-white"></select>
+            <div class="flex justify-end gap-3"><button onclick="closeCreatePackageModal()" class="px-4 py-2 border rounded text-sm">Hủy</button><button onclick="createPackage()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Thêm</button></div>
         </div>
     </div>
-
-    <!-- MODAL ĐỔI THÔNG TIN CÁ NHÂN -->
+    
     <div id="profileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-user-edit mr-2 text-blue-600"></i>Cài đặt tài khoản</h2>
-                <button onclick="closeProfileModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên hiển thị (Họ và tên)</label>
-                    <input type="text" id="profileFullname" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Đổi mật khẩu mới</label>
-                    <input type="password" id="profilePassword" placeholder="Để trống nếu không muốn đổi" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="pt-4 flex justify-end gap-3">
-                    <button onclick="closeProfileModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-medium">Đóng</button>
-                    <button onclick="saveProfile()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">Lưu thay đổi</button>
-                </div>
-            </div>
+            <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Cài đặt tài khoản</h2>
+            <input type="text" id="profileFullname" class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="password" id="profilePassword" placeholder="Mật khẩu mới (Tùy chọn)" class="w-full border p-2.5 rounded text-sm mb-4">
+            <div class="flex justify-end gap-3"><button onclick="closeProfileModal()" class="px-4 py-2 border rounded text-sm">Đóng</button><button onclick="saveProfile()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Lưu</button></div>
         </div>
     </div>
-
-    <!-- MODAL SỬA TÀI KHOẢN (CHO ADMIN) -->
+    
     <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-user-cog mr-2 text-purple-600"></i>Sửa thông tin tài khoản</h2>
-                <button onclick="closeEditUserModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập (ID)</label>
-                    <input type="text" id="editUserUsername" disabled class="w-full border border-gray-300 bg-gray-100 p-2.5 rounded text-sm outline-none text-gray-500 cursor-not-allowed">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên cán bộ</label>
-                    <input type="text" id="editUserFullname" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
-                    <select id="editUserRole" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        <option value="user">Cán bộ thực hiện</option>
-                        <option value="leader">Lãnh đạo (Xem tất cả)</option>
-                        <option value="admin">Quản trị viên (Admin)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới (Tùy chọn)</label>
-                    <input type="password" id="editUserPassword" placeholder="Để trống nếu giữ nguyên" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="pt-4 flex justify-end gap-3">
-                    <button onclick="closeEditUserModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-medium">Đóng</button>
-                    <button onclick="saveEditUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">Lưu thay đổi</button>
-                </div>
-            </div>
+            <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Sửa tài khoản</h2>
+            <input type="text" id="editUserUsername" disabled class="w-full border bg-gray-100 p-2.5 rounded text-sm mb-3">
+            <input type="text" id="editUserFullname" class="w-full border p-2.5 rounded text-sm mb-3">
+            <select id="editUserRole" class="w-full border p-2.5 rounded text-sm mb-3 bg-white">
+                <option value="user">Cán bộ</option><option value="leader">Lãnh đạo</option><option value="admin">Admin</option>
+            </select>
+            <input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border p-2.5 rounded text-sm mb-4">
+            <div class="flex justify-end gap-3"><button onclick="closeEditUserModal()" class="px-4 py-2 border rounded text-sm">Hủy</button><button onclick="saveEditUser()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Lưu</button></div>
         </div>
     </div>
 
@@ -307,1136 +274,478 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
 
         const defaultTemplates = {
-            duoi100: {
-                title: "Mua sắm giá trị nhỏ (Dưới 100 triệu theo NĐ 349/2026)",
-                steps: [
-                    { name: "Lập và phê duyệt dự toán, nhu cầu mua sắm", days: 2, dayType: "workday" },
-                    { name: "Lựa chọn nhà thầu, thu thập báo giá trực tiếp", days: 3, dayType: "workday" },
-                    { name: "Phê duyệt kết quả và Ký kết hợp đồng/Hóa đơn chứng từ", days: 2, dayType: "workday" }
-                ]
-            },
-            chidinh: {
-                title: "Quy trình Chỉ định thầu rút gọn",
-                steps: [
-                    { name: "Lập, thẩm định và phê duyệt KHLCNT", days: 3, dayType: "workday" },
-                    { name: "Đăng tải yêu cầu báo giá trên Hệ thống mạng đấu thầu", days: 3, dayType: "workday" },
-                    { name: "Hoàn thiện và thương thảo hợp đồng với nhà thầu", days: 3, dayType: "workday" },
-                    { name: "Phê duyệt kết quả chỉ định thầu", days: 2, dayType: "workday" },
-                    { name: "Ký kết hợp đồng", days: 2, dayType: "workday" }
-                ]
-            }
+            duoi100: { title: "Mua sắm < 100 triệu (NĐ 349)", steps: [{ name: "Phê duyệt dự toán", days: 2, dayType: "workday" }, { name: "Lấy báo giá", days: 3, dayType: "workday" }, { name: "Ký hợp đồng", days: 2, dayType: "workday" }] },
+            chidinh: { title: "Chỉ định thầu rút gọn", steps: [{ name: "Phê duyệt KHLCNT", days: 3, dayType: "workday" }, { name: "Đăng tải YCBG", days: 3, dayType: "workday" }, { name: "Thương thảo HĐ", days: 3, dayType: "workday" }, { name: "Ký hợp đồng", days: 2, dayType: "workday" }] }
         };
+        const defaultDocs = [ { number: "22/2023/QH15", title: "Luật Đấu thầu", link: "" }, { number: "349/2026/NĐ-CP", title: "Nghị định sửa đổi", link: "" } ];
 
-        const defaultDocs = [
-            { number: "22/2023/QH15", title: "Luật Đấu thầu (và các Luật sửa đổi, bổ sung liên quan)", link: "" },
-            { number: "214/2025/NĐ-CP", title: "Nghị định quy định chi tiết thi hành Luật Đấu thầu", link: "" },
-            { number: "349/2026/NĐ-CP", title: "Nghị định sửa đổi, bổ sung một số điều liên quan đấu thầu", link: "" }
-        ];
-
-        let db = {
-            users: [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }],
-            processTemplates: {},
-            missions: [], 
-            regulatoryDocs: []
-        };
-
-        let currentUser = null;
-        let syncTimeout = null;
-        let autoSyncInterval = null; 
-        let isDataSynchronized = false; 
-        let isSaving = false; 
-        let lastSaveTime = 0; 
+        let db = { users: [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }], processTemplates: {}, missions: [], regulatoryDocs: [] };
+        let currentUser = null, syncTimeout = null, autoSyncInterval = null, isDataSynchronized = false, isSaving = false, lastSaveTime = 0;
         let currentMissionIndexForNewPackage = -1;
-        let configSortableInstance = null; 
-        let currentEditUserIndex = -1;
+        let currentFinanceMIndex = -1, currentFinancePIndex = -1;
 
-        // --- KHỞI ĐỘNG VÀ ĐĂNG NHẬP ---
         window.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('projStartDate').valueAsDate = new Date();
-            document.getElementById('missionDeadline').valueAsDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
-            
             const savedUser = localStorage.getItem('bidAppUser');
             if (savedUser) {
-                document.getElementById('loaderText').innerText = "Đang kết nối máy chủ & Đăng nhập...";
-                document.getElementById('loader').style.display = 'flex';
-                
+                document.getElementById('loaderText').innerText = "Đang kết nối..."; document.getElementById('loader').style.display = 'flex';
                 await loadDataFromGAS();
                 document.getElementById('loader').style.display = 'none';
-
-                if (!isDataSynchronized) {
-                    showLoginError("Lỗi kết nối máy chủ. Không thể tải dữ liệu.");
-                    return; 
-                }
-
-                const parsedUser = JSON.parse(savedUser);
-                const found = db.users.find(u => u.username === parsedUser.username && u.password === parsedUser.password);
-                
-                if (found) {
-                    currentUser = found;
-                    openAppScreen();
-                } else {
-                    localStorage.removeItem('bidAppUser');
-                }
+                if (!isDataSynchronized) return showLoginError("Lỗi kết nối máy chủ.");
+                const pU = JSON.parse(savedUser);
+                const found = db.users.find(u => u.username === pU.username && u.password === pU.password);
+                if (found) { currentUser = found; openAppScreen(); } else localStorage.removeItem('bidAppUser');
             }
         });
 
-        function showLoginError(msg) {
-            const errBox = document.getElementById('loginError');
-            errBox.innerText = msg;
-            errBox.classList.remove('hidden');
-        }
+        function showLoginError(msg) { document.getElementById('loginError').innerText = msg; document.getElementById('loginError').classList.remove('hidden'); }
 
         async function handleLogin() {
-            const userIn = document.getElementById('loginUser').value.trim();
-            const passIn = document.getElementById('loginPass').value.trim();
-
-            if (!userIn || !passIn) {
-                showLoginError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
-                return;
-            }
-
-            document.getElementById('loaderText').innerText = "Đang kết nối máy chủ để tải dữ liệu...";
-            document.getElementById('loader').style.display = 'flex';
-            
-            await loadDataFromGAS();
-            document.getElementById('loader').style.display = 'none';
-
-            if (!isDataSynchronized) {
-                showLoginError("Lỗi mạng. Không lấy được dữ liệu từ Google Sheets.");
-                return;
-            }
-
-            const found = db.users.find(u => u.username === userIn && u.password === passIn);
-            if (found) {
-                currentUser = found;
-                if (document.getElementById('rememberMe').checked) {
-                    localStorage.setItem('bidAppUser', JSON.stringify(found));
-                }
-                openAppScreen();
-            } else {
-                showLoginError("Tên đăng nhập hoặc mật khẩu không chính xác.");
-            }
+            const u = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPass').value.trim();
+            if (!u || !p) return showLoginError("Nhập đủ tài khoản/mật khẩu.");
+            document.getElementById('loaderText').innerText = "Đang kết nối..."; document.getElementById('loader').style.display = 'flex';
+            await loadDataFromGAS(); document.getElementById('loader').style.display = 'none';
+            if (!isDataSynchronized) return showLoginError("Lỗi mạng.");
+            const found = db.users.find(x => x.username === u && x.password === p);
+            if (found) { currentUser = found; if (document.getElementById('rememberMe').checked) localStorage.setItem('bidAppUser', JSON.stringify(found)); openAppScreen(); } 
+            else showLoginError("Sai tài khoản hoặc mật khẩu.");
         }
 
         function handleLogout() {
-            currentUser = null;
-            localStorage.removeItem('bidAppUser'); 
-            if(autoSyncInterval) clearInterval(autoSyncInterval);
-            document.getElementById('loginUser').value = '';
-            document.getElementById('loginPass').value = '';
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('btnCreateProject').classList.replace('flex', 'hidden');
-        }
-
-        function renderUserBadge() {
-            let roleBadge = 'Cán bộ';
-            if (currentUser.role === 'admin') roleBadge = 'Admin';
-            else if (currentUser.role === 'leader') roleBadge = 'Lãnh đạo';
-
-            document.getElementById('userBadge').innerHTML = `
-                <i class="fas fa-user-circle"></i> ${currentUser.fullname} 
-                <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${roleBadge}</span>
-            `;
+            currentUser = null; localStorage.removeItem('bidAppUser'); clearInterval(autoSyncInterval);
+            document.getElementById('appScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden');
         }
 
         function openAppScreen() {
-            document.getElementById('loginError').classList.add('hidden');
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
-            
-            renderUserBadge();
-            document.getElementById('syncStatus').classList.replace('hidden', 'flex');
+            document.getElementById('loginError').classList.add('hidden'); document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.fullname} <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${currentUser.role}</span>`;
             if (currentUser.role !== 'leader') document.getElementById('btnCreateProject').classList.replace('hidden', 'flex');
-
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                if (currentUser.role === 'admin') el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            });
-
-            populateProcessDropdowns();
-            switchTab('projects');
-
-            if(autoSyncInterval) clearInterval(autoSyncInterval);
-            autoSyncInterval = setInterval(backgroundSync, 60000); 
+            document.querySelectorAll('.admin-only').forEach(el => currentUser.role === 'admin' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            populateProcessDropdowns(); switchTab('dashboard'); 
+            autoSyncInterval = setInterval(backgroundSync, 60000);
         }
 
         function switchTab(tab) {
-            if (currentUser.role !== 'admin' && ['settings', 'docs', 'users'].includes(tab)) {
-                alert("Bạn không có quyền truy cập khu vực này!");
-                return;
-            }
-
-            ['projects', 'settings', 'docs', 'users'].forEach(t => {
-                const view = document.getElementById(`view-${t}`);
-                const btn = document.getElementById(`tab-${t}`);
-                if (view) view.classList.add('hidden');
-                if (btn) {
-                    btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                    btn.classList.add('text-gray-500');
-                }
+            if (currentUser.role !== 'admin' && ['settings', 'docs', 'users'].includes(tab)) return alert("Không có quyền!");
+            ['dashboard','projects', 'settings', 'docs', 'users'].forEach(t => {
+                document.getElementById(`view-${t}`)?.classList.add('hidden');
+                document.getElementById(`tab-${t}`)?.classList.replace('text-blue-700', 'text-gray-500');
+                document.getElementById(`tab-${t}`)?.classList.remove('border-b-2', 'border-blue-700');
             });
-
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tab-${tab}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-500');
-                activeBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-            }
-
-            if (tab === 'settings') renderConfig();
-            if (tab === 'docs') renderDocs();
-            if (tab === 'users') renderUsers();
-            if (tab === 'projects') renderMissions();
+            document.getElementById(`view-${tab}`)?.classList.remove('hidden');
+            document.getElementById(`tab-${tab}`)?.classList.replace('text-gray-500', 'text-blue-700');
+            document.getElementById(`tab-${tab}`)?.classList.add('border-b-2', 'border-blue-700');
+            if(tab==='dashboard') renderDashboard(); if (tab === 'settings') renderConfig(); if (tab === 'docs') renderDocs(); if (tab === 'users') renderUsers(); if (tab === 'projects') renderMissions();
         }
 
-        // --- HÀM ĐỒNG BỘ MÁY CHỦ ---
+        // --- BACKEND ---
         async function loadDataFromGAS() {
             try {
                 const response = await fetch(GAS_URL);
-                if (!response.ok) throw new Error("HTTP Status " + response.status);
+                if (!response.ok) throw new Error();
                 const data = await response.json();
-
                 if (data && typeof data === 'object') {
                     if (Object.keys(data).length > 0) db = data;
                     if (!db.processTemplates || Object.keys(db.processTemplates).length === 0) db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
                     if (!db.users || db.users.length === 0) db.users = [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }];
-                    if (!db.regulatoryDocs || db.regulatoryDocs.length === 0) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+                    if (!db.regulatoryDocs) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
                     if (!db.missions) db.missions = [];
                     isDataSynchronized = true; 
                 }
-            } catch (err) {
-                console.error("Lỗi nạp dữ liệu:", err);
-                isDataSynchronized = false; 
-            }
+            } catch (err) { isDataSynchronized = false; }
         }
 
         async function saveDataToGAS(alertSuccess = false) {
-            if (!isDataSynchronized) return console.warn("Lệnh lưu bị chặn để bảo vệ dữ liệu.");
-
-            isSaving = true; 
-            const syncIcon = document.querySelector('#syncStatus i');
-            const syncText = document.getElementById('syncText');
-            
-            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-yellow-400";
-            if (syncText) syncText.innerText = "Đang lưu...";
-
+            if (!isDataSynchronized) return;
+            isSaving = true; document.querySelector('#syncStatus i').className = "fas fa-sync fa-spin text-yellow-400"; document.getElementById('syncText').innerText = "Đang lưu...";
             try {
-                await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(db),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    redirect: 'follow'
-                });
-
+                await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' });
                 lastSaveTime = Date.now(); 
-
-                if (syncIcon) syncIcon.className = "fas fa-check-circle text-green-400";
-                if (syncText) syncText.innerText = "Đã lưu";
-                
-                clearTimeout(syncTimeout);
-                syncTimeout = setTimeout(() => {
-                    if (syncText && syncText.innerText === "Đã lưu") {
-                        syncIcon.className = "fas fa-cloud text-blue-300";
-                        syncText.innerText = "Đã đồng bộ";
-                    }
-                }, 3000);
-
-                if (alertSuccess) alert("Đã đồng bộ dữ liệu thành công!");
-            } catch (err) {
-                console.error("Lỗi khi lưu:", err);
-                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
-                if (syncText) syncText.innerText = "Lỗi mạng";
-                if (alertSuccess) alert("Có lỗi mạng khi lưu!");
-            } finally {
-                isSaving = false; 
-            }
+                document.querySelector('#syncStatus i').className = "fas fa-check-circle text-green-400"; document.getElementById('syncText').innerText = "Đã lưu";
+                setTimeout(() => { if (document.getElementById('syncText').innerText === "Đã lưu") { document.querySelector('#syncStatus i').className = "fas fa-cloud text-blue-300"; document.getElementById('syncText').innerText = "Đã đồng bộ"; } }, 3000);
+            } catch (err) { document.querySelector('#syncStatus i').className = "fas fa-exclamation-triangle text-red-400"; document.getElementById('syncText').innerText = "Lỗi mạng"; } finally { isSaving = false; }
         }
-
-        function forceSync(alertSuccess = false) {
-            saveDataToGAS(alertSuccess);
-        }
+        function forceSync() { saveDataToGAS(true); }
 
         async function backgroundSync() {
             if (!isDataSynchronized || !currentUser || isSaving || (Date.now() - lastSaveTime < 5000)) return;
-
-            const syncIcon = document.querySelector('#syncStatus i');
-            const syncText = document.getElementById('syncText');
-            
-            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300";
-            if (syncText) syncText.innerText = "Đang làm mới...";
-
+            document.querySelector('#syncStatus i').className = "fas fa-sync fa-spin text-blue-300"; document.getElementById('syncText').innerText = "Làm mới...";
             try {
                 const response = await fetch(GAS_URL);
-                if (!response.ok) throw new Error("Lỗi HTTP");
                 const data = await response.json();
-                
-                if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-                    if (JSON.stringify(db) !== JSON.stringify(data)) {
-                        db = data;
-                        if (!db.processTemplates) db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
-                        if (!db.users) db.users = [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }];
-                        if (!db.regulatoryDocs) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
-                        if (!db.missions) db.missions = [];
-
-                        const currentTabObj = document.querySelector('.border-b-2.border-blue-600');
-                        if (currentTabObj) {
-                            if (currentTabObj.id === 'tab-projects') renderMissions();
-                            else if (currentTabObj.id === 'tab-settings') renderConfig();
-                            else if (currentTabObj.id === 'tab-docs') renderDocs();
-                            else if (currentTabObj.id === 'tab-users') renderUsers();
-                        }
-                        populateProcessDropdowns();
-                    }
+                if (data && typeof data === 'object' && JSON.stringify(db) !== JSON.stringify(data)) {
+                    db = data;
+                    if (!db.processTemplates) db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
+                    if (!db.users) db.users = [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }];
+                    if (!db.regulatoryDocs) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+                    if (!db.missions) db.missions = [];
+                    const activeTabId = document.querySelector('.border-blue-700')?.id;
+                    if (activeTabId === 'tab-projects') renderMissions(); else if (activeTabId === 'tab-dashboard') renderDashboard();
+                    populateProcessDropdowns();
                 }
-                if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300";
-                if (syncText) syncText.innerText = "Đã đồng bộ";
-            } catch (err) {
-                console.error("Lỗi đồng bộ ngầm:", err);
-                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
-                if (syncText) syncText.innerText = "Mất kết nối";
-            }
+                document.querySelector('#syncStatus i').className = "fas fa-cloud text-blue-300"; document.getElementById('syncText').innerText = "Đã đồng bộ";
+            } catch (err) { document.querySelector('#syncStatus i').className = "fas fa-exclamation-triangle text-red-400"; document.getElementById('syncText').innerText = "Mất kết nối"; }
         }
 
-        // --- XUẤT EXCEL & IN ẤN ---
-        function exportExcel(mIndex, pkgIndex) {
-            const mission = db.missions[mIndex];
-            const pkg = mission.packages[pkgIndex];
-            const processLabel = pkg.processTitle || "Quy trình đấu thầu";
-            
-            let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8"></head><body>`;
-            
-            tableHtml += `<h3>NHIỆM VỤ: ${mission.name.toUpperCase()}</h3>`;
-            tableHtml += `<h4>GÓI THẦU: ${pkg.name}</h4>`;
-            tableHtml += `<p>Quy trình áp dụng: ${processLabel} | Phụ trách: ${mission.owner}</p>`;
-            
-            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                tableHtml += `<h4>Căn cứ triển khai chung:</h4><ul>`;
-                db.regulatoryDocs.forEach(d => {
-                    tableHtml += `<li><b>${d.number}</b>: ${d.title}</li>`;
-                });
-                tableHtml += `</ul><br>`;
-            }
-            
-            tableHtml += `<table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th style="background-color: #4CAF50; color: white;">STT</th>
-                        <th style="background-color: #4CAF50; color: white;">Nội dung công việc</th>
-                        <th style="background-color: #4CAF50; color: white;">Định mức</th>
-                        <th style="background-color: #4CAF50; color: white;">Hạn chót</th>
-                        <th style="background-color: #4CAF50; color: white;">Trạng thái</th>
-                        <th style="background-color: #4CAF50; color: white;">Tài liệu / Văn bản</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-                
-            pkg.steps.forEach((step, idx) => {
-                let timeBudget = "-";
-                if (step.originalDays !== undefined && step.originalDays > 0) {
-                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'Ngày LV' : 'Ngày lịch'}`;
-                }
-                const status = step.completed ? `Đã xong (${step.completedBy})` : 'Chưa xong';
-                
-                let linkText = "";
-                if (step.links && step.links.length > 0) {
-                    linkText = step.links.map(l => `${l.name} (${l.url})`).join(" \n ");
-                }
-
-                tableHtml += `
-                    <tr>
-                        <td align="center">${idx + 1}</td>
-                        <td>${step.name}</td>
-                        <td align="center">${timeBudget}</td>
-                        <td align="center">${formatDate(step.deadline)}</td>
-                        <td>${status}</td>
-                        <td>${linkText}</td>
-                    </tr>`;
-            });
-            
-            tableHtml += `</tbody></table></body></html>`;
-
-            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            
-            // Xóa các ký tự đặc biệt gây lỗi hệ thống file, giữ nguyên tiếng Việt
-            const safeName = pkg.name.replace(/[\/\\?%*:|"<>]/g, '-').substring(0, 50);
-            a.download = `TienDo_${safeName}.xls`;
-            
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function printProject(mIndex, pkgIndex) {
-            const mission = db.missions[mIndex];
-            const pkg = mission.packages[pkgIndex];
-            const processLabel = pkg.processTitle || "Quy trình đấu thầu";
-            
-            let html = `<html><head><title>In Tiến độ - ${pkg.name}</title>`;
-            html += `<style>
-                body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; }
-                h1 { text-align: center; font-size: 18px; text-transform: uppercase; margin-bottom: 5px; }
-                h2 { text-align: center; font-size: 16px; margin-top: 5px; margin-bottom: 5px; }
-                h3 { text-align: center; font-size: 14px; font-weight: normal; margin-top: 0; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-                th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
-                th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
-                .text-center { text-align: center; }
-                .status-done { font-weight: bold; color: #000; }
-                .docs-section { margin-bottom: 15px; font-size: 12px; border-left: 3px solid #666; padding-left: 10px; }
-                .docs-section ul { margin: 5px 0 0 0; padding-left: 20px; }
-            </style></head><body>`;
-            
-            html += `<h1>NHIỆM VỤ: ${mission.name}</h1>`;
-            html += `<h2>GÓI THẦU: ${pkg.name}</h2>`;
-            html += `<h3>Loại: ${processLabel} | Phụ trách: ${mission.owner}</h3>`;
-            
-            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                html += `<div class="docs-section"><b>Căn cứ triển khai chung:</b><ul>`;
-                db.regulatoryDocs.forEach(d => {
-                    html += `<li style="margin-bottom: 3px;"><b>${d.number}</b> - ${d.title}</li>`;
-                });
-                html += `</ul></div>`;
-            }
-
-            html += `<table>
-                <thead>
-                    <tr>
-                        <th style="width: 30px">STT</th>
-                        <th>Nội dung công việc</th>
-                        <th style="width: 70px">Định mức</th>
-                        <th style="width: 80px">Hạn chót</th>
-                        <th style="width: 120px">Trạng thái</th>
-                        <th style="width: 180px">Văn bản</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-            
-            pkg.steps.forEach((step, idx) => {
-                let timeBudget = "-";
-                if (step.originalDays !== undefined && step.originalDays > 0) {
-                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}`;
-                }
-                const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
-                
-                let linkText = "";
-                if (step.links && step.links.length > 0) {
-                    linkText = step.links.map(l => `- ${l.name}`).join("<br>");
-                }
-
-                html += `
-                    <tr>
-                        <td class="text-center">${idx + 1}</td>
-                        <td>${step.name}</td>
-                        <td class="text-center">${timeBudget}</td>
-                        <td class="text-center">${formatDate(step.deadline)}</td>
-                        <td class="text-center">${status}</td>
-                        <td>${linkText}</td>
-                    </tr>`;
-            });
-            
-            html += `</tbody></table>
-            <div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 12px;">
-                Ngày trích xuất: ${formatDate(new Date().toISOString())}
-            </div>
-            </body></html>`;
-
-            const printWindow = window.open('', '_blank');
-            if (!printWindow) {
-                alert("Vui lòng cho phép mở Pop-up trên trình duyệt để sử dụng chức năng In!");
-                return;
-            }
-            printWindow.document.write(html);
-            printWindow.document.close();
-            printWindow.focus();
-            
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 300);
-        }
-
-        // --- CÁC HÀM TIỆN ÍCH NGÀY THÁNG ---
-        function addCustomDays(dateObj, days, type) {
-            let result = new Date(dateObj);
-            if (type === 'workday') {
-                let added = 0;
-                while (added < days) {
-                    result.setDate(result.getDate() + 1);
-                    if (result.getDay() !== 0 && result.getDay() !== 6) added++;
-                }
-            } else {
-                result.setDate(result.getDate() + days);
-            }
-            return result;
-        }
-
-        function formatDate(dateInput) {
-            if (!dateInput) return '';
-            let dt = dateInput.includes('T') ? new Date(dateInput) : new Date(dateInput.split('-')[0], dateInput.split('-')[1]-1, dateInput.split('-')[2]);
-            return `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear()}`;
-        }
-
-        function formatForDateInput(dateInput) {
-            if (!dateInput) return '';
-            if (!dateInput.includes('T')) return dateInput; 
-            let dt = new Date(dateInput);
-            return `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`;
-        }
-
-        // --- QUẢN LÝ TÀI KHOẢN CỦA ADMIN (TAB USERS) ---
-        function renderUsers() {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '';
-            if(!db.users) return;
-            
-            db.users.forEach((u, index) => {
-                let roleName = 'Cán bộ';
-                let roleClass = 'bg-gray-100 text-gray-600';
-                if (u.role === 'admin') { roleName = 'Quản trị viên'; roleClass = 'bg-purple-100 text-purple-700 font-bold'; }
-                else if (u.role === 'leader') { roleName = 'Lãnh đạo'; roleClass = 'bg-orange-100 text-orange-700 font-bold'; }
-
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-gray-50";
-                
-                let actionsHtml = `<button onclick="openEditUserModal(${index})" class="text-blue-500 hover:text-blue-700 p-1 mr-2 transition" title="Sửa tài khoản"><i class="fas fa-edit"></i></button>`;
-                
-                if (u.username !== 'admin') {
-                    actionsHtml += `<button onclick="deleteUser(${index})" class="text-red-500 hover:text-red-700 p-1 transition" title="Xóa tài khoản"><i class="fas fa-trash"></i></button>`;
-                } else {
-                    actionsHtml += `<span class="text-xs text-gray-400 italic ml-1">Mặc định</span>`;
-                }
-
-                tr.innerHTML = `
-                    <td class="p-3 font-medium text-gray-800">${u.username}</td>
-                    <td class="p-3 text-gray-700">${u.fullname}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded text-xs ${roleClass}">${roleName}</span></td>
-                    <td class="p-3 text-right">${actionsHtml}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function addNewUser() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            const username = document.getElementById('newUserUsername').value.trim();
-            const password = document.getElementById('newUserPassword').value.trim();
-            const fullname = document.getElementById('newUserFullname').value.trim();
-            const role = document.getElementById('newUserRole').value;
-
-            if (!username || !password || !fullname) return alert("Vui lòng điền đầy đủ thông tin!");
-            if (db.users.some(u => u.username === username)) return alert("Tên đăng nhập này đã tồn tại!");
-
-            db.users.push({ username, password, fullname, role });
-            
-            document.getElementById('newUserUsername').value = '';
-            document.getElementById('newUserPassword').value = '';
-            document.getElementById('newUserFullname').value = '';
-
-            renderUsers();
-            saveDataToGAS(); 
-        }
-
-        function openEditUserModal(index) {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            currentEditUserIndex = index;
-            const u = db.users[index];
-            
-            document.getElementById('editUserUsername').value = u.username;
-            document.getElementById('editUserPassword').value = '';
-            document.getElementById('editUserFullname').value = u.fullname;
-            document.getElementById('editUserRole').value = u.role;
-            
-            if (u.username === 'admin') {
-                document.getElementById('editUserRole').disabled = true;
-                document.getElementById('editUserRole').classList.add('bg-gray-100', 'cursor-not-allowed');
-            } else {
-                document.getElementById('editUserRole').disabled = false;
-                document.getElementById('editUserRole').classList.remove('bg-gray-100', 'cursor-not-allowed');
-            }
-
-            document.getElementById('editUserModal').classList.remove('hidden');
-        }
-
-        function closeEditUserModal() {
-            document.getElementById('editUserModal').classList.add('hidden');
-            currentEditUserIndex = -1;
-        }
-
-        function saveEditUser() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            if(currentEditUserIndex === -1) return;
-
-            const newPass = document.getElementById('editUserPassword').value.trim();
-            const newFullname = document.getElementById('editUserFullname').value.trim();
-            const newRole = document.getElementById('editUserRole').value;
-
-            if (!newFullname) return alert("Vui lòng điền Họ và tên cán bộ!");
-
-            const oldName = db.users[currentEditUserIndex].fullname;
-            const targetUsername = db.users[currentEditUserIndex].username;
-
-            db.users[currentEditUserIndex].fullname = newFullname;
-            if (targetUsername !== 'admin') {
-                db.users[currentEditUserIndex].role = newRole; 
-            }
-            if (newPass) {
-                db.users[currentEditUserIndex].password = newPass;
-            }
-
-            if (oldName !== newFullname) {
-                if (db.missions) {
-                    db.missions.forEach(m => {
-                        if (m.owner === oldName) m.owner = newFullname;
-                        if (m.packages) {
-                            m.packages.forEach(p => {
+        // --- DASHBOARD ---
+        function renderDashboard() {
+            let activeMs=0, overdue=0, completedPkgs=0, totalSav=0;
+            const now = new Date(new Date().setHours(0,0,0,0));
+            if(db.missions) {
+                db.missions.forEach(m => {
+                    if (m.archived) return;
+                    activeMs++;
+                    if(m.packages) {
+                        m.packages.forEach(p => {
+                            let pkgDone = true;
+                            if(p.steps) {
                                 p.steps.forEach(s => {
-                                    if (s.completedBy === oldName) s.completedBy = newFullname;
+                                    if(!s.completed) pkgDone = false;
+                                    if(!s.completed && new Date(s.deadline) < now) overdue++;
                                 });
-                            });
-                        }
-                    });
-                }
-            }
-
-            if (currentUser.username === targetUsername) {
-                currentUser = db.users[currentEditUserIndex];
-                if (localStorage.getItem('bidAppUser')) {
-                    localStorage.setItem('bidAppUser', JSON.stringify(currentUser));
-                }
-                renderUserBadge();
-            }
-
-            closeEditUserModal();
-            renderUsers();
-            renderMissions(); 
-            saveDataToGAS();
-            alert("Đã cập nhật thông tin tài khoản!");
-        }
-
-        function deleteUser(index) {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            if (confirm(`Xóa tài khoản "${db.users[index].username}"?`)) {
-                db.users.splice(index, 1);
-                renderUsers();
-                saveDataToGAS();
-            }
-        }
-
-        // --- CÁ NHÂN HÓA (PROFILE TỰ ĐỔI) ---
-        function openProfileModal() {
-            document.getElementById('profileFullname').value = currentUser.fullname;
-            document.getElementById('profilePassword').value = '';
-            document.getElementById('profileModal').classList.remove('hidden');
-        }
-
-        function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
-
-        function saveProfile() {
-            const newName = document.getElementById('profileFullname').value.trim();
-            const newPass = document.getElementById('profilePassword').value.trim();
-
-            if (!newName) return alert("Tên hiển thị không được để trống!");
-            const oldName = currentUser.fullname;
-            
-            const userIndex = db.users.findIndex(u => u.username === currentUser.username);
-            if (userIndex !== -1) {
-                db.users[userIndex].fullname = newName;
-                if (newPass) db.users[userIndex].password = newPass;
-                currentUser = db.users[userIndex];
-                
-                if (oldName !== newName && db.missions) {
-                    db.missions.forEach(m => {
-                        if (m.owner === oldName) m.owner = newName;
-                        if (m.packages) m.packages.forEach(p => { p.steps.forEach(s => { if (s.completedBy === oldName) s.completedBy = newName; }); });
-                    });
-                }
-
-                if (localStorage.getItem('bidAppUser')) localStorage.setItem('bidAppUser', JSON.stringify(currentUser));
-
-                renderUserBadge();
-                if(currentUser.role === 'admin') renderUsers();
-                renderMissions();
-                saveDataToGAS();
-                closeProfileModal();
-                alert("Cập nhật thông tin thành công!");
-            }
-        }
-
-        // --- QUẢN LÝ CẤU HÌNH QUY TRÌNH & KÉO THẢ ---
-        function populateProcessDropdowns() {
-            const createSelect = document.getElementById('projType');
-            const configSelect = document.getElementById('configProcessSelector');
-            createSelect.innerHTML = '';
-            configSelect.innerHTML = '';
-            for (const key in db.processTemplates) {
-                createSelect.innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`;
-                configSelect.innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`;
-            }
-        }
-
-        function renderConfig() {
-            const activeType = document.getElementById('configProcessSelector').value;
-            const container = document.getElementById('configSteps');
-            container.innerHTML = '';
-            if (!activeType || !db.processTemplates[activeType]) return;
-            
-            db.processTemplates[activeType].steps.forEach((step, index) => {
-                const isWorkday = step.dayType === 'workday';
-                container.innerHTML += `
-                    <div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm hover:shadow-md transition drag-item" data-index="${index}">
-                        <div class="cursor-move text-gray-400 hover:text-blue-500 px-1 drag-handle" title="Kéo thả để sắp xếp"><i class="fas fa-grip-vertical"></i></div>
-                        <span class="font-bold w-6 text-gray-400 text-sm text-center step-number">${index + 1}.</span>
-                        <input type="text" value="${step.name}" onchange="updateConfigStep('${activeType}', ${index}, 'name', this.value)" class="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-sm">
-                        <input type="number" value="${step.days}" onchange="updateConfigStep('${activeType}', ${index}, 'days', this.value)" class="w-16 bg-gray-50 border border-gray-300 rounded p-1 text-center outline-none text-sm font-semibold text-blue-700"> 
-                        <select onchange="updateConfigStep('${activeType}', ${index}, 'dayType', this.value)" class="border-b border-gray-300 bg-transparent text-sm text-gray-600 outline-none p-1">
-                            <option value="calendar" ${!isWorkday ? 'selected' : ''}>Ngày lịch</option>
-                            <option value="workday" ${isWorkday ? 'selected' : ''}>Ngày LV</option>
-                        </select>
-                        <button onclick="removeConfigStep('${activeType}', ${index})" class="text-gray-400 hover:text-red-500 ml-2 px-2" title="Xóa bước này"><i class="fas fa-times"></i></button>
-                    </div>
-                `;
-            });
-
-            if (configSortableInstance) configSortableInstance.destroy();
-            configSortableInstance = Sortable.create(container, {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd: function (evt) {
-                    const oldIndex = evt.oldIndex;
-                    const newIndex = evt.newIndex;
-                    if (oldIndex !== newIndex) {
-                        const stepsArr = db.processTemplates[activeType].steps;
-                        const movedItem = stepsArr.splice(oldIndex, 1)[0];
-                        stepsArr.splice(newIndex, 0, movedItem);
-                        renderConfig(); 
-                        saveDataToGAS();
+                            }
+                            if(pkgDone && p.steps && p.steps.length > 0) completedPkgs++;
+                            if(p.estimatePrice && p.winningPrice) totalSav += (p.estimatePrice - p.winningPrice);
+                        });
                     }
-                }
-            });
-        }
-
-        function addNewProcessTemplate() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            const title = document.getElementById('newProcessTitle').value.trim();
-            if (!title) return alert("Vui lòng nhập tên quy trình mới!");
-            const newId = 'proc_' + Date.now();
-            db.processTemplates[newId] = { title: title, steps: [] };
-            document.getElementById('newProcessTitle').value = '';
-            populateProcessDropdowns();
-            document.getElementById('configProcessSelector').value = newId;
-            renderConfig();
-            saveDataToGAS();
-        }
-
-        function deleteProcessTemplate() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            const activeType = document.getElementById('configProcessSelector').value;
-            if (!activeType) return;
-            if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn quy trình này không?`)) {
-                delete db.processTemplates[activeType];
-                populateProcessDropdowns();
-                renderConfig();
-                saveDataToGAS();
+                });
             }
+            document.getElementById('dashActiveMissions').innerText = activeMs;
+            document.getElementById('dashOverdue').innerText = overdue;
+            document.getElementById('dashCompletedPkgs').innerText = completedPkgs;
+            document.getElementById('dashSavings').innerText = totalSav.toLocaleString('vi-VN') + " đ";
         }
 
-        function updateConfigStep(typeKey, index, field, value) {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            db.processTemplates[typeKey].steps[index][field] = field === 'days' ? (parseInt(value) || 0) : value;
-            saveDataToGAS();
+        // --- NHIỆM VỤ & GÓI THẦU (NÂNG CẤP) ---
+        function addCustomDays(dObj, days, type) {
+            let r = new Date(dObj);
+            if (type === 'workday') { let a = 0; while (a < days) { r.setDate(r.getDate() + 1); if (r.getDay() !== 0 && r.getDay() !== 6) a++; } } 
+            else { r.setDate(r.getDate() + days); } return r;
         }
-
-        function removeConfigStep(typeKey, index) {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            db.processTemplates[typeKey].steps.splice(index, 1);
-            renderConfig();
-            saveDataToGAS();
-        }
-
-        function addConfigStep() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            const activeType = document.getElementById('configProcessSelector').value;
-            const name = document.getElementById('newStepName').value.trim();
-            const days = parseInt(document.getElementById('newStepDays').value);
-            const dayType = document.getElementById('newStepDayType').value;
-            
-            if (name && !isNaN(days)) {
-                db.processTemplates[activeType].steps.push({ name, days, dayType });
-                document.getElementById('newStepName').value = '';
-                document.getElementById('newStepDays').value = '';
-                renderConfig();
-                saveDataToGAS();
-            } else { alert("Vui lòng nhập đủ tên bước và số ngày!"); }
-        }
-
-        // --- QUẢN LÝ CĂN CỨ TRIỂN KHAI ---
-        function renderDocs() {
-            const tbody = document.getElementById('docsTableBody');
-            tbody.innerHTML = '';
-            if(!db.regulatoryDocs || db.regulatoryDocs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400 italic">Chưa có văn bản pháp quy nào được cấu hình.</td></tr>`;
-                return;
-            }
-            db.regulatoryDocs.forEach((doc, index) => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50 transition">
-                        <td class="p-3"><input type="text" value="${doc.number}" onchange="updateDoc(${index}, 'number', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm font-medium"></td>
-                        <td class="p-3"><input type="text" value="${doc.title}" onchange="updateDoc(${index}, 'title', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm"></td>
-                        <td class="p-3"><input type="url" value="${doc.link || ''}" onchange="updateDoc(${index}, 'link', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm" placeholder="https://..."></td>
-                        <td class="p-3 text-center"><button onclick="deleteDoc(${index})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
-        }
-
-        function addNewDoc() {
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            const number = document.getElementById('newDocNumber').value.trim();
-            const title = document.getElementById('newDocTitle').value.trim();
-            const link = document.getElementById('newDocLink').value.trim();
-            if (!number || !title) return alert("Vui lòng nhập Số hiệu và Tên văn bản!");
-            if(!db.regulatoryDocs) db.regulatoryDocs = [];
-            db.regulatoryDocs.push({ number, title, link });
-            document.getElementById('newDocNumber').value = '';
-            document.getElementById('newDocTitle').value = '';
-            document.getElementById('newDocLink').value = '';
-            renderDocs();
-            saveDataToGAS();
-        }
-
-        function updateDoc(index, field, value) { 
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            db.regulatoryDocs[index][field] = value; saveDataToGAS(); 
-        }
-        function deleteDoc(index) { 
-            if(currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!");
-            if(confirm("Xóa văn bản này?")) { db.regulatoryDocs.splice(index, 1); renderDocs(); saveDataToGAS(); } 
-        }
-
-        // --- QUẢN LÝ NHIỆM VỤ & GÓI THẦU (Missions & Packages) ---
-        function openCreateMissionModal() {
-            document.getElementById('missionDeadline').valueAsDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
-            document.getElementById('createMissionModal').classList.remove('hidden');
-        }
-        function closeCreateMissionModal() { document.getElementById('createMissionModal').classList.add('hidden'); }
+        function formatDate(dIn) { if(!dIn) return ''; let dt = new Date(dIn); return `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear()}`; }
+        function formatForDateInput(dIn) { if(!dIn) return ''; let dt = new Date(dIn); return `${dt.getFullYear()}-${(dt.getMonth()+1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`; }
         
+        function formatCurrencyInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if(val) input.value = parseInt(val).toLocaleString('vi-VN');
+        }
+
+        function logActivity(mIndex, pkgIndex, msg) {
+            let pkg = db.missions[mIndex].packages[pkgIndex];
+            if(!pkg.logs) pkg.logs = [];
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}`;
+            pkg.logs.unshift(`[${timeStr}] ${currentUser.fullname}: ${msg}`);
+            if(pkg.logs.length > 50) pkg.logs.pop(); // Giữ 50 log gần nhất
+        }
+
+        function openCreateMissionModal() { document.getElementById('createMissionModal').classList.remove('hidden'); }
+        function closeCreateMissionModal() { document.getElementById('createMissionModal').classList.add('hidden'); }
+        function createMission() {
+            const name = document.getElementById('missionName').value.trim(); const deadlineStr = document.getElementById('missionDeadline').value;
+            if (!name || !deadlineStr) return alert("Vui lòng điền đủ thông tin!");
+            db.missions.unshift({ id: Date.now(), name: name, deadline: new Date(deadlineStr).toISOString(), owner: currentUser.fullname, packages: [], archived: false });
+            document.getElementById('missionName').value = ''; closeCreateMissionModal(); renderMissions(); saveDataToGAS();
+        }
+
+        function archiveMission(mIndex) {
+            if(confirm("Lưu trữ nhiệm vụ này? Nó sẽ không hiện ở danh sách chính nữa.")){
+                db.missions[mIndex].archived = true; renderMissions(); saveDataToGAS();
+            }
+        }
+
         function openCreatePackageModal(mIndex) {
             currentMissionIndexForNewPackage = mIndex;
-            document.getElementById('projStartDate').valueAsDate = new Date(); 
+            const sel = document.getElementById('pkgOwner'); sel.innerHTML = '';
+            db.users.forEach(u => { sel.innerHTML += `<option value="${u.fullname}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${u.fullname}</option>`; });
             document.getElementById('createPackageModal').classList.remove('hidden');
         }
         function closeCreatePackageModal() { document.getElementById('createPackageModal').classList.add('hidden'); }
-
-        function createMission() {
-            const name = document.getElementById('missionName').value.trim();
-            const deadlineStr = document.getElementById('missionDeadline').value;
-            if (!name || !deadlineStr) return alert("Vui lòng điền đủ thông tin!");
-            const [y, m, d] = deadlineStr.split('-');
-            db.missions.unshift({ id: Date.now(), name: name, deadline: new Date(y, m - 1, d).toISOString(), owner: currentUser.fullname, packages: [] });
-            document.getElementById('missionName').value = '';
-            closeCreateMissionModal();
-            renderMissions();
-            saveDataToGAS();
-        }
-
-        function deleteMission(mIndex) {
-            if (confirm(`Xóa toàn bộ Nhiệm vụ "${db.missions[mIndex].name}"?`)) {
-                db.missions.splice(mIndex, 1);
-                renderMissions();
-                saveDataToGAS();
-            }
-        }
-
+        
         function createPackage() {
-            if(currentMissionIndexForNewPackage === -1) return;
             const mIndex = currentMissionIndexForNewPackage;
-            const name = document.getElementById('projName').value.trim();
-            const startDateStr = document.getElementById('projStartDate').value;
-            const typeKey = document.getElementById('projType').value;
-            if (!name || !startDateStr || !typeKey) return alert("Vui lòng điền đủ thông tin gói thầu!");
-            
-            const selectedTemplate = db.processTemplates[typeKey];
-            const [y, m, d] = startDateStr.split('-');
-            let currentDt = new Date(y, m - 1, d);
-            
-            let steps = selectedTemplate.steps.map(tmpl => {
-                const dType = tmpl.dayType || 'calendar'; 
-                currentDt = addCustomDays(currentDt, tmpl.days, dType);
-                return { name: tmpl.name, deadline: currentDt.toISOString(), completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: dType };
+            const name = document.getElementById('projName').value.trim(), startDateStr = document.getElementById('projStartDate').value, typeKey = document.getElementById('projType').value, owner = document.getElementById('pkgOwner').value;
+            if (!name || !startDateStr) return alert("Vui lòng điền đủ thông tin gói thầu!");
+            let currentDt = new Date(startDateStr);
+            let steps = db.processTemplates[typeKey].steps.map(tmpl => {
+                currentDt = addCustomDays(currentDt, tmpl.days, tmpl.dayType);
+                return { name: tmpl.name, deadline: currentDt.toISOString(), completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: tmpl.dayType };
             });
-
-            db.missions[mIndex].packages.push({ id: Date.now(), name: name, processTitle: selectedTemplate.title, startDate: new Date(y, m - 1, d).toISOString(), steps: steps });
-            document.getElementById('projName').value = '';
-            closeCreatePackageModal();
-            renderMissions();
-            saveDataToGAS();
+            db.missions[mIndex].packages.push({ id: Date.now(), name: name, processTitle: db.processTemplates[typeKey].title, owner: owner, estimatePrice: 0, winningPrice: 0, logs: [`Khởi tạo gói thầu`], steps: steps });
+            closeCreatePackageModal(); renderMissions(); saveDataToGAS();
         }
 
-        function deletePackage(mIndex, pkgIndex) {
-            if (confirm("Xóa gói thầu này khỏi nhiệm vụ?")) {
-                db.missions[mIndex].packages.splice(pkgIndex, 1);
-                renderMissions();
-                saveDataToGAS();
+        function deletePackage(mIndex, pkgIndex) { if (confirm("Xóa gói thầu này?")) { db.missions[mIndex].packages.splice(pkgIndex, 1); renderMissions(); saveDataToGAS(); } }
+
+        function openFinanceLogModal(mIndex, pIndex) {
+            currentFinanceMIndex = mIndex; currentFinancePIndex = pIndex;
+            const pkg = db.missions[mIndex].packages[pIndex];
+            document.getElementById('finEstimate').value = pkg.estimatePrice ? pkg.estimatePrice.toLocaleString('vi-VN') : '';
+            document.getElementById('finWinning').value = pkg.winningPrice ? pkg.winningPrice.toLocaleString('vi-VN') : '';
+            const logBox = document.getElementById('activityLogs'); logBox.innerHTML = '';
+            if(pkg.logs && pkg.logs.length > 0){ pkg.logs.forEach(l => logBox.innerHTML += `<div>${l}</div>`); } else { logBox.innerHTML = '<div class="italic text-gray-400">Chưa có lịch sử.</div>'; }
+            document.getElementById('financeLogModal').classList.remove('hidden');
+        }
+        function closeFinanceLogModal() { document.getElementById('financeLogModal').classList.add('hidden'); }
+        
+        function saveFinance() {
+            let eVal = parseInt(document.getElementById('finEstimate').value.replace(/[^0-9]/g, '')) || 0;
+            let wVal = parseInt(document.getElementById('finWinning').value.replace(/[^0-9]/g, '')) || 0;
+            let pkg = db.missions[currentFinanceMIndex].packages[currentFinancePIndex];
+            if(pkg.estimatePrice !== eVal || pkg.winningPrice !== wVal) {
+                pkg.estimatePrice = eVal; pkg.winningPrice = wVal;
+                logActivity(currentFinanceMIndex, currentFinancePIndex, `Cập nhật tài chính`);
+                saveDataToGAS(); renderMissions();
             }
+            closeFinanceLogModal();
         }
 
         function updateStepStatus(mIndex, pkgIndex, stepIndex, checked) {
             db.missions[mIndex].packages[pkgIndex].steps[stepIndex].completed = checked;
             db.missions[mIndex].packages[pkgIndex].steps[stepIndex].completedBy = checked ? currentUser.fullname : "";
-            renderMissions();
-            saveDataToGAS();
+            logActivity(mIndex, pkgIndex, `${checked?'Hoàn thành':'Bỏ hoàn thành'} bước ${stepIndex+1}`);
+            renderMissions(); saveDataToGAS();
         }
 
         function updateProjStep(mIndex, pkgIndex, sIndex, field, value) {
             let pkg = db.missions[mIndex].packages[pkgIndex];
             if (field === 'deadline') {
                 if (!value) return; 
-                const [y, m, d] = value.split('-');
-                const newDeadline = new Date(y, m - 1, d);
-                pkg.steps[sIndex].deadline = newDeadline.toISOString();
-                
-                let currentDt = new Date(newDeadline);
+                pkg.steps[sIndex].deadline = new Date(value).toISOString();
+                let currentDt = new Date(value);
                 for (let k = sIndex + 1; k < pkg.steps.length; k++) {
-                    const step = pkg.steps[k];
-                    currentDt = addCustomDays(currentDt, step.originalDays || 0, step.originalDayType || 'calendar');
-                    step.deadline = currentDt.toISOString();
+                    currentDt = addCustomDays(currentDt, pkg.steps[k].originalDays || 0, pkg.steps[k].originalDayType || 'calendar');
+                    pkg.steps[k].deadline = currentDt.toISOString();
                 }
+                logActivity(mIndex, pkgIndex, `Sửa hạn chót bước ${sIndex+1} thành ${formatDate(value)}`);
             } else { pkg.steps[sIndex][field] = value; }
-            renderMissions();
-            saveDataToGAS();
+            renderMissions(); saveDataToGAS();
         }
 
         function addProjStep(mIndex, pkgIndex) {
             let pkg = db.missions[mIndex].packages[pkgIndex];
-            let newDeadline = new Date();
-            if (pkg.steps.length > 0) {
-                newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline);
-                newDeadline.setDate(newDeadline.getDate() + 1);
-            }
+            let newDeadline = new Date(); if (pkg.steps.length > 0) { newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); newDeadline.setDate(newDeadline.getDate() + 1); }
             pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" });
-            renderMissions();
-            saveDataToGAS();
-        }
-
-        function deleteProjStep(mIndex, pkgIndex, sIndex) {
-            if (confirm("Xóa công việc này khỏi lộ trình?")) {
-                db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1);
-                renderMissions();
-                saveDataToGAS();
-            }
+            logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`);
+            renderMissions(); saveDataToGAS();
         }
 
         function toggleLinkForm(mIndex, pkgIndex, sIndex) { document.getElementById(`link_form_${mIndex}_${pkgIndex}_${sIndex}`).classList.toggle('hidden'); }
         function addLink(mIndex, pkgIndex, sIndex) {
-            const nameInput = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim();
-            const urlInput = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim();
-            if (!urlInput) return alert("Vui lòng nhập URL hợp lệ!");
-            let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
-            if (!step.links) step.links = [];
-            step.links.push({ name: nameInput || "Tài liệu", url: urlInput });
-            renderMissions();
-            saveDataToGAS();
+            const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim();
+            if (!u) return; let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex]; if (!step.links) step.links = [];
+            step.links.push({ name: n || "Tài liệu", url: u }); logActivity(mIndex, pkgIndex, `Gắn link tài liệu bước ${sIndex+1}`); renderMissions(); saveDataToGAS();
         }
-        function removeLink(mIndex, pkgIndex, sIndex, lIndex) {
-            if (confirm("Xóa tài liệu đính kèm này?")) {
-                db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1);
-                renderMissions();
-                saveDataToGAS();
-            }
-        }
+        function removeLink(mIndex, pkgIndex, sIndex, lIndex) { if (confirm("Xóa tài liệu đính kèm này?")) { db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1); logActivity(mIndex, pkgIndex, `Xóa link bước ${sIndex+1}`); renderMissions(); saveDataToGAS(); } }
 
         function renderMissions() {
             const container = document.getElementById('projectList');
             container.innerHTML = '';
+            const searchKw = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const filterStat = document.getElementById('filterStatus')?.value || 'active';
+            const now = new Date(new Date().setHours(0,0,0,0));
 
             let visibleCount = 0;
             if (db.missions) {
-                db.missions.forEach(m => { if (currentUser.role !== 'user' || m.owner === currentUser.fullname) visibleCount++; });
-            }
+                db.missions.forEach((mission, mIndex) => {
+                    // Filter Archive
+                    if(filterStat === 'active' && mission.archived) return;
+                    if(filterStat === 'archived' && !mission.archived) return;
+                    
+                    // Filter Search
+                    if(searchKw && !mission.name.toLowerCase().includes(searchKw)) return;
 
-            if (visibleCount === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400 italic bg-white rounded-lg shadow-sm border border-gray-200">Chưa có nhiệm vụ nào. Bấm "Tạo Nhiệm vụ" phía trên để bắt đầu.</div>`;
-                return;
-            }
+                    // Quyền Lãnh đạo/Admin thấy hết, Cán bộ thấy của mình
+                    let isMissionOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mission.owner;
+                    let hasOwnedPackage = false;
+                    if(mission.packages) { mission.packages.forEach(p => { if(p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
+                    if(currentUser.role === 'user' && !isMissionOwner && !hasOwnedPackage) return;
 
-            db.missions.forEach((mission, mIndex) => {
-                if (currentUser.role === 'user' && mission.owner !== currentUser.fullname) return;
+                    visibleCount++;
+                    let isOwnerAdmin = currentUser.role === 'admin' || currentUser.fullname === mission.owner;
 
-                const isOwner = currentUser.role === 'admin' || currentUser.fullname === mission.owner;
-                let packagesHtml = "";
-                
-                if (!mission.packages || mission.packages.length === 0) {
-                    packagesHtml = `<div class="p-4 text-center text-sm text-gray-500 italic">Nhiệm vụ này chưa có gói thầu nào.</div>`;
-                } else {
-                    mission.packages.forEach((pkg, pkgIndex) => {
-                        const finalDate = pkg.steps.length > 0 ? formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
-                        
-                        let stepsHtml = pkg.steps.map((step, sIndex) => {
-                            const isOverdue = !step.completed && new Date(step.deadline) < new Date(new Date().setHours(0,0,0,0));
-                            const dateColor = step.completed ? 'text-green-600' : (isOverdue ? 'text-red-600 font-bold' : 'text-gray-700');
+                    let packagesHtml = "";
+                    if (!mission.packages || mission.packages.length === 0) { packagesHtml = `<div class="p-4 text-center text-sm text-gray-500 italic">Nhiệm vụ này chưa có gói thầu.</div>`; } 
+                    else {
+                        mission.packages.forEach((pkg, pkgIndex) => {
+                            if(!pkg.owner) pkg.owner = mission.owner; // Tương thích cũ
+                            let isPkgOwner = currentUser.role === 'admin' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
+
+                            const finalDate = pkg.steps.length > 0 ? formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
                             
-                            const nameHtml = isOwner ? 
-                                `<input type="text" value="${step.name}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'name', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm ${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'}">` : 
-                                `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-sm">${step.name}</div>`;
-                            
-                            const dateHtml = isOwner ? 
-                                `<div class="relative inline-flex items-center group cursor-pointer" onclick="try{this.querySelector('input[type=date]').showPicker()}catch(e){}">
-                                    <span class="text-sm ${dateColor} whitespace-nowrap border-b border-dashed border-gray-400 pb-0.5" title="Bấm để đổi ngày">
-                                        ${formatDate(step.deadline)} <i class="fas fa-pencil-alt text-gray-300 group-hover:text-blue-500 text-xs ml-1"></i>
-                                    </span>
-                                    <input type="date" value="${formatForDateInput(step.deadline)}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'deadline', this.value)" class="absolute w-full h-full opacity-0 cursor-pointer left-0 top-0 pointer-events-none">
-                                </div>` : 
-                                `<span class="text-sm ${dateColor} whitespace-nowrap">${formatDate(step.deadline)}</span>`;
-                            
-                            let timeBudget = "-";
-                            if (step.originalDays !== undefined && step.originalDays > 0) {
-                                timeBudget = `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded font-medium border border-blue-100 whitespace-nowrap">${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}</span>`;
-                            }
+                            let stepsHtml = pkg.steps.map((step, sIndex) => {
+                                const isOverdue = !step.completed && new Date(step.deadline) < now;
+                                const isWarning = !step.completed && !isOverdue && ((new Date(step.deadline) - now)/(1000*3600*24) <= 2);
+                                
+                                let dateColor = 'text-gray-700'; let bgRow = '';
+                                if(step.completed) { dateColor = 'text-green-600'; }
+                                else if(isOverdue) { dateColor = 'text-red-600 font-bold'; bgRow = 'bg-red-50'; }
+                                else if(isWarning) { dateColor = 'text-orange-500 font-bold'; bgRow = 'bg-orange-50'; }
 
-                            if (!step.links) step.links = [];
-                            let linksDisplayHtml = step.links.map((l, lIndex) => {
-                                return `<div class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded text-xs mr-1 mb-1 shadow-sm">
-                                    <a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[150px]" title="${l.url}"><i class="fas fa-link mr-1"></i>${l.name}</a>
-                                    ${isOwner ? `<button onclick="removeLink(${mIndex},${pkgIndex}, ${sIndex},${lIndex})" class="text-blue-300 hover:text-red-500 ml-1 transition"><i class="fas fa-times"></i></button>` : ''}
-                                </div>`;
+                                const nameHtml = isPkgOwner ? `<input type="text" value="${step.name}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'name', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm ${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'}">` : `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-sm">${step.name}</div>`;
+                                const dateHtml = isPkgOwner ? `<div class="relative inline-flex items-center group cursor-pointer" onclick="try{this.querySelector('input[type=date]').showPicker()}catch(e){}">
+                                    <span class="text-sm ${dateColor} whitespace-nowrap border-b border-dashed border-gray-400 pb-0.5">${formatDate(step.deadline)} <i class="fas fa-pencil-alt text-gray-300 ml-1"></i></span>
+                                    <input type="date" value="${formatForDateInput(step.deadline)}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'deadline', this.value)" class="absolute w-full h-full opacity-0 cursor-pointer left-0 top-0 pointer-events-none"></div>` : `<span class="text-sm ${dateColor} whitespace-nowrap">${formatDate(step.deadline)}</span>`;
+                                
+                                let timeBudget = (step.originalDays > 0) ? `<span class="bg-white text-blue-700 text-xs px-2 py-0.5 rounded border border-blue-200">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-";
+                                
+                                if (!step.links) step.links = [];
+                                let linksDisplayHtml = step.links.map((l, lIndex) => `<div class="inline-flex items-center gap-1 bg-white text-blue-700 border border-blue-200 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm"><a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[120px]" title="${l.url}"><i class="fas fa-link mr-1"></i>${l.name}</a>${isPkgOwner ? `<button onclick="removeLink(${mIndex},${pkgIndex}, ${sIndex},${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : ''}</div>`).join('');
+                                
+                                const linkInputHtml = isPkgOwner ? `<div class="mt-1"><button onclick="toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><i class="fas fa-plus"></i> Gắn file</button><div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white rounded shadow-lg absolute z-10 w-48"><input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên hiển thị" class="w-full mb-1 p-1 border rounded text-xs"><input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="URL" class="w-full mb-1 p-1 border rounded text-xs"><button onclick="addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Lưu</button></div></div>` : '';
+                                
+                                return `<tr class="border-b transition hover:bg-gray-100 ${bgRow}">
+                                    <td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${isPkgOwner?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${!isPkgOwner?'disabled':''} onchange="updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)"></td>
+                                    <td class="p-2 align-top">${nameHtml}${step.completedBy?`<div class="text-[10px] text-green-600 mt-1"><i class="fas fa-check"></i> ${step.completedBy}</div>`:''}</td>
+                                    <td class="p-2 text-center align-top">${timeBudget}</td><td class="p-2 align-top">${dateHtml}</td>
+                                    <td class="p-2 align-top"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>
+                                    ${isPkgOwner ? `<td class="p-2 text-center align-top"><button onclick="deleteProjStep(${mIndex}, ${pkgIndex},${sIndex})" class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button></td>` : ''}
+                                </tr>`;
                             }).join('');
 
-                            const linkInputHtml = isOwner ? `
-                                <div class="mt-1">
-                                    <button onclick="toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
-                                        <i class="fas fa-plus mr-0.5"></i> Gắn file
-                                    </button>
-                                    <div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-2 p-2.5 bg-white rounded border border-gray-200 shadow-lg relative z-10 min-w-[200px]">
-                                        <input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file hiển thị..." class="w-full mb-1.5 p-1.5 border border-gray-300 rounded outline-none focus:border-blue-500 text-xs">
-                                        <input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="https://..." class="w-full mb-2 p-1.5 border border-gray-300 rounded outline-none focus:border-blue-500 text-xs">
-                                        <div class="flex gap-2">
-                                            <button onclick="addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium">Lưu</button>
-                                            <button onclick="toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs">Hủy</button>
+                            let savStr = "";
+                            if(pkg.estimatePrice && pkg.winningPrice) {
+                                let sav = pkg.estimatePrice - pkg.winningPrice;
+                                let pct = ((sav/pkg.estimatePrice)*100).toFixed(2);
+                                savStr = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-bold shadow-sm ml-2" title="Tiết kiệm: ${sav.toLocaleString('vi-VN')} đ">TK: ${pct}%</span>`;
+                            }
+
+                            packagesHtml += `
+                                <div class="bg-white rounded border border-gray-200 border-l-4 border-l-blue-500 overflow-visible mb-4 shadow-sm relative">
+                                    <div class="bg-blue-50/50 px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-blue-100 gap-3">
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-[14px] text-blue-900"><i class="fas fa-box mr-1.5 text-blue-600"></i>${pkg.name} ${savStr}</h4>
+                                            <div class="text-[11px] text-gray-600 mt-1">
+                                                <span class="inline-block bg-white border border-blue-200 text-blue-700 px-1.5 py-0.5 rounded mr-2 font-medium">${pkg.processTitle}</span>
+                                                Ký HĐ dự kiến: <span class="font-semibold text-gray-800">${finalDate}</span> | Cán bộ: <b>${pkg.owner}</b>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            ${isOwnerAdmin || currentUser.fullname === pkg.owner ? `<button onclick="openFinanceLogModal(${mIndex},${pkgIndex})" class="text-orange-600 hover:bg-orange-50 px-2 py-1.5 rounded border border-orange-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-history"></i> Log/TC</button>` : ''}
+                                            <button onclick="exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 hover:bg-green-50 px-2 py-1.5 rounded border border-green-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-file-excel"></i> Xuất</button>
+                                            ${isOwnerAdmin ? `<button onclick="deletePackage(${mIndex},${pkgIndex})" class="text-gray-400 hover:text-red-500 px-2 py-1.5 rounded border border-gray-200 bg-white shadow-sm"><i class="fas fa-trash-alt"></i></button>` : ''}
                                         </div>
                                     </div>
-                                </div>
-                            ` : '';
-                            
-                            const actionHtml = isOwner ? `<td class="p-2 text-center align-top"><button onclick="deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 p-1.5 rounded" title="Xóa bước"><i class="fas fa-trash"></i></button></td>` : '';
-                            
-                            return `
-                            <tr class="border-b hover:bg-gray-50 transition">
-                                <td class="p-3 w-10 text-center align-top">
-                                    <input type="checkbox" class="w-4 h-4 ${isOwner ? 'cursor-pointer' : 'cursor-not-allowed'} accent-blue-600 mt-1" 
-                                        ${step.completed ? 'checked' : ''} 
-                                        ${!isOwner ? 'disabled title="Chỉ người phụ trách mới được xác nhận"' : ''}
-                                        onchange="updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)">
-                                </td>
-                                <td class="p-3 align-top">
-                                    ${nameHtml}
-                                    ${step.completedBy ? `<div class="text-[11px] text-green-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Xác nhận: ${step.completedBy}</div>` : ''}
-                                </td>
-                                <td class="p-3 text-center align-top">${timeBudget}</td>
-                                <td class="p-3 align-top">${dateHtml}</td>
-                                <td class="p-3 align-top">
-                                    <div class="flex flex-wrap">${linksDisplayHtml}</div>
-                                    ${linkInputHtml}
-                                </td>
-                                ${actionHtml}
-                            </tr>
-                            `;
-                        }).join('');
-
-                        const addBtnHtml = isOwner ? `
-                            <tr class="bg-indigo-50/30 border-t border-indigo-100">
-                                <td colspan="6" class="p-2 text-center">
-                                    <button onclick="addProjStep(${mIndex}, ${pkgIndex})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"><i class="fas fa-plus-circle mr-1"></i> Thêm việc phát sinh</button>
-                                </td>
-                            </tr>
-                        ` : '';
-
-                        const deletePkgBtn = isOwner ? `<button onclick="deletePackage(${mIndex}, ${pkgIndex})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition bg-white border border-gray-200 shadow-sm ml-2" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : '';
-
-                        packagesHtml += `
-                            <div class="bg-white rounded border border-gray-200 border-l-4 border-l-emerald-500 overflow-hidden mb-4 shadow-sm">
-                                <div class="bg-emerald-50/50 px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-emerald-100 gap-3">
-                                    <div class="flex-1 w-full">
-                                        <h4 class="font-bold text-[15px] text-emerald-900"><i class="fas fa-box-open mr-1.5 text-emerald-600"></i>Gói thầu: ${pkg.name}</h4>
-                                        <div class="text-xs text-gray-600 mt-1">
-                                            <span class="inline-block bg-white border border-emerald-200 text-emerald-700 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${pkg.processTitle || "Quy trình đấu thầu"}</span>
-                                            Ký HĐ dự kiến: <span class="font-semibold text-gray-800">${finalDate}</span>
-                                        </div>
+                                    <div class="overflow-x-auto overflow-y-visible">
+                                        <table class="w-full text-left border-collapse text-sm">
+                                            <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                                                <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-20 text-center">Định mức</th><th class="p-2 w-28">Hạn chót</th><th class="p-2 min-w-[200px]">Đính kèm</th>${isPkgOwner ? '<th class="p-2 w-8"></th>' : ''}</tr>
+                                            </thead>
+                                            <tbody>${stepsHtml} ${isPkgOwner ? `<tr><td colspan="6" class="p-1.5 text-center bg-gray-50"><button onclick="addProjStep(${mIndex},${pkgIndex})" class="text-blue-600 text-xs font-medium"><i class="fas fa-plus"></i> Thêm việc</button></td></tr>` : ''}</tbody>
+                                        </table>
                                     </div>
-                                    <div class="flex items-center gap-1.5 self-end md:self-center mt-2 md:mt-0">
-                                        <button onclick="printProject(${mIndex}, ${pkgIndex})" class="text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-2 py-1 rounded transition border border-blue-200 bg-white shadow-sm text-xs font-medium"><i class="fas fa-print"></i> In</button>
-                                        <button onclick="exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 hover:bg-green-50 hover:text-green-700 px-2 py-1 rounded transition border border-green-200 bg-white shadow-sm text-xs font-medium"><i class="fas fa-file-excel"></i> Xuất</button>
-                                        ${deletePkgBtn}
-                                    </div>
+                                </div>`;
+                        });
+                    }
+
+                    container.innerHTML += `
+                        <div class="border-2 ${mission.archived ? 'border-gray-300' : 'border-emerald-300'} rounded-xl bg-white overflow-hidden shadow-sm mb-6">
+                            <div class="${mission.archived ? 'bg-gray-100' : 'bg-emerald-50'} p-4 border-b border-emerald-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-lg font-bold ${mission.archived ? 'text-gray-500 line-through' : 'text-emerald-900'}"><i class="fas fa-folder text-emerald-500 mr-2"></i>NV: ${mission.name} ${mission.archived ? '(Đã lưu trữ)' : ''}</h2>
+                                    <p class="text-sm text-emerald-800 mt-1"><i class="far fa-clock mr-1"></i>Hạn tổng: <b>${formatDate(mission.deadline)}</b> | <i class="far fa-user mr-1"></i>Owner: <b>${mission.owner}</b></p>
                                 </div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse text-sm">
-                                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                                            <tr>
-                                                <th class="p-2 text-center w-10">Xong</th>
-                                                <th class="p-2">Chi tiết công việc</th>
-                                                <th class="p-2 text-center w-24">Định mức</th>
-                                                <th class="p-2 w-32">Hạn chót</th>
-                                                <th class="p-2 min-w-[200px]">Hồ sơ đính kèm</th>
-                                                ${isOwner ? '<th class="p-2 w-10 text-center">Xóa</th>' : ''}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${stepsHtml}
-                                            ${addBtnHtml}
-                                        </tbody>
-                                    </table>
+                                <div class="flex gap-2">
+                                    ${isOwnerAdmin ? `
+                                    <button onclick="archiveMission(${mIndex})" class="bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm transition" title="${mission.archived ? 'Khôi phục' : 'Lưu trữ'}"><i class="fas fa-archive"></i></button>
+                                    <button onclick="openCreatePackageModal(${mIndex})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-sm font-medium shadow-sm transition ${mission.archived?'hidden':''}"><i class="fas fa-plus"></i> Gói thầu</button>
+                                    <button onclick="deleteMission(${mIndex})" class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded text-sm transition"><i class="fas fa-trash-alt"></i></button>
+                                    ` : ''}
                                 </div>
                             </div>
-                        `;
-                    });
-                }
+                            <div class="p-4 bg-gray-50/50">${packagesHtml}</div>
+                        </div>`;
+                });
+            }
 
-                let docsHtml = "";
-                if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                    docsHtml = `<div class="mt-3 bg-white p-2 rounded border border-indigo-100 text-xs shadow-sm">
-                        <span class="font-semibold text-indigo-800">Căn cứ chung:</span>
-                        <span class="text-gray-600 ml-1">
-                            ${db.regulatoryDocs.map(d => `${d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 hover:underline">` : ''}<b>${d.number}</b>${d.link ? `</a>` : ''}`).join(', ')}
-                        </span>
-                    </div>`;
-                }
-
-                container.innerHTML += `
-                    <div class="mission-block border-2 border-indigo-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                        <div class="bg-indigo-50 p-4 border-b border-indigo-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div class="flex-1">
-                                <h2 class="text-lg font-bold text-indigo-900"><i class="fas fa-folder text-indigo-500 mr-2"></i>Nhiệm vụ: ${mission.name}</h2>
-                                <p class="text-sm text-indigo-700 mt-1">
-                                    <i class="far fa-clock mr-1"></i>Hạn hoàn thành: <span class="font-bold">${formatDate(mission.deadline)}</span> 
-                                    <span class="mx-2">|</span> 
-                                    <i class="far fa-user mr-1"></i>Phụ trách: <b>${mission.owner}</b>
-                                </p>
-                                ${docsHtml}
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                ${isOwner ? `
-                                <button onclick="openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-medium shadow-sm transition"><i class="fas fa-plus mr-1"></i> Thêm Gói thầu</button>
-                                <button onclick="deleteMission(${mIndex})" class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>
-                                ` : ''}
-                            </div>
-                        </div>
-                        <div class="p-4 bg-gray-50/50">${packagesHtml}</div>
-                    </div>
-                `;
-            });
+        // --- XUẤT EXCEL TỔNG HỢP ---
+        function exportGlobalExcel() {
+            let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="UTF-8"></head><body>`;
+            tableHtml += `<h2>BÁO CÁO TỔNG HỢP TIẾN ĐỘ ĐẤU THẦU (SCE)</h2><p>Ngày xuất: ${formatDate(new Date().toISOString())}</p>`;
+            tableHtml += `<table border="1" cellpadding="5"><thead><tr style="background:#4CAF50;color:#fff"><th>Nhiệm vụ</th><th>Gói thầu</th><th>Cán bộ</th><th>Trạng thái (Số việc đã xong/Tổng)</th><th>Hạn chót cuối</th><th>Dự toán (VNĐ)</th><th>Tiết kiệm (VNĐ)</th></tr></thead><tbody>`;
+            
+            if(db.missions) {
+                db.missions.forEach(m => {
+                    if(m.archived) return;
+                    if(m.packages) {
+                        m.packages.forEach(p => {
+                            let total=0, done=0;
+                            if(p.steps) { total=p.steps.length; p.steps.forEach(s => { if(s.completed) done++; }); }
+                            let deadline = p.steps && p.steps.length > 0 ? formatDate(p.steps[p.steps.length-1].deadline) : "";
+                            let est = p.estimatePrice || 0; let win = p.winningPrice || 0; let sav = (est && win) ? (est-win) : 0;
+                            tableHtml += `<tr><td>${m.name}</td><td>${p.name}</td><td>${p.owner}</td><td>${done}/${total}</td><td>${deadline}</td><td>${est}</td><td>${sav}</td></tr>`;
+                        });
+                    }
+                });
+            }
+            tableHtml += `</tbody></table></body></html>`;
+            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `BaoCao_DauThau_SCE_${new Date().getTime()}.xls`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
+
+        // --- XUẤT EXCEL GÓI THẦU LẺ ---
+        function exportExcel(mIndex, pkgIndex) {
+            const m = db.missions[mIndex]; const pkg = m.packages[pkgIndex];
+            let t = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>`;
+            t += `<h3>NHIỆM VỤ: ${m.name.toUpperCase()}</h3><h4>GÓI THẦU: ${pkg.name}</h4><p>Cán bộ: ${pkg.owner}</p>`;
+            t += `<table border="1" cellpadding="5"><thead><tr style="background:#4CAF50;color:#fff"><th>STT</th><th>Công việc</th><th>Hạn chót</th><th>Trạng thái</th></tr></thead><tbody>`;
+            pkg.steps.forEach((s, i) => { t += `<tr><td>${i+1}</td><td>${s.name}</td><td>${formatDate(s.deadline)}</td><td>${s.completed ? 'Xong' : 'Chưa'}</td></tr>`; });
+            t += `</tbody></table></body></html>`;
+            const blob = new Blob([t], { type: 'application/vnd.ms-excel' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `TienDo_${pkg.name.replace(/[\/\\?%*:|"<>]/g, '-')}.xls`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        // --- RENDER CONFIG & DOCS & USERS (Giữ nguyên) ---
+        function populateProcessDropdowns() {
+            document.getElementById('projType').innerHTML = ''; document.getElementById('configProcessSelector').innerHTML = '';
+            for (const key in db.processTemplates) {
+                document.getElementById('projType').innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`;
+                document.getElementById('configProcessSelector').innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`;
+            }
+        }
+        function renderConfig() {
+            const type = document.getElementById('configProcessSelector').value; const c = document.getElementById('configSteps'); c.innerHTML = '';
+            if (!type || !db.processTemplates[type]) return;
+            db.processTemplates[type].steps.forEach((s, i) => {
+                c.innerHTML += `<div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm drag-item" data-index="${i}">
+                    <div class="cursor-move text-gray-400 hover:text-blue-500 px-1 drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                    <span class="font-bold w-6 text-gray-400 text-sm">${i + 1}.</span>
+                    <input type="text" value="${s.name}" onchange="updateConfigStep('${type}', ${i}, 'name', this.value)" class="flex-1 border-b focus:border-blue-500 outline-none text-sm">
+                    <input type="number" value="${s.days}" onchange="updateConfigStep('${type}', ${i}, 'days', this.value)" class="w-16 border rounded text-center outline-none text-sm"> 
+                    <select onchange="updateConfigStep('${type}', ${i}, 'dayType', this.value)" class="border-b outline-none text-sm p-1"><option value="calendar" ${s.dayType !== 'workday' ? 'selected' : ''}>Ngày lịch</option><option value="workday" ${s.dayType === 'workday' ? 'selected' : ''}>Ngày LV</option></select>
+                    <button onclick="removeConfigStep('${type}', ${i})" class="text-gray-400 hover:text-red-500 px-2"><i class="fas fa-times"></i></button></div>`;
+            });
+            if (configSortableInstance) configSortableInstance.destroy();
+            configSortableInstance = Sortable.create(c, { handle: '.drag-handle', onEnd: function(evt) { if(evt.oldIndex!==evt.newIndex){ const arr=db.processTemplates[type].steps; arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]); renderConfig(); saveDataToGAS(); } } });
+        }
+        function addNewProcessTemplate() { const t=document.getElementById('newProcessTitle').value.trim(); if(t){ const id='proc_'+Date.now(); db.processTemplates[id]={title:t, steps:[]}; document.getElementById('newProcessTitle').value=''; populateProcessDropdowns(); document.getElementById('configProcessSelector').value=id; renderConfig(); saveDataToGAS(); } }
+        function deleteProcessTemplate() { const type=document.getElementById('configProcessSelector').value; if(type && confirm("Xóa?")){ delete db.processTemplates[type]; populateProcessDropdowns(); renderConfig(); saveDataToGAS(); } }
+        function updateConfigStep(k, i, f, v) { db.processTemplates[k].steps[i][f]=f==='days'?parseInt(v)||0:v; saveDataToGAS(); }
+        function removeConfigStep(k, i) { db.processTemplates[k].steps.splice(i, 1); renderConfig(); saveDataToGAS(); }
+        function addConfigStep() { const type=document.getElementById('configProcessSelector').value; const n=document.getElementById('newStepName').value.trim(); const d=parseInt(document.getElementById('newStepDays').value); if(n && !isNaN(d)){ db.processTemplates[type].steps.push({name:n, days:d, dayType:document.getElementById('newStepDayType').value}); document.getElementById('newStepName').value=''; document.getElementById('newStepDays').value=''; renderConfig(); saveDataToGAS(); } }
+
+        function renderDocs() {
+            const b = document.getElementById('docsTableBody'); b.innerHTML = '';
+            if(!db.regulatoryDocs) db.regulatoryDocs=[];
+            db.regulatoryDocs.forEach((d, i) => { b.innerHTML += `<tr><td class="p-3"><input value="${d.number}" onchange="updateDoc(${i}, 'number', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3"><input value="${d.title}" onchange="updateDoc(${i}, 'title', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3"><input type="url" value="${d.link||''}" onchange="updateDoc(${i}, 'link', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3 text-center"><button onclick="deleteDoc(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`; });
+        }
+        function addNewDoc() { const num=document.getElementById('newDocNumber').value, tit=document.getElementById('newDocTitle').value, lnk=document.getElementById('newDocLink').value; if(num&&tit){ db.regulatoryDocs.push({number:num, title:tit, link:lnk}); document.getElementById('newDocNumber').value=''; document.getElementById('newDocTitle').value=''; document.getElementById('newDocLink').value=''; renderDocs(); saveDataToGAS(); } }
+        function updateDoc(i, f, v) { db.regulatoryDocs[i][f]=v; saveDataToGAS(); } function deleteDoc(i) { if(confirm("Xóa?")){ db.regulatoryDocs.splice(i,1); renderDocs(); saveDataToGAS(); } }
+
+        function renderUsers() {
+            const b = document.getElementById('userTableBody'); b.innerHTML = '';
+            db.users.forEach((u, i) => { b.innerHTML += `<tr><td class="p-3">${u.username}</td><td class="p-3">${u.fullname}</td><td class="p-3">${u.role}</td><td class="p-3 text-right">${u.username!=='admin'?`<button onclick="deleteUser(${i})" class="text-red-500"><i class="fas fa-trash"></i></button>`:'-'}</td></tr>`; });
+        }
+        function addNewUser() { const u=document.getElementById('newUserUsername').value, p=document.getElementById('newUserPassword').value, f=document.getElementById('newUserFullname').value, r=document.getElementById('newUserRole').value; if(u&&p&&f){ db.users.push({username:u, password:p, fullname:f, role:r}); renderUsers(); saveDataToGAS(); } }
+        function deleteUser(i) { if(confirm("Xóa?")){ db.users.splice(i,1); renderUsers(); saveDataToGAS(); } }
     </script>
 </body>
 </html>
