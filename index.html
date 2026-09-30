@@ -187,7 +187,7 @@
     <div id="createMissionModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-emerald-500"><h2 class="text-lg font-bold text-emerald-700 dark:text-emerald-400 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-folder-plus mr-2"></i>Tạo Nhiệm vụ mới</h2><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên Nhiệm vụ tổng</label><input type="text" id="missionName" placeholder="VD: Triển khai ứng dụng phần mềm SCE..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thời hạn hoàn thành</label><input type="date" id="missionDeadline" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"><div class="flex justify-end gap-3"><button onclick="window.closeCreateMissionModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button><button onclick="window.createMission()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium shadow">Tạo mới</button></div></div></div>
     <div id="createPackageModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-blue-500"><h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 pb-2 border-b dark:border-gray-700">Thêm Gói thầu mới</h2><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quy trình áp dụng</label><select id="projType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên gói thầu</label><input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày bắt đầu</label><input type="date" id="projStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label><select id="pkgOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select><div class="flex justify-end gap-3"><button onclick="window.closeCreatePackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button><button onclick="window.createPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Thêm gói thầu</button></div></div></div>
     <div id="profileModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm"><h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-user-edit mr-2 text-blue-600"></i>Cài đặt tài khoản</h2><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và Tên</label><input type="text" id="profileFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mật khẩu mới (Tùy chọn)</label><input type="password" id="profilePassword" placeholder="Bỏ trống nếu giữ nguyên" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><div class="flex justify-end gap-3"><button onclick="window.closeProfileModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Đóng</button><button onclick="window.saveProfile()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Lưu</button></div></div></div>
-    <div id="editUserModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm"><h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-user-cog mr-2 text-purple-600"></i>Sửa tài khoản</h2><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID Đăng nhập</label><input type="text" id="editUserUsername" disabled class="w-full border dark:border-gray-600 bg-gray-200 dark:bg-gray-900 p-2.5 rounded text-sm mb-3 cursor-not-allowed dark:text-gray-400"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên chuyên viên</label><input type="text" id="editUserFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vai trò</label><select id="editUserRole" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><option value="user">Chuyên viên thực hiện</option><option value="leader">Lãnh đạo</option><option value="admin">Admin</option></select><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mật khẩu mới (Tùy chọn)</label><input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><div class="flex justify-end gap-3"><button onclick="window.closeEditUserModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button><button onclick="window.saveEditUser()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Lưu</button></div></div></div>
+    <div id="editUserModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm"><h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-user-cog mr-2 text-purple-600"></i>Sửa tài khoản</h2><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID Đăng nhập</label><input type="text" id="editUserUsername" disabled class="w-full border dark:border-gray-600 bg-gray-200 dark:bg-gray-900 p-2.5 rounded text-sm mb-3 cursor-not-allowed dark:text-gray-400"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên chuyên viên</label><input type="text" id="editUserFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vai trò</label><select id="editUserRole" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><option value="user">Chuyên viên thực hiện</option><option value="leader">Lãnh đạo</option><option value="admin">Admin</option></select><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mật khẩu mới (Tùy chọn)</label><input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"><div class="flex justify-end gap-3"><button onclick="window.closeEditUserModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy bỏ</button><button onclick="window.saveEditUser()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Lưu thay đổi</button></div></div></div>
 
     <!-- LOADER -->
     <div id="loader" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]">
@@ -200,7 +200,6 @@
     <!-- MÃ JAVASCRIPT -->
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
-
         const defaultTemplates = {
             duoi100: { title: "Mua sắm < 100 triệu (NĐ 349)", steps: [{ name: "Phê duyệt dự toán", days: 2, dayType: "workday" }, { name: "Lấy báo giá", days: 3, dayType: "workday" }, { name: "Ký hợp đồng", days: 2, dayType: "workday" }] },
             chidinh: { title: "Chỉ định thầu rút gọn", steps: [{ name: "Phê duyệt KHLCNT", days: 3, dayType: "workday" }, { name: "Đăng tải YCBG", days: 3, dayType: "workday" }, { name: "Thương thảo HĐ", days: 3, dayType: "workday" }, { name: "Ký hợp đồng", days: 2, dayType: "workday" }] }
@@ -209,51 +208,17 @@
         const VN_HOLIDAYS = ['01/01', '30/04', '01/05', '02/09'];
 
         let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
-        
-        let currentUser = null;
-        let syncTimeout = null;
-        let autoSyncInterval = null;
-        let isDataSynchronized = false;
-        let isSaving = false;
-        let lastSaveTime = 0;
-        
-        let currentMissionIndexForNewPackage = -1;
-        let currentFinanceMIndex = -1;
-        let currentFinancePIndex = -1;
-        let configSortableInstance = null;
-        let currentEditUserIndex = -1;
-        let globalOverdueTasksList = [];
-        let cEditM = -1; let cEditP = -1; let cEditS = -1;
-        let chartStatusIns = null;
-        let chartFinIns = null;
+        let currentUser = null; let syncTimeout = null; let autoSyncInterval = null; let isDataSynchronized = false; let isSaving = false; let lastSaveTime = 0;
+        let currentMissionIndexForNewPackage = -1; let currentFinanceMIndex = -1; let currentFinancePIndex = -1; let configSortableInstance = null; let currentEditUserIndex = -1; let globalOverdueTasksList = [];
+        let cEditM = -1; let cEditP = -1; let cEditS = -1; let chartStatusIns = null; let chartFinIns = null;
 
-        window.toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
+        window.toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; } });
 
         window.toggleDarkMode = function() {
-            document.documentElement.classList.toggle('dark');
-            const icon = document.getElementById('darkModeIcon');
-            if (document.documentElement.classList.contains('dark')) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-                icon.classList.replace('text-indigo-200', 'text-white');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                icon.classList.replace('text-white', 'text-indigo-200');
-            }
-            if (!document.getElementById('view-dashboard').classList.contains('hidden')) {
-                window.renderCharts();
-            }
+            document.documentElement.classList.toggle('dark'); const icon = document.getElementById('darkModeIcon');
+            if (document.documentElement.classList.contains('dark')) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); icon.classList.replace('text-indigo-200', 'text-white'); } 
+            else { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); icon.classList.replace('text-white', 'text-indigo-200'); }
+            if (!document.getElementById('view-dashboard').classList.contains('hidden')) { window.renderCharts(); }
         };
 
         function applyDefaultsIfMissing() {
@@ -265,9 +230,7 @@
         }
 
         function autoCleanArchivedData() {
-            if (!db.missions) return;
-            const now = new Date();
-            let dataChanged = false;
+            if (!db.missions) return; const now = new Date(); let dataChanged = false;
             db.missions.forEach(m => {
                 if (m.packages) {
                     const originalLen = m.packages.length;
@@ -275,8 +238,7 @@
                         if (pkg.archived) {
                             if (!pkg.archiveDate) { pkg.archiveDate = now.toISOString(); dataChanged = true; return true; }
                             if ((now - new Date(pkg.archiveDate)) / (1000 * 60 * 60 * 24) > 30) return false; 
-                        }
-                        return true;
+                        } return true;
                     });
                     if (m.packages.length !== originalLen) dataChanged = true;
                 }
@@ -286,21 +248,12 @@
 
         window.formatDate = function(dIn) { 
             if (!dIn) return ''; 
-            try {
-                let dt = (typeof dIn === 'string' && dIn.includes('T')) ? new Date(dIn) : new Date(dIn);
-                if (isNaN(dt.getTime())) return '';
-                return `${("0" + dt.getDate()).slice(-2)}/${("0" + (dt.getMonth() + 1)).slice(-2)}/${dt.getFullYear()}`;
-            } catch(e) { return ''; }
+            try { let dt = (typeof dIn === 'string' && dIn.includes('T')) ? new Date(dIn) : new Date(dIn); if (isNaN(dt.getTime())) return ''; return `${("0" + dt.getDate()).slice(-2)}/${("0" + (dt.getMonth() + 1)).slice(-2)}/${dt.getFullYear()}`; } catch(e) { return ''; }
         }
 
         window.formatForDateInput = function(dIn) { 
             if (!dIn) return ''; 
-            try {
-                if (typeof dIn === 'string' && !dIn.includes('T')) return dIn; 
-                let dt = new Date(dIn);
-                if (isNaN(dt.getTime())) return '';
-                return `${dt.getFullYear()}-${("0" + (dt.getMonth() + 1)).slice(-2)}-${("0" + dt.getDate()).slice(-2)}`;
-            } catch(e) { return ''; }
+            try { if (typeof dIn === 'string' && !dIn.includes('T')) return dIn; let dt = new Date(dIn); if (isNaN(dt.getTime())) return ''; return `${dt.getFullYear()}-${("0" + (dt.getMonth() + 1)).slice(-2)}-${("0" + dt.getDate()).slice(-2)}`; } catch(e) { return ''; }
         }
 
         window.addCustomDays = function(dObj, days, type) { 
@@ -309,53 +262,26 @@
                 let a = 0; 
                 while (a < days) { 
                     r.setDate(r.getDate() + 1); 
-                    let isWeekend = r.getDay() === 0 || r.getDay() === 6;
-                    let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2);
-                    let isHoliday = VN_HOLIDAYS.includes(dateStr);
+                    let isWeekend = r.getDay() === 0 || r.getDay() === 6; let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2); let isHoliday = VN_HOLIDAYS.includes(dateStr);
                     if (!isWeekend && !isHoliday) a++; 
                 } 
-            } else { r.setDate(r.getDate() + days); } 
-            return r; 
+            } else { r.setDate(r.getDate() + days); } return r; 
         }
 
         window.formatCurrencyInput = function(input) { let val = input.value.replace(/[^0-9]/g, ''); input.value = val ? parseInt(val).toLocaleString('vi-VN') : ''; }
-        
-        window.logActivity = function(mIndex, pkgIndex, msg) { 
-            let pkg = db.missions[mIndex].packages[pkgIndex]; 
-            if (!pkg.logs) pkg.logs = []; 
-            const now = new Date(); 
-            const timeStr = `${("0" + now.getHours()).slice(-2)}:${("0" + now.getMinutes()).slice(-2)} ${("0" + now.getDate()).slice(-2)}/${("0" + (now.getMonth()+1)).slice(-2)}`; 
-            pkg.logs.unshift(`[${timeStr}] ${currentUser.fullname}: ${msg}`); 
-            if (pkg.logs.length > 50) pkg.logs.pop(); 
-        }
+        window.logActivity = function(mIndex, pkgIndex, msg) { let pkg = db.missions[mIndex].packages[pkgIndex]; if (!pkg.logs) pkg.logs = []; const now = new Date(); const timeStr = `${("0" + now.getHours()).slice(-2)}:${("0" + now.getMinutes()).slice(-2)} ${("0" + now.getDate()).slice(-2)}/${("0" + (now.getMonth()+1)).slice(-2)}`; pkg.logs.unshift(`[${timeStr}] ${currentUser.fullname}: ${msg}`); if (pkg.logs.length > 50) pkg.logs.pop(); }
 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                document.getElementById('projStartDate').valueAsDate = new Date();
-                let dlDate = new Date(); dlDate.setMonth(dlDate.getMonth() + 1);
-                document.getElementById('missionDeadline').valueAsDate = dlDate;
-                
-                const today = new Date();
-                document.getElementById('dashCurrentDate').innerText = `Cập nhật: ${("0" + today.getDate()).slice(-2)}/${("0" + (today.getMonth()+1)).slice(-2)}/${today.getFullYear()}`;
-
+                document.getElementById('projStartDate').valueAsDate = new Date(); let dlDate = new Date(); dlDate.setMonth(dlDate.getMonth() + 1); document.getElementById('missionDeadline').valueAsDate = dlDate;
+                const today = new Date(); document.getElementById('dashCurrentDate').innerText = `Cập nhật: ${("0" + today.getDate()).slice(-2)}/${("0" + (today.getMonth()+1)).slice(-2)}/${today.getFullYear()}`;
                 const savedUser = localStorage.getItem('bidAppUser');
                 if (savedUser) {
-                    document.getElementById('loaderText').innerText = "Đang tải dữ liệu...";
-                    document.getElementById('loader').style.display = 'flex';
-                    
-                    await window.loadDataFromGAS();
-                    document.getElementById('loader').style.display = 'none';
-                    
-                    if (!isDataSynchronized) {
-                        showLoginError("Lỗi kết nối máy chủ. Vui lòng tải lại trang hoặc đăng nhập lại.");
-                        return;
-                    }
-
-                    const pU = JSON.parse(savedUser);
-                    const found = db.users.find(u => u.username === pU.username && u.password === pU.password);
-                    
-                    if (found) { currentUser = found; window.openAppScreen(); } 
-                    else { localStorage.removeItem('bidAppUser'); }
+                    document.getElementById('loaderText').innerText = "Đang tải dữ liệu..."; document.getElementById('loader').style.display = 'flex';
+                    await window.loadDataFromGAS(); document.getElementById('loader').style.display = 'none';
+                    if (!isDataSynchronized) { showLoginError("Lỗi kết nối máy chủ. Vui lòng tải lại trang hoặc đăng nhập lại."); return; }
+                    const pU = JSON.parse(savedUser); const found = db.users.find(u => u.username === pU.username && u.password === pU.password);
+                    if (found) { currentUser = found; window.openAppScreen(); } else { localStorage.removeItem('bidAppUser'); }
                 }
             } catch (error) { console.error("Lỗi khởi động:", error); }
         });
@@ -363,136 +289,76 @@
         window.loadDataFromGAS = async function() {
             try {
                 const response = await fetch(GAS_URL, { cache: "no-store" });
+                if (!response.ok) throw new Error("Network not OK");
                 const textData = await response.text();
-                
                 let data = {};
-                if (textData && textData.trim() !== "") {
-                    try { data = JSON.parse(textData); } 
-                    catch(e) { console.warn("Lỗi đọc JSON từ Google Sheets."); }
-                }
-
+                if (textData && textData.trim() !== "") { try { data = JSON.parse(textData); } catch(e) { console.warn("Lỗi đọc JSON."); } }
                 if (data && typeof data === 'object' && Object.keys(data).length > 0) { db = data; }
-                
-                applyDefaultsIfMissing();
-                isDataSynchronized = true; 
-            } catch (err) {
-                console.error("Lỗi fetch API:", err);
-                isDataSynchronized = false; 
-            }
+                applyDefaultsIfMissing(); isDataSynchronized = true; 
+            } catch (err) { console.error("Lỗi fetch API:", err); isDataSynchronized = false; }
         }
 
         window.saveDataToGAS = async function(alertSuccess = false) {
-            if (!isDataSynchronized) return;
-            isSaving = true; 
-            const syncIcon = document.querySelector('#syncStatus i');
-            const syncText = document.getElementById('syncText');
-            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-yellow-400";
-            if (syncText) syncText.innerText = "Đang lưu...";
-
+            if (!isDataSynchronized) return; isSaving = true; 
+            const syncIcon = document.querySelector('#syncStatus i'); const syncText = document.getElementById('syncText');
+            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-yellow-400"; if (syncText) syncText.innerText = "Đang lưu...";
             try {
-                await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(db),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
+                await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 lastSaveTime = Date.now(); 
-                if (syncIcon) syncIcon.className = "fas fa-check-circle text-green-400";
-                if (syncText) syncText.innerText = "Đã lưu";
-                clearTimeout(syncTimeout);
-                syncTimeout = setTimeout(() => {
-                    if (syncText && syncText.innerText === "Đã lưu") {
-                        syncIcon.className = "fas fa-cloud text-blue-300";
-                        syncText.innerText = "Đã đồng bộ";
-                    }
-                }, 3000);
-
+                if (syncIcon) syncIcon.className = "fas fa-check-circle text-green-400"; if (syncText) syncText.innerText = "Đã lưu";
+                clearTimeout(syncTimeout); syncTimeout = setTimeout(() => { if (syncText && syncText.innerText === "Đã lưu") { syncIcon.className = "fas fa-cloud text-blue-300"; syncText.innerText = "Đã đồng bộ"; } }, 3000);
                 if (alertSuccess) window.toast.fire({ icon: 'success', title: 'Đã lưu dữ liệu!' });
             } catch (err) {
                 console.error("Lỗi khi lưu:", err);
-                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
-                if (syncText) syncText.innerText = "Lỗi mạng";
+                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400"; if (syncText) syncText.innerText = "Lỗi mạng";
                 if (alertSuccess) window.toast.fire({ icon: 'error', title: 'Lỗi kết nối khi lưu!' });
-            } finally {
-                isSaving = false; 
-            }
+            } finally { isSaving = false; }
         }
 
         window.forceSync = function() { window.saveDataToGAS(true); }
 
         window.fetchBackups = async function() {
             if (currentUser.role !== 'admin') return Swal.fire('Cảnh báo', 'Chỉ Admin được truy cập!', 'warning');
-            document.getElementById('loaderText').innerText = "Đang tải danh sách bản sao lưu...";
-            document.getElementById('loader').style.display = 'flex';
-            
+            document.getElementById('loaderText').innerText = "Đang tải danh sách bản sao lưu..."; document.getElementById('loader').style.display = 'flex';
             try {
                 const response = await fetch(GAS_URL + "?action=getBackups", { cache: "no-store" });
                 const textResponse = await response.text();
-                
-                let backups = null;
-                try { backups = JSON.parse(textResponse); } catch(e) {}
-                
-                if (!Array.isArray(backups)) {
-                    Swal.fire({ title: 'Hệ thống cần cập nhật', html: "Google Apps Script của bạn chưa được cập nhật bản mới!<br><br>Vào Google Sheets -> Tiện ích -> Apps Script -> <b>Deploy</b> -> <b>Manage Deployments</b> -> Chọn bút chì (Edit) -> Mục Version chọn <b>New version</b> -> Bấm <b>Deploy</b>.", icon: 'warning' });
-                    document.getElementById('loader').style.display = 'none';
-                    return;
-                }
-
-                const tbody = document.getElementById('backupsTableBody');
-                tbody.innerHTML = '';
-                
-                if (backups.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào. Hãy thử thao tác công việc để hệ thống ghi lại.</td></tr>`;
-                } else {
+                let backups = null; try { backups = JSON.parse(textResponse); } catch(e) {}
+                if (!Array.isArray(backups)) { Swal.fire({ title: 'Cần cập nhật Google Apps Script', html: "Vui lòng <b>Deploy</b> -> <b>New version</b> trong Google Sheets để sử dụng tính năng này.", icon: 'warning' }); document.getElementById('loader').style.display = 'none'; return; }
+                const tbody = document.getElementById('backupsTableBody'); tbody.innerHTML = '';
+                if (backups.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào.</td></tr>`; } else {
                     backups.forEach(b => {
                         let displayTime = b.time;
                         try {
-                            let tParts = b.time.split(" ");
-                            if(tParts.length === 2 && tParts[0].includes("/")) {
-                                displayTime = `Lúc <span class="font-bold text-red-600">${tParts[1]}</span> ngày <span class="font-bold text-gray-700 dark:text-gray-300">${tParts[0]}</span>`;
+                            let dt = new Date(b.time);
+                            if (!isNaN(dt.getTime())) {
+                                let d = ("0" + dt.getDate()).slice(-2); let m = ("0" + (dt.getMonth() + 1)).slice(-2); let y = dt.getFullYear(); let hr = ("0" + dt.getHours()).slice(-2); let min = ("0" + dt.getMinutes()).slice(-2); let sec = ("0" + dt.getSeconds()).slice(-2);
+                                displayTime = `Lúc <span class="font-bold text-red-600">${hr}:${min}:${sec}</span> ngày <span class="font-bold text-gray-700 dark:text-gray-300">${d}/${m}/${y}</span>`;
+                            } else {
+                                let tParts = b.time.split(" ");
+                                if(tParts.length === 2 && tParts[0].includes("/")) { displayTime = `Lúc <span class="font-bold text-red-600">${tParts[1]}</span> ngày <span class="font-bold text-gray-700 dark:text-gray-300">${tParts[0]}</span>`; }
                             }
                         } catch(e) {}
-
-                        tbody.innerHTML += `
-                            <tr class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                                <td class="p-3 text-center font-bold text-gray-500 dark:text-gray-400">#${b.id}</td>
-                                <td class="p-3 text-sm">${displayTime}</td>
-                                <td class="p-3 text-center">
-                                    <button onclick="window.restoreBackup(${b.id}, '${b.time}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition">
-                                        <i class="fas fa-undo-alt mr-1"></i> Khôi phục
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"><td class="p-3 text-center font-bold text-gray-500 dark:text-gray-400">#${b.id}</td><td class="p-3 text-sm">${displayTime}</td><td class="p-3 text-center"><button onclick="window.restoreBackup(${b.id}, '${b.time}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition"><i class="fas fa-undo-alt mr-1"></i> Khôi phục</button></td></tr>`;
                     });
                 }
-            } catch (err) { Swal.fire('Lỗi', 'Lỗi tải danh sách sao lưu (Có thể do mạng): ' + err.message, 'error'); }
+            } catch (err) { Swal.fire('Lỗi', 'Lỗi tải danh sách: ' + err.message, 'error'); }
             document.getElementById('loader').style.display = 'none';
         }
 
         window.restoreBackup = function(id, timeStr) {
             if (currentUser.role !== 'admin') return;
-            Swal.fire({
-                title: 'CẢNH BÁO NGUY HIỂM!', text: `Bạn có chắc chắn muốn XÓA BỎ toàn bộ dữ liệu hiện tại và GHI ĐÈ bằng bản sao lưu lúc [${timeStr}] không?`,
-                icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Đồng ý, Khôi phục!', cancelButtonText: 'Hủy'
-            }).then(async (result) => {
+            Swal.fire({ title: 'CẢNH BÁO NGUY HIỂM!', text: `Bạn có chắc chắn muốn XÓA BỎ toàn bộ dữ liệu hiện tại và GHI ĐÈ bằng bản sao lưu lúc [${timeStr}] không?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Đồng ý, Khôi phục!', cancelButtonText: 'Hủy' }).then(async (result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('loaderText').innerText = "Đang tải và khôi phục dữ liệu...";
-                    document.getElementById('loader').style.display = 'flex';
+                    document.getElementById('loaderText').innerText = "Đang tải và khôi phục..."; document.getElementById('loader').style.display = 'flex';
                     try {
                         const response = await fetch(GAS_URL + "?action=loadBackup&id=" + id, { cache: "no-store" });
-                        const textData = await response.text();
-                        let data = null;
-                        if(textData && textData.trim() !== "") data = JSON.parse(textData);
-                        
+                        const textData = await response.text(); let data = null; if(textData && textData.trim() !== "") data = JSON.parse(textData);
                         if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-                            db = data; applyDefaultsIfMissing(); window.populateProcessDropdowns(); await window.saveDataToGAS(false);
-                            document.getElementById('loader').style.display = 'none';
-                            Swal.fire('Thành công', 'Đã khôi phục thành công dữ liệu từ bản sao lưu!', 'success');
+                            db = data; applyDefaultsIfMissing(); window.populateProcessDropdowns(); await window.saveDataToGAS(false); document.getElementById('loader').style.display = 'none'; Swal.fire('Thành công', 'Đã khôi phục thành công!', 'success');
                             const activeTabObj = document.querySelector('.border-blue-700') || document.querySelector('.border-red-600');
                             if (activeTabObj) { window.switchTab(activeTabObj.id.replace('tab-', '')); } else { window.switchTab('dashboard'); }
-                        } else {
-                            document.getElementById('loader').style.display = 'none'; Swal.fire('Lỗi', 'Bản sao lưu này bị hỏng hoặc trống!', 'error');
-                        }
+                        } else { document.getElementById('loader').style.display = 'none'; Swal.fire('Lỗi', 'Bản sao lưu này bị hỏng hoặc trống!', 'error'); }
                     } catch(e) { document.getElementById('loader').style.display = 'none'; Swal.fire('Lỗi', 'Lỗi trong quá trình khôi phục: ' + e.message, 'error'); }
                 }
             });
@@ -501,13 +367,10 @@
         async function backgroundSync() {
             if (!isDataSynchronized || !currentUser || isSaving || (Date.now() - lastSaveTime < 5000)) return;
             const syncIcon = document.querySelector('#syncStatus i'); const syncText = document.getElementById('syncText');
-            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300";
-            if (syncText) syncText.innerText = "Làm mới...";
+            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300"; if (syncText) syncText.innerText = "Làm mới...";
             try {
                 const response = await fetch(GAS_URL, { cache: "no-store" });
-                const textData = await response.text();
-                let data = null;
-                if (textData && textData.trim() !== "") data = JSON.parse(textData);
+                const textData = await response.text(); let data = null; if (textData && textData.trim() !== "") data = JSON.parse(textData);
                 if (data && typeof data === 'object' && Object.keys(data).length > 0) {
                     if (JSON.stringify(db) !== JSON.stringify(data)) {
                         db = data; applyDefaultsIfMissing(); autoCleanArchivedData();
@@ -523,18 +386,11 @@
                         window.populateProcessDropdowns();
                     }
                 }
-                if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300";
-                if (syncText) syncText.innerText = "Đã đồng bộ";
-            } catch (err) {
-                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
-                if (syncText) syncText.innerText = "Mất kết nối";
-            }
+                if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300"; if (syncText) syncText.innerText = "Đã đồng bộ";
+            } catch (err) { if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400"; if (syncText) syncText.innerText = "Mất kết nối"; }
         }
 
-        function showLoginError(msg) {
-            const el = document.getElementById('loginError');
-            if (el) { el.innerText = msg; el.classList.remove('hidden'); }
-        }
+        function showLoginError(msg) { const el = document.getElementById('loginError'); if (el) { el.innerText = msg; el.classList.remove('hidden'); } }
 
         window.handleLogin = async function() {
             try {
@@ -543,64 +399,34 @@
                 if (!uEl || !pEl) return;
                 const u = uEl.value.trim(); const p = pEl.value.trim();
                 if (!u || !p) { showLoginError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu."); return; }
-                
-                document.getElementById('loaderText').innerText = "Đang kết nối máy chủ...";
-                document.getElementById('loader').style.display = 'flex';
-                await window.loadDataFromGAS();
-                document.getElementById('loader').style.display = 'none';
-
+                document.getElementById('loaderText').innerText = "Đang kết nối máy chủ..."; document.getElementById('loader').style.display = 'flex';
+                await window.loadDataFromGAS(); document.getElementById('loader').style.display = 'none';
                 if (!isDataSynchronized) { showLoginError("Lỗi kết nối máy chủ Google Sheets. Vui lòng kiểm tra mạng."); return; }
-
                 const found = db.users.find(x => x.username === u && x.password === p);
-                if (found) {
-                    currentUser = found;
-                    if (document.getElementById('rememberMe').checked) { localStorage.setItem('bidAppUser', JSON.stringify(found)); }
-                    window.openAppScreen();
-                } else { showLoginError("Sai tài khoản hoặc mật khẩu."); }
-            } catch (error) {
-                document.getElementById('loader').style.display = 'none';
-                showLoginError("Lỗi hệ thống: " + error.message);
-            }
+                if (found) { currentUser = found; if (document.getElementById('rememberMe').checked) { localStorage.setItem('bidAppUser', JSON.stringify(found)); } window.openAppScreen(); } 
+                else { showLoginError("Sai tài khoản hoặc mật khẩu."); }
+            } catch (error) { document.getElementById('loader').style.display = 'none'; showLoginError("Lỗi hệ thống: " + error.message); }
         }
 
         window.handleLogout = function() {
-            currentUser = null; localStorage.removeItem('bidAppUser');
-            if (autoSyncInterval) clearInterval(autoSyncInterval);
-            document.getElementById('appScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
+            currentUser = null; localStorage.removeItem('bidAppUser'); if (autoSyncInterval) clearInterval(autoSyncInterval);
+            document.getElementById('appScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = '';
         }
 
         window.openAppScreen = function() {
-            document.getElementById('loginError').classList.add('hidden');
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
-            
+            document.getElementById('loginError').classList.add('hidden'); document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden');
             window.renderUserBadge(); autoCleanArchivedData();
-            
-            if (currentUser.role !== 'leader') { document.getElementById('btnCreateProject').classList.replace('hidden', 'flex'); } 
-            else { document.getElementById('btnCreateProject').classList.replace('flex', 'hidden'); }
-            
+            if (currentUser.role !== 'leader') { document.getElementById('btnCreateProject').classList.replace('hidden', 'flex'); } else { document.getElementById('btnCreateProject').classList.replace('flex', 'hidden'); }
             const ownerFilters = document.getElementById('filterOwner');
-            if(ownerFilters) {
-                ownerFilters.innerHTML = '<option value="all">Tất cả Chuyên viên</option>';
-                db.users.forEach(u => { ownerFilters.innerHTML += `<option value="${u.fullname}">${u.fullname}</option>`; });
-            }
-            
-            document.querySelectorAll('.admin-only').forEach(el => {
-                if (currentUser.role === 'admin') el.classList.remove('hidden'); else el.classList.add('hidden');
-            });
-            
-            window.populateProcessDropdowns();
-            window.switchTab('dashboard');
-            
-            if (autoSyncInterval) clearInterval(autoSyncInterval);
-            autoSyncInterval = setInterval(backgroundSync, 60000);
+            if(ownerFilters) { ownerFilters.innerHTML = '<option value="all">Tất cả Chuyên viên</option>'; db.users.forEach(u => { ownerFilters.innerHTML += `<option value="${u.fullname}">${u.fullname}</option>`; }); }
+            document.querySelectorAll('.admin-only').forEach(el => { if (currentUser.role === 'admin') el.classList.remove('hidden'); else el.classList.add('hidden'); });
+            window.populateProcessDropdowns(); window.switchTab('dashboard');
+            if (autoSyncInterval) clearInterval(autoSyncInterval); autoSyncInterval = setInterval(backgroundSync, 60000);
         }
 
         window.renderUserBadge = function() {
-            let roleBadge = 'Chuyên viên';
-            if (currentUser.role === 'admin') roleBadge = 'Admin'; else if (currentUser.role === 'leader') roleBadge = 'Lãnh đạo';
+            let roleBadge = 'Chuyên viên'; if (currentUser.role === 'admin') roleBadge = 'Admin'; else if (currentUser.role === 'leader') roleBadge = 'Lãnh đạo';
             document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.fullname} <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${roleBadge}</span>`;
         }
 
@@ -609,11 +435,7 @@
             ['dashboard', 'projects', 'kanban', 'settings', 'docs', 'users', 'backups'].forEach(t => {
                 const viewEl = document.getElementById(`view-${t}`); if (viewEl) viewEl.classList.add('hidden');
                 const tabEl = document.getElementById(`tab-${t}`);
-                if (tabEl) {
-                    tabEl.classList.replace('text-blue-700', 'text-gray-500'); tabEl.classList.replace('text-blue-400', 'text-gray-400');
-                    tabEl.classList.replace('text-red-600', 'text-gray-500'); tabEl.classList.replace('text-red-400', 'text-gray-400'); 
-                    tabEl.classList.remove('border-b-2', 'border-blue-700', 'border-blue-400', 'border-red-600', 'border-red-400');
-                }
+                if (tabEl) { tabEl.classList.replace('text-blue-700', 'text-gray-500'); tabEl.classList.replace('text-blue-400', 'text-gray-400'); tabEl.classList.replace('text-red-600', 'text-gray-500'); tabEl.classList.replace('text-red-400', 'text-gray-400'); tabEl.classList.remove('border-b-2', 'border-blue-700', 'border-blue-400', 'border-red-600', 'border-red-400'); }
             });
             const selectedView = document.getElementById(`view-${tab}`); if (selectedView) selectedView.classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-${tab}`);
@@ -622,25 +444,17 @@
                 if (tab === 'backups') { activeBtn.classList.add('text-red-600', 'dark:text-red-400', 'border-b-2', 'border-red-600', 'dark:border-red-400'); window.fetchBackups(); } 
                 else { activeBtn.classList.add('text-blue-700', 'dark:text-blue-400', 'border-b-2', 'border-blue-700', 'dark:border-blue-400'); }
             }
-            if (tab === 'dashboard') window.renderDashboard();
-            if (tab === 'kanban') window.renderKanban();
-            if (tab === 'settings') window.renderConfig();
-            if (tab === 'docs') window.renderDocs();
-            if (tab === 'users') window.renderUsers();
-            if (tab === 'projects') window.renderMissions();
+            if (tab === 'dashboard') window.renderDashboard(); if (tab === 'kanban') window.renderKanban(); if (tab === 'settings') window.renderConfig(); if (tab === 'docs') window.renderDocs(); if (tab === 'users') window.renderUsers(); if (tab === 'projects') window.renderMissions();
         }
 
         window.renderCharts = function() {
             let sTodo = 0, sDoing = 0, sLate = 0, sDone = 0; let topSavers = []; const now = new Date(new Date().setHours(0,0,0,0));
             if (db.missions) {
                 db.missions.forEach(m => {
-                    if (m.archived) return;
-                    let isViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
+                    if (m.archived) return; let isViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                     if (m.packages) {
                         m.packages.forEach(p => {
-                            if (p.archived) return;
-                            let isPkgOwner = isViewer || p.owner === currentUser.fullname;
-                            if (currentUser.role === 'user' && !isPkgOwner) return;
+                            if (p.archived) return; let isPkgOwner = isViewer || p.owner === currentUser.fullname; if (currentUser.role === 'user' && !isPkgOwner) return;
                             if (p.completed || m.completed) { sDone++; } else {
                                 let hasSteps = p.steps && p.steps.length > 0; let anyDone = false; let anyLate = false;
                                 if (hasSteps) { p.steps.forEach(s => { if (s.completed) anyDone = true; else if (new Date(s.deadline) < now) anyLate = true; }); }
@@ -654,118 +468,66 @@
             }
             topSavers.sort((a,b) => b.save - a.save); topSavers = topSavers.slice(0, 5);
             let isDark = document.documentElement.classList.contains('dark'); let textColor = isDark ? '#e5e7eb' : '#374151';
-            const ctx1 = document.getElementById('chartStatus');
-            if (chartStatusIns) chartStatusIns.destroy();
+            const ctx1 = document.getElementById('chartStatus'); if (chartStatusIns) chartStatusIns.destroy();
             if (ctx1) { chartStatusIns = new Chart(ctx1, { type: 'doughnut', data: { labels: ['Chưa bắt đầu', 'Đang thực hiện', 'Trễ hạn', 'Đã xong'], datasets: [{ data: [sTodo, sDoing, sLate, sDone], backgroundColor: ['#e5e7eb', '#3b82f6', '#ef4444', '#10b981'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } } }); }
-            const ctx2 = document.getElementById('chartFinance');
-            if (chartFinIns) chartFinIns.destroy();
+            const ctx2 = document.getElementById('chartFinance'); if (chartFinIns) chartFinIns.destroy();
             if (ctx2) { chartFinIns = new Chart(ctx2, { type: 'bar', data: { labels: topSavers.map(s => s.name.length > 15 ? s.name.substring(0,15)+'...' : s.name), datasets: [{ label: 'Tiết kiệm (VNĐ)', data: topSavers.map(s => s.save), backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor }, grid: { color: isDark ? '#374151' : '#e5e7eb' } }, x: { ticks: { color: textColor }, grid: { display: false } } } } }); }
         };
 
         window.renderDashboard = function() {
             try {
-                let activeMs = 0, overdue = 0, completedPkgs = 0, totalSav = 0;
-                const now = new Date(new Date().setHours(0,0,0,0));
-                globalOverdueTasksList = []; let missionsHTML = ""; let overdueHTML = "";
-
-                if (currentUser.role === 'user') { document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; } 
-                else { document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể`; }
-
+                let activeMs = 0, overdue = 0, completedPkgs = 0, totalSav = 0; const now = new Date(new Date().setHours(0,0,0,0)); globalOverdueTasksList = []; let missionsHTML = ""; let overdueHTML = "";
+                if (currentUser.role === 'user') { document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; } else { document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể`; }
                 if (db.missions && Array.isArray(db.missions)) {
                     db.missions.forEach((m, mIndex) => {
-                        if (m.archived) return; 
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
-                        let hasOwnedPackage = false; let visiblePackages = [];
+                        if (m.archived) return; let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner; let hasOwnedPackage = false; let visiblePackages = [];
                         if (m.packages && Array.isArray(m.packages)) {
-                            m.packages.forEach(p => {
-                                if (p.archived) return;
-                                let pOwnerSafe = p.owner || m.owner;
-                                let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || pOwnerSafe === currentUser.fullname || m.owner === currentUser.fullname;
-                                if (isPkgOwner) { hasOwnedPackage = true; visiblePackages.push(p); }
-                            });
+                            m.packages.forEach(p => { if (p.archived) return; let pOwnerSafe = p.owner || m.owner; let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || pOwnerSafe === currentUser.fullname || m.owner === currentUser.fullname; if (isPkgOwner) { hasOwnedPackage = true; visiblePackages.push(p); } });
                         }
                         if (currentUser.role === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
-                        if (!m.completed) activeMs++; 
-                        let mTotalSteps = 0; let mCompletedSteps = 0;
-
+                        if (!m.completed) activeMs++; let mTotalSteps = 0; let mCompletedSteps = 0;
                         visiblePackages.forEach(p => {
                             if (p.steps && Array.isArray(p.steps)) {
                                 p.steps.forEach(s => {
-                                    mTotalSteps++;
-                                    if (s.completed) { mCompletedSteps++; } else {
+                                    mTotalSteps++; if (s.completed) { mCompletedSteps++; } else {
                                         if (!p.completed && !m.completed) {
                                             let sDate = new Date(s.deadline);
-                                            if (sDate < now) {
-                                                overdue++; let diffDays = Math.ceil((now - sDate) / (1000 * 60 * 60 * 24));
-                                                let tOwner = p.owner || m.owner || "Không rõ"; let mNameSafe = m.name || "Nhiệm vụ"; let pNameSafe = p.name || "Gói thầu"; let sNameSafe = s.name || "Công việc";
-                                                globalOverdueTasksList.push({ mName: mNameSafe, pName: pNameSafe, sName: sNameSafe, owner: tOwner, days: diffDays });
-                                                overdueHTML += `<tr class="border-b dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition"><td class="p-3"><div class="font-medium text-red-700 dark:text-red-400">${sNameSafe}</div><div class="text-xs text-gray-500 dark:text-gray-400 truncate w-48" title="${pNameSafe}">Gói: ${pNameSafe}</div></td><td class="p-3 text-gray-700 dark:text-gray-300 font-medium">${tOwner}</td><td class="p-3 text-center"><span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded font-bold">${diffDays}</span></td></tr>`;
-                                            }
+                                            if (sDate < now) { overdue++; let diffDays = Math.ceil((now - sDate) / (1000 * 60 * 60 * 24)); let tOwner = p.owner || m.owner || "Không rõ"; let mNameSafe = m.name || "Nhiệm vụ"; let pNameSafe = p.name || "Gói thầu"; let sNameSafe = s.name || "Công việc"; globalOverdueTasksList.push({ mName: mNameSafe, pName: pNameSafe, sName: sNameSafe, owner: tOwner, days: diffDays }); overdueHTML += `<tr class="border-b dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition"><td class="p-3"><div class="font-medium text-red-700 dark:text-red-400">${sNameSafe}</div><div class="text-xs text-gray-500 dark:text-gray-400 truncate w-48" title="${pNameSafe}">Gói: ${pNameSafe}</div></td><td class="p-3 text-gray-700 dark:text-gray-300 font-medium">${tOwner}</td><td class="p-3 text-center"><span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded font-bold">${diffDays}</span></td></tr>`; }
                                         }
                                     }
                                 });
                             }
-                            if (p.completed) completedPkgs++;
-                            if (p.estimatePrice && p.winningPrice) totalSav += (p.estimatePrice - p.winningPrice);
+                            if (p.completed) completedPkgs++; if (p.estimatePrice && p.winningPrice) totalSav += (p.estimatePrice - p.winningPrice);
                         });
-
-                        let progress = mTotalSteps > 0 ? Math.round((mCompletedSteps / mTotalSteps) * 100) : 0;
-                        if (m.completed) progress = 100; 
-                        let colorClass = progress === 100 ? 'bg-emerald-500' : 'bg-blue-600';
-                        let statusBadge = m.completed ? `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Hoàn thành</span>` : '';
-                        let mNameFinal = m.name || "Nhiệm vụ"; let mOwnerFinal = m.owner || "Không rõ";
+                        let progress = mTotalSteps > 0 ? Math.round((mCompletedSteps / mTotalSteps) * 100) : 0; if (m.completed) progress = 100; let colorClass = progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'; let statusBadge = m.completed ? `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Hoàn thành</span>` : ''; let mNameFinal = m.name || "Nhiệm vụ"; let mOwnerFinal = m.owner || "Không rõ";
                         missionsHTML += `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="p-3"><div class="font-bold text-gray-800 dark:text-gray-200">${mNameFinal} ${statusBadge}</div><div class="text-xs text-gray-500 dark:text-gray-400">Hạn chót: ${window.formatDate(m.deadline)}</div></td><td class="p-3 text-gray-700 dark:text-gray-300">${mOwnerFinal}</td><td class="p-3"><div class="flex items-center gap-2"><div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2"><div class="${colorClass} h-2 rounded-full" style="width: ${progress}%"></div></div><span class="text-xs font-bold w-8 text-right dark:text-gray-300">${progress}%</span></div></td></tr>`;
                     });
                 }
-                document.getElementById('dashActiveMissions').innerText = activeMs; document.getElementById('dashOverdue').innerText = overdue;
-                document.getElementById('dashCompletedPkgs').innerText = completedPkgs; document.getElementById('dashSavings').innerText = totalSav.toLocaleString('vi-VN') + " đ";
-                document.getElementById('dashMissionsTable').innerHTML = missionsHTML || `<tr><td colspan="3" class="p-6 text-center text-gray-400 italic">Chưa có nhiệm vụ đang thực hiện.</td></tr>`;
-                document.getElementById('dashOverdueTable').innerHTML = overdueHTML || `<tr><td colspan="3" class="p-6 text-center text-emerald-600 dark:text-emerald-500 font-medium italic"><i class="fas fa-check-circle mr-1"></i>Không có công việc nào trễ hạn.</td></tr>`;
+                document.getElementById('dashActiveMissions').innerText = activeMs; document.getElementById('dashOverdue').innerText = overdue; document.getElementById('dashCompletedPkgs').innerText = completedPkgs; document.getElementById('dashSavings').innerText = totalSav.toLocaleString('vi-VN') + " đ";
+                document.getElementById('dashMissionsTable').innerHTML = missionsHTML || `<tr><td colspan="3" class="p-6 text-center text-gray-400 italic">Chưa có nhiệm vụ đang thực hiện.</td></tr>`; document.getElementById('dashOverdueTable').innerHTML = overdueHTML || `<tr><td colspan="3" class="p-6 text-center text-emerald-600 dark:text-emerald-500 font-medium italic"><i class="fas fa-check-circle mr-1"></i>Không có công việc nào trễ hạn.</td></tr>`;
                 window.renderCharts();
             } catch (error) { console.error("Lỗi Render Dashboard:", error); Swal.fire('Lỗi', 'Lỗi khi vẽ Tổng quan: ' + error.message, 'error'); }
         }
 
         window.renderKanban = function() {
             try {
-                let htmlTodo = "", htmlDoing = "", htmlLate = "", htmlDone = "";
-                let cTodo = 0, cDoing = 0, cLate = 0, cDone = 0;
-                const now = new Date(new Date().setHours(0,0,0,0));
-
+                let htmlTodo = "", htmlDoing = "", htmlLate = "", htmlDone = ""; let cTodo = 0, cDoing = 0, cLate = 0, cDone = 0; const now = new Date(new Date().setHours(0,0,0,0));
                 if (db.missions && Array.isArray(db.missions)) {
                     db.missions.forEach((m, mIndex) => {
-                        if (m.archived) return;
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
+                        if (m.archived) return; let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         if (m.packages && Array.isArray(m.packages)) {
                             m.packages.forEach((p, pIndex) => {
-                                if (p.archived) return;
-                                let isPkgOwner = isMissionViewer || p.owner === currentUser.fullname;
-                                if (currentUser.role === 'user' && !isPkgOwner) return;
-
-                                let safePkgName = p.name || 'Gói thầu'; let ownerName = p.owner || m.owner;
-                                let totalSteps = 0, completedSteps = 0; let isLate = false;
-                                if (p.steps && Array.isArray(p.steps)) {
-                                    totalSteps = p.steps.length;
-                                    p.steps.forEach(s => {
-                                        if (s.completed) completedSteps++;
-                                        else if (!p.completed && !m.completed && new Date(s.deadline) < now) isLate = true;
-                                    });
-                                }
-
-                                let progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-                                if (p.completed || m.completed) progress = 100;
-
-                                let cardHtml = `<div class="bg-white dark:bg-gray-800 p-3 rounded shadow-sm border-l-4 ${p.completed||m.completed ? 'border-emerald-500' : (isLate ? 'border-red-500' : 'border-blue-500')} border border-gray-200 dark:border-gray-700 hover:shadow-md transition cursor-pointer" onclick="window.switchTab('projects'); setTimeout(()=>document.getElementById('searchInput').value='${safePkgName}'; window.renderMissions(), 200);"><div class="text-[13px] font-bold text-gray-800 dark:text-gray-200 leading-tight mb-1">${safePkgName}</div><div class="text-[10px] text-gray-500 dark:text-gray-400 mb-2 truncate" title="${m.name}">${m.name}</div><div class="flex justify-between items-center text-[10px]"><span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded truncate max-w-[90px]" title="${ownerName}"><i class="fas fa-user mr-1"></i>${ownerName}</span><span class="font-bold ${progress===100?'text-emerald-600':(isLate?'text-red-600':'text-blue-600')}">${progress}%</span></div></div>`;
-
+                                if (p.archived) return; let isPkgOwner = isMissionViewer || p.owner === currentUser.fullname; if (currentUser.role === 'user' && !isPkgOwner) return;
+                                let safePkgName = p.name || 'Gói thầu'; let ownerName = p.owner || m.owner; let totalSteps = 0, completedSteps = 0; let isLate = false;
+                                if (p.steps && Array.isArray(p.steps)) { totalSteps = p.steps.length; p.steps.forEach(s => { if (s.completed) completedSteps++; else if (!p.completed && !m.completed && new Date(s.deadline) < now) isLate = true; }); }
+                                let progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0; if (p.completed || m.completed) progress = 100;
+                                let cardHtml = `<div class="group bg-white dark:bg-gray-800 p-3 rounded shadow-sm border-l-4 ${p.completed||m.completed ? 'border-emerald-500' : (isLate ? 'border-red-500' : 'border-blue-500')} border border-gray-200 dark:border-gray-700 hover:shadow-md transition cursor-pointer" onclick="window.switchTab('projects'); setTimeout(()=>document.getElementById('searchInput').value='${safePkgName}'; window.renderMissions(), 200);"><div class="text-[13px] font-bold text-gray-800 dark:text-gray-200 leading-tight mb-1 group-hover:whitespace-normal break-words">${safePkgName}</div><div class="text-[10px] text-gray-500 dark:text-gray-400 mb-2 truncate group-hover:whitespace-normal group-hover:overflow-visible transition-all">${m.name}</div><div class="flex justify-between items-center text-[10px]"><span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded truncate max-w-[90px] group-hover:max-w-none group-hover:whitespace-normal inline-block transition-all"><i class="fas fa-user mr-1"></i>${ownerName}</span><span class="font-bold ${progress===100?'text-emerald-600':(isLate?'text-red-600':'text-blue-600')}">${progress}%</span></div></div>`;
                                 if (progress === 100) { htmlDone += cardHtml; cDone++; } else if (isLate) { htmlLate += cardHtml; cLate++; } else if (progress > 0) { htmlDoing += cardHtml; cDoing++; } else { htmlTodo += cardHtml; cTodo++; }
                             });
                         }
                     });
                 }
-                document.getElementById('kb-todo').innerHTML = htmlTodo || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`;
-                document.getElementById('kb-doing').innerHTML = htmlDoing || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`;
-                document.getElementById('kb-late').innerHTML = htmlLate || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`;
-                document.getElementById('kb-done').innerHTML = htmlDone || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`;
-                document.getElementById('kb-todo-count').innerText = cTodo; document.getElementById('kb-doing-count').innerText = cDoing; document.getElementById('kb-late-count').innerText = cLate; document.getElementById('kb-done-count').innerText = cDone;
+                document.getElementById('kb-todo').innerHTML = htmlTodo || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; document.getElementById('kb-doing').innerHTML = htmlDoing || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; document.getElementById('kb-late').innerHTML = htmlLate || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; document.getElementById('kb-done').innerHTML = htmlDone || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; document.getElementById('kb-todo-count').innerText = cTodo; document.getElementById('kb-doing-count').innerText = cDoing; document.getElementById('kb-late-count').innerText = cLate; document.getElementById('kb-done-count').innerText = cDone;
             } catch (error) { console.error("Lỗi Render Kanban:", error); }
         };
 
@@ -778,100 +540,57 @@
                 const filterFrom = document.getElementById('filterFromDate') && document.getElementById('filterFromDate').value ? new Date(document.getElementById('filterFromDate').value).setHours(0,0,0,0) : null;
                 const filterTo = document.getElementById('filterToDate') && document.getElementById('filterToDate').value ? new Date(document.getElementById('filterToDate').value).setHours(23,59,59,999) : null;
                 const now = new Date(new Date().setHours(0,0,0,0));
-                
-                const warningEl = document.getElementById('archiveWarning');
-                if (warningEl) { if (filterStat === 'archived') warningEl.classList.remove('hidden'); else warningEl.classList.add('hidden'); }
-
+                const warningEl = document.getElementById('archiveWarning'); if (warningEl) { if (filterStat === 'archived') warningEl.classList.remove('hidden'); else warningEl.classList.add('hidden'); }
                 let visibleCount = 0;
-                
                 if (db.missions && Array.isArray(db.missions) && db.missions.length > 0) {
                     db.missions.forEach((mission, mIndex) => {
-                        let mNameSafe = mission.name || "Chưa có tên"; let mOwnerSafe = mission.owner || "Chưa xác định";
-                        let matchSearch = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw);
-                        let visiblePackages = [];
+                        let mNameSafe = mission.name || "Chưa có tên"; let mOwnerSafe = mission.owner || "Chưa xác định"; let matchSearch = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw); let visiblePackages = [];
                         if (mission.packages && Array.isArray(mission.packages)) {
                             mission.packages.forEach(p => { if (!p.owner) p.owner = mOwnerSafe; });
                             visiblePackages = mission.packages.filter(pkg => {
-                                if (filterStat === 'active' && pkg.archived) return false;
-                                if (filterStat === 'archived' && !pkg.archived) return false;
-                                if (filterOwner !== 'all' && pkg.owner !== filterOwner) return false;
+                                if (filterStat === 'active' && pkg.archived) return false; if (filterStat === 'archived' && !pkg.archived) return false; if (filterOwner !== 'all' && pkg.owner !== filterOwner) return false;
                                 let finalD = pkg.steps && pkg.steps.length > 0 ? new Date(pkg.steps[pkg.steps.length-1].deadline).getTime() : null;
-                                if (filterFrom && finalD && finalD < filterFrom) return false;
-                                if (filterTo && finalD && finalD > filterTo) return false;
-                                let pNameSafe = pkg.name || "";
-                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.toLowerCase().includes(searchKw);
-                                if (!matchSearchPkg) return false;
-                                let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe;
-                                if (currentUser.role === 'user' && !isPkgViewer) return false;
-                                return true;
+                                if (filterFrom && finalD && finalD < filterFrom) return false; if (filterTo && finalD && finalD > filterTo) return false;
+                                let pNameSafe = pkg.name || ""; let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.toLowerCase().includes(searchKw); if (!matchSearchPkg) return false;
+                                let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; if (currentUser.role === 'user' && !isPkgViewer) return false; return true;
                             });
                         }
-
-                        let showMission = false;
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mOwnerSafe;
-                        if (visiblePackages.length > 0) { showMission = true; } 
-                        else if (filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && filterOwner === 'all' && !filterFrom && !filterTo) {
-                            if (currentUser.role !== 'user' || isMissionViewer) showMission = true;
-                        }
-                        if (!showMission) return;
-                        visibleCount++;
+                        let showMission = false; let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mOwnerSafe;
+                        if (visiblePackages.length > 0) { showMission = true; } else if (filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && filterOwner === 'all' && !filterFrom && !filterTo) { if (currentUser.role !== 'user' || isMissionViewer) showMission = true; }
+                        if (!showMission) return; visibleCount++;
                         
-                        let isAdmin = currentUser.role === 'admin'; let isLeader = currentUser.role === 'leader';
-                        let canEditMission = (isAdmin || currentUser.fullname === mOwnerSafe) && !isLeader;
-                        let btnCompleteMission = "";
-                        
+                        let isAdmin = currentUser.role === 'admin'; let isLeader = currentUser.role === 'leader'; let canEditMission = (isAdmin || currentUser.fullname === mOwnerSafe) && !isLeader; let btnCompleteMission = "";
                         if (canEditMission) {
                             if (mission.completed) { btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-emerald-600 border-2 border-emerald-600 text-white hover:bg-emerald-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-md transition flex items-center gap-2"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</button>`; } 
                             else { btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="far fa-circle"></i> Chốt Nhiệm vụ</button>`; }
                         } else if (mission.completed) { btnCompleteMission = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`; }
-
                         let btnEditMission = canEditMission ? `<button onclick="window.openEditMissionModal(${mIndex})" class="text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 px-2 py-1 rounded shadow-sm text-xs transition ml-2"><i class="fas fa-edit"></i> Sửa</button>` : '';
                         let btnPrintMission = `<button onclick="window.printMission(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-print"></i> In NV</button>`;
-
+                        
                         let packagesHtml = "";
-                        if (visiblePackages.length === 0) {
-                            packagesHtml = `<div class="p-4 text-center text-sm text-gray-500 italic">Nhiệm vụ này chưa có gói thầu phù hợp bộ lọc.</div>`;
-                        } else {
+                        if (visiblePackages.length === 0) { packagesHtml = `<div class="p-4 text-center text-sm text-gray-500 italic">Nhiệm vụ này chưa có gói thầu phù hợp bộ lọc.</div>`; } else {
                             visiblePackages.forEach((pkg) => {
-                                let pkgIndex = mission.packages.indexOf(pkg);
-                                let isPkgOwner = currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe;
-                                let canEditPkg = (isAdmin || isPkgOwner) && !isLeader;
+                                let pkgIndex = mission.packages.indexOf(pkg); let isPkgOwner = currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; let canEditPkg = (isAdmin || isPkgOwner) && !isLeader;
                                 const finalDate = pkg.steps && pkg.steps.length > 0 ? window.formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
-                                
                                 let stepsHtml = "";
                                 if (pkg.steps && Array.isArray(pkg.steps)) {
                                     stepsHtml = pkg.steps.map((step, sIndex) => {
                                         let isOverdue = false; let isWarning = false;
-                                        if (!pkg.completed && !mission.completed && !step.completed) {
-                                            isOverdue = new Date(step.deadline) < now;
-                                            if(!isOverdue) { isWarning = ((new Date(step.deadline) - now)/(1000*3600*24) <= 2); }
-                                        }
+                                        if (!pkg.completed && !mission.completed && !step.completed) { isOverdue = new Date(step.deadline) < now; if(!isOverdue) { isWarning = ((new Date(step.deadline) - now)/(1000*3600*24) <= 2); } }
                                         let dateColor = 'text-gray-700 dark:text-gray-300'; let bgRow = '';
-                                        if(step.completed) { dateColor = 'text-green-600 dark:text-green-400'; }
-                                        else if(isOverdue) { dateColor = 'text-red-600 dark:text-red-400 font-bold'; bgRow = 'bg-red-50 dark:bg-red-900/20'; }
-                                        else if(isWarning) { dateColor = 'text-orange-500 dark:text-orange-400 font-bold'; bgRow = 'bg-orange-50 dark:bg-orange-900/20'; }
-
-                                        let safeStepName = step.name ? String(step.name).replace(/"/g, '&quot;') : '';
-                                        let safeNote = step.note ? String(step.note).replace(/"/g, '&quot;') : '';
+                                        if(step.completed) { dateColor = 'text-green-600 dark:text-green-400'; } else if(isOverdue) { dateColor = 'text-red-600 dark:text-red-400 font-bold'; bgRow = 'bg-red-50 dark:bg-red-900/20'; } else if(isWarning) { dateColor = 'text-orange-500 dark:text-orange-400 font-bold'; bgRow = 'bg-orange-50 dark:bg-orange-900/20'; }
+                                        let safeStepName = step.name ? String(step.name).replace(/"/g, '&quot;') : ''; let safeNote = step.note ? String(step.note).replace(/"/g, '&quot;') : '';
                                         let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800 dark:text-gray-200'} text-[13px] leading-tight">${safeStepName}</div>`;
-                                        
                                         let subTasksHtml = "";
                                         if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
                                             subTasksHtml = `<div class="mt-1.5 ml-1 border-l-2 border-gray-200 dark:border-gray-600 pl-2 space-y-1">`;
                                             step.subTasks.forEach((sub, subIdx) => {
-                                                let safeSubName = sub.name ? String(sub.name).replace(/"/g, '&quot;') : '';
-                                                let subClass = sub.completed ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400";
-                                                let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 dark:text-gray-500 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : '';
+                                                let safeSubName = sub.name ? String(sub.name).replace(/"/g, '&quot;') : ''; let subClass = sub.completed ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400"; let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 dark:text-gray-500 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : '';
                                                 subTasksHtml += `<div class="flex items-start gap-1.5 text-[12px]"><input type="checkbox" class="mt-0.5 ${canEditPkg?'cursor-pointer':'cursor-not-allowed'}" ${sub.completed ? 'checked' : ''} ${!canEditPkg?'disabled':''} onchange="window.toggleSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx}, this.checked)"><span class="${subClass} leading-tight flex-1">${safeSubName}</span>${delSubBtn}</div>`;
                                             });
                                             subTasksHtml += `</div>`;
                                         }
-
-                                        let fullTaskHtml = nameHtml + subTasksHtml;
-                                        let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`;
-                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-";
-                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded">${safeNote}</div>` : '';
-
+                                        let fullTaskHtml = nameHtml + subTasksHtml; let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-"; let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded">${safeNote}</div>` : '';
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links)) {
                                             linksDisplayHtml = step.links.map((l, lIndex) => {
@@ -880,21 +599,18 @@
                                             }).join('');
                                         }
                                         const linkInputHtml = canEditPkg ? `<div class="mt-1"><button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800"><i class="fas fa-paperclip"></i> Gắn file</button><div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white dark:bg-gray-800 rounded shadow-lg absolute z-10 w-48 border dark:border-gray-700"><input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file" class="w-full mb-1 p-1 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white"><input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1 p-1 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white"><button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs w-full">Lưu</button></div></div>` : '';
-                                        
                                         let actCell = ""; let dragHandle = "";
                                         if (canEditPkg) {
                                             dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mr-2 step-drag-handle inline-block"><i class="fas fa-grip-vertical"></i></div>`;
                                             actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
                                         }
-                                        
                                         return `<tr class="border-b dark:border-gray-700 transition hover:bg-gray-50 dark:hover:bg-gray-800 ${bgRow}"><td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${canEditPkg?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${!canEditPkg?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)"></td><td class="p-2 align-top flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${step.completedBy}</div>`:''}</div></td><td class="p-2 text-center align-top">${timeBudget}</td><td class="p-2 align-top">${dateHtml}</td><td class="p-2 align-top min-w-[150px]">${noteHtml}</td><td class="p-2 align-top min-w-[120px]"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
                                     }).join('');
                                 }
 
                                 let savStr = "";
                                 if(pkg.estimatePrice && pkg.winningPrice) {
-                                    let sav = pkg.estimatePrice - pkg.winningPrice;
-                                    let pct = ((sav/pkg.estimatePrice)*100).toFixed(2);
+                                    let sav = pkg.estimatePrice - pkg.winningPrice; let pct = ((sav/pkg.estimatePrice)*100).toFixed(2);
                                     savStr = `<span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-0.5 rounded text-xs font-bold shadow-sm ml-2" title="Tiết kiệm: ${sav.toLocaleString('vi-VN')} đ">TK: ${pct}%</span>`;
                                 }
 
@@ -914,8 +630,7 @@
 
                                 let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (pkg.completed ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'bg-blue-50/50 dark:bg-blue-900/10');
                                 let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
-                                let pkgNameSafe = pkg.name || "Gói thầu không tên";
-                                let pkgProcessTitle = pkg.processTitle || "Quy trình đấu thầu";
+                                let pkgNameSafe = pkg.name || "Gói thầu không tên"; let pkgProcessTitle = pkg.processTitle || "Quy trình đấu thầu";
 
                                 packagesHtml += `
                                     <div class="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 border-l-4 ${borderColor} overflow-visible mb-4 shadow-sm relative">
@@ -926,8 +641,7 @@
                                                         <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
                                                         ${pkgNameSafe} ${btnEditPkg}
                                                     </h4>
-                                                    ${btnCompletePkg}
-                                                    ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''} ${savStr}
+                                                    ${btnCompletePkg} ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''} ${savStr}
                                                 </div>
                                                 <div class="text-[11px] text-gray-600 dark:text-gray-400 mt-1.5">
                                                     <span class="inline-block bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${pkgProcessTitle}</span>
@@ -945,15 +659,7 @@
                                         <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
                                             <table class="w-full text-left border-collapse text-sm">
                                                 <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                                    <tr>
-                                                        <th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th>
-                                                        <th class="p-2">Chi tiết việc</th>
-                                                        <th class="p-2 w-16 text-center">Mức</th>
-                                                        <th class="p-2 w-24">Hạn chót</th>
-                                                        <th class="p-2 w-48">Ghi chú</th>
-                                                        <th class="p-2 min-w-[120px]">Đính kèm</th>
-                                                        ${canEditPkg ? '<th class="p-2 w-24 text-right"><i class="fas fa-cogs"></i></th>' : ''}
-                                                    </tr>
+                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-16 text-center">Mức</th><th class="p-2 w-24">Hạn chót</th><th class="p-2 w-48">Ghi chú</th><th class="p-2 min-w-[120px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-24 text-right"><i class="fas fa-cogs"></i></th>' : ''}</tr>
                                                 </thead>
                                                 <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-1.5 text-center bg-gray-50 dark:bg-gray-900"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
@@ -964,11 +670,7 @@
 
                         let docsHtml = "";
                         if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                            let docLinks = db.regulatoryDocs.map(d => {
-                                let linkPart = d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : '';
-                                let linkClose = d.link ? `</a>` : '';
-                                return `${linkPart}<b>${d.number}</b>${linkClose}`;
-                            }).join(', ');
+                            let docLinks = db.regulatoryDocs.map(d => { let linkPart = d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : ''; let linkClose = d.link ? `</a>` : ''; return `${linkPart}<b>${d.number}</b>${linkClose}`; }).join(', ');
                             docsHtml = `<div class="mt-3 bg-white dark:bg-gray-800 p-2 rounded border border-indigo-100 dark:border-indigo-900 text-xs shadow-sm"><span class="font-semibold text-indigo-800 dark:text-indigo-400">Căn cứ chung:</span><span class="text-gray-600 dark:text-gray-400 ml-1">${docLinks}</span></div>`;
                         }
 
@@ -1008,11 +710,7 @@
                 }
 
                 if (visibleCount === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                            <i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-5xl mb-4"></i>
-                            <p class="text-gray-500 dark:text-gray-400 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp bộ lọc.</p>
-                        </div>`;
+                    container.innerHTML = `<div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"><i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-5xl mb-4"></i><p class="text-gray-500 dark:text-gray-400 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp bộ lọc.</p></div>`;
                 }
 
                 setTimeout(() => {
@@ -1022,27 +720,17 @@
                             onEnd: function(evt) {
                                 if (evt.oldIndex === evt.newIndex) return;
                                 let mIdx = tbody.getAttribute('data-mindex'); let pIdx = tbody.getAttribute('data-pindex');
-                                let arr = db.missions[mIdx].packages[pIdx].steps;
-                                arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]);
-                                window.logActivity(mIdx, pIdx, `Đổi thứ tự công việc`);
-                                window.saveDataToGAS(false);
+                                let arr = db.missions[mIdx].packages[pIdx].steps; arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]);
+                                window.logActivity(mIdx, pIdx, `Đổi thứ tự công việc`); window.saveDataToGAS(false);
                             }
                         });
                     });
                 }, 200);
-
-            } catch (e) {
-                console.error("Lỗi Render Nhiệm vụ:", e);
-                Swal.fire('Lỗi', 'Lỗi vẽ giao diện Nhiệm vụ: ' + e.message, 'error');
-            }
+            } catch (e) { console.error("Lỗi Render Nhiệm vụ:", e); Swal.fire('Lỗi', 'Lỗi vẽ giao diện Nhiệm vụ: ' + e.message, 'error'); }
         };
 
         // --- CÁC HÀM XỬ LÝ MODAL "SỬA" ---
-        window.openEditMissionModal = function(mIndex) {
-            cEditM = mIndex; let m = db.missions[mIndex];
-            document.getElementById('editMissionName').value = m.name || ""; document.getElementById('editMissionDeadline').value = window.formatForDateInput(m.deadline);
-            document.getElementById('editMissionModal').classList.remove('hidden');
-        };
+        window.openEditMissionModal = function(mIndex) { cEditM = mIndex; let m = db.missions[mIndex]; document.getElementById('editMissionName').value = m.name || ""; document.getElementById('editMissionDeadline').value = window.formatForDateInput(m.deadline); document.getElementById('editMissionModal').classList.remove('hidden'); };
         window.closeEditMissionModal = function() { document.getElementById('editMissionModal').classList.add('hidden'); };
         window.saveEditMission = function() {
             let name = document.getElementById('editMissionName').value.trim(); let date = document.getElementById('editMissionDeadline').value;
@@ -1090,9 +778,7 @@
             window.closeEditStepModal(); window.renderMissions(); window.saveDataToGAS(false);
         };
 
-        window.openSubTaskModal = function(mIndex, pIndex, sIndex) {
-            cEditM = mIndex; cEditP = pIndex; cEditS = sIndex; document.getElementById('subTaskName').value = ""; document.getElementById('subTaskModal').classList.remove('hidden'); setTimeout(() => document.getElementById('subTaskName').focus(), 100);
-        };
+        window.openSubTaskModal = function(mIndex, pIndex, sIndex) { cEditM = mIndex; cEditP = pIndex; cEditS = sIndex; document.getElementById('subTaskName').value = ""; document.getElementById('subTaskModal').classList.remove('hidden'); setTimeout(() => document.getElementById('subTaskName').focus(), 100); };
         window.closeSubTaskModal = function() { document.getElementById('subTaskModal').classList.add('hidden'); };
         window.saveSubTask = function() {
             let name = document.getElementById('subTaskName').value.trim(); if(!name) return;
@@ -1100,128 +786,35 @@
             step.subTasks.push({ id: Date.now(), name: name, completed: false });
             window.closeSubTaskModal(); window.renderMissions(); window.saveDataToGAS(false);
         };
-        window.deleteSubTask = function(mIndex, pIndex, sIndex, subIndex) {
-            Swal.fire({ title: 'Xóa việc nhỏ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa' }).then((result) => {
-                if (result.isConfirmed) { db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks.splice(subIndex, 1); window.renderMissions(); window.saveDataToGAS(false); }
-            });
-        };
+        window.deleteSubTask = function(mIndex, pIndex, sIndex, subIndex) { Swal.fire({ title: 'Xóa việc nhỏ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Xóa' }).then((result) => { if (result.isConfirmed) { db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks.splice(subIndex, 1); window.renderMissions(); window.saveDataToGAS(false); } }); };
         window.toggleSubTask = function(mIndex, pIndex, sIndex, subIndex, checked) { db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks[subIndex].completed = checked; window.renderMissions(); window.saveDataToGAS(false); };
 
         // --- CÁC HÀM XÓA, LƯU TRỮ VÀ HOÀN THÀNH ---
-        window.deleteMission = function(mIndex) {
-            if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning');
-            Swal.fire({ title: 'Xóa Nhiệm vụ?', text: `Xóa toàn bộ "${db.missions[mIndex].name}" và tất cả gói thầu?`, icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' }).then((r) => {
-                if(r.isConfirmed) { db.missions.splice(mIndex, 1); window.renderMissions(); window.saveDataToGAS(false); }
-            });
-        };
-        
-        window.deletePackage = function(mIndex, pkgIndex) { 
-            if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning');
-            Swal.fire({ title: 'Xóa Gói thầu?', icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' }).then((r) => {
-                if(r.isConfirmed) { db.missions[mIndex].packages.splice(pkgIndex, 1); window.renderMissions(); window.saveDataToGAS(false); }
-            });
-        };
-        
-        window.deleteProjStep = function(mIndex, pkgIndex, sIndex) { 
-            if (currentUser.role === 'leader') return;
-            Swal.fire({ title: 'Xóa công việc?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa' }).then((r) => {
-                if(r.isConfirmed) { db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1); window.logActivity(mIndex, pkgIndex, `Đã xóa công việc`); window.renderMissions(); window.saveDataToGAS(false); }
-            });
-        };
-        
-        window.deleteDoc = function(index) { 
-            if (currentUser.role !== 'admin') return; 
-            Swal.fire({title: 'Xóa văn bản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{
-                if(r.isConfirmed){ db.regulatoryDocs.splice(index, 1); window.renderDocs(); window.saveDataToGAS(false); }
-            });
-        };
-        
-        window.deleteUser = function(index) { 
-            if (currentUser.role !== 'admin') return;
-            Swal.fire({title: 'Xóa tài khoản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{
-                if(r.isConfirmed){ db.users.splice(index, 1); window.renderUsers(); window.saveDataToGAS(false); }
-            });
-        };
-        
-        window.deleteProcessTemplate = function() { 
-            if (currentUser.role !== 'admin') return;
-            const type = document.getElementById('configProcessSelector').value; if (!type) return;
-            Swal.fire({title: 'Xóa quy trình mẫu?', icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{
-                if(r.isConfirmed){ delete db.processTemplates[type]; window.populateProcessDropdowns(); window.renderConfig(); window.saveDataToGAS(false); }
-            });
-        };
-        
+        window.deleteMission = function(mIndex) { if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning'); Swal.fire({ title: 'Xóa Nhiệm vụ?', text: `Xóa toàn bộ "${db.missions[mIndex].name}" và tất cả gói thầu?`, icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' }).then((r) => { if(r.isConfirmed) { db.missions.splice(mIndex, 1); window.renderMissions(); window.saveDataToGAS(false); } }); };
+        window.deletePackage = function(mIndex, pkgIndex) { if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning'); Swal.fire({ title: 'Xóa Gói thầu?', icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' }).then((r) => { if(r.isConfirmed) { db.missions[mIndex].packages.splice(pkgIndex, 1); window.renderMissions(); window.saveDataToGAS(false); } }); };
+        window.deleteProjStep = function(mIndex, pkgIndex, sIndex) { if (currentUser.role === 'leader') return; Swal.fire({ title: 'Xóa công việc?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa' }).then((r) => { if(r.isConfirmed) { db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1); window.logActivity(mIndex, pkgIndex, `Đã xóa công việc`); window.renderMissions(); window.saveDataToGAS(false); } }); };
+        window.deleteDoc = function(index) { if (currentUser.role !== 'admin') return; Swal.fire({title: 'Xóa văn bản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ if(r.isConfirmed){ db.regulatoryDocs.splice(index, 1); window.renderDocs(); window.saveDataToGAS(false); } }); };
+        window.deleteUser = function(index) { if (currentUser.role !== 'admin') return; Swal.fire({title: 'Xóa tài khoản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ if(r.isConfirmed){ db.users.splice(index, 1); window.renderUsers(); window.saveDataToGAS(false); } }); };
+        window.deleteProcessTemplate = function() { if (currentUser.role !== 'admin') return; const type = document.getElementById('configProcessSelector').value; if (!type) return; Swal.fire({title: 'Xóa quy trình mẫu?', icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ if(r.isConfirmed){ delete db.processTemplates[type]; window.populateProcessDropdowns(); window.renderConfig(); window.saveDataToGAS(false); } }); };
         window.removeConfigStep = function(typeKey, index) { if (currentUser.role !== 'admin') return; db.processTemplates[typeKey].steps.splice(index, 1); window.renderConfig(); window.saveDataToGAS(false); };
-        
-        window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { 
-            if (currentUser.role === 'leader') return;
-            Swal.fire({title: 'Xóa đính kèm?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{
-                if(r.isConfirmed){ db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1); window.logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm`); window.renderMissions(); window.saveDataToGAS(false); }
-            });
-        };
+        window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { if (currentUser.role === 'leader') return; Swal.fire({title: 'Xóa đính kèm?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ if(r.isConfirmed){ db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1); window.logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm`); window.renderMissions(); window.saveDataToGAS(false); } }); };
 
         window.archivePackage = function(mIndex, pkgIndex) {
-            if (currentUser.role === 'leader') return;
-            let pkg = db.missions[mIndex].packages[pkgIndex]; let action = pkg.archived ? "Khôi phục" : "Lưu trữ";
-            Swal.fire({ title: `${action} gói thầu?`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3085d6', confirmButtonText: 'Đồng ý' }).then((r) => {
-                if(r.isConfirmed) { pkg.archived = !pkg.archived; if (pkg.archived) pkg.archiveDate = new Date().toISOString(); else delete pkg.archiveDate; window.renderMissions(); window.saveDataToGAS(false); }
-            });
+            if (currentUser.role === 'leader') return; let pkg = db.missions[mIndex].packages[pkgIndex]; let action = pkg.archived ? "Khôi phục" : "Lưu trữ";
+            Swal.fire({ title: `${action} gói thầu?`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3085d6', confirmButtonText: 'Đồng ý' }).then((r) => { if(r.isConfirmed) { pkg.archived = !pkg.archived; if (pkg.archived) pkg.archiveDate = new Date().toISOString(); else delete pkg.archiveDate; window.renderMissions(); window.saveDataToGAS(false); } });
         };
+        window.toggleMissionComplete = function(mIndex) { if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== m.owner) return Swal.fire('Cảnh báo','Chỉ người tạo Nhiệm vụ mới được phép chốt!','warning'); m.completed = !m.completed; window.renderMissions(); window.saveDataToGAS(false); };
+        window.togglePackageComplete = function(mIndex, pkgIndex) { if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return Swal.fire('Cảnh báo','Chỉ Chuyên viên phụ trách mới được phép chốt!','warning'); pkg.completed = !pkg.completed; window.logActivity(mIndex, pkgIndex, pkg.completed ? "Đã chốt Hoàn thành toàn bộ Gói thầu" : "Đã hủy chốt Hoàn thành Gói thầu"); window.renderMissions(); window.saveDataToGAS(false); };
 
-        window.toggleMissionComplete = function(mIndex) {
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== m.owner) return Swal.fire('Cảnh báo','Chỉ người tạo Nhiệm vụ mới được phép chốt!','warning');
-            m.completed = !m.completed; window.renderMissions(); window.saveDataToGAS(false);
-        };
-
-        window.togglePackageComplete = function(mIndex, pkgIndex) {
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return Swal.fire('Cảnh báo','Chỉ Chuyên viên phụ trách mới được phép chốt!','warning');
-            pkg.completed = !pkg.completed; window.logActivity(mIndex, pkgIndex, pkg.completed ? "Đã chốt Hoàn thành toàn bộ Gói thầu" : "Đã hủy chốt Hoàn thành Gói thầu"); window.renderMissions(); window.saveDataToGAS(false);
-        };
-
-        window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked) { 
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let p = m.packages[pkgIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) return Swal.fire('Lỗi','Bạn không có quyền thao tác!','error');
-            p.steps[stepIndex].completed = checked; p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; window.logActivity(mIndex, pkgIndex, `${checked ? 'Hoàn thành' : 'Bỏ hoàn thành'} bước: ${p.steps[stepIndex].name}`); window.renderMissions(); window.saveDataToGAS(false); 
-        };
-        
-        window.updateProjStep = function(mIndex, pkgIndex, sIndex, field, value) { 
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return Swal.fire('Lỗi','Bạn không có quyền thao tác!','error');
-            if (field === 'deadline') { if (!value) return; pkg.steps[sIndex].deadline = new Date(value).toISOString(); let currentDt = new Date(value); for (let k = sIndex + 1; k < pkg.steps.length; k++) { currentDt = window.addCustomDays(currentDt, pkg.steps[k].originalDays || 0, pkg.steps[k].originalDayType || 'calendar'); pkg.steps[k].deadline = currentDt.toISOString(); } window.logActivity(mIndex, pkgIndex, `Sửa hạn chót bước ${sIndex+1}`); } else { pkg.steps[sIndex][field] = value; } window.renderMissions(); window.saveDataToGAS(false); 
-        };
-        
-        window.addProjStep = function(mIndex, pkgIndex) { 
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; 
-            let newDeadline = new Date(); if (pkg.steps.length > 0) { newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); newDeadline.setDate(newDeadline.getDate() + 1); } 
-            pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), note: "", subTasks: [], completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" }); window.logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); window.renderMissions(); window.saveDataToGAS(false); 
-        };
+        window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked) { if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let p = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) return Swal.fire('Lỗi','Bạn không có quyền thao tác!','error'); p.steps[stepIndex].completed = checked; p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; window.logActivity(mIndex, pkgIndex, `${checked ? 'Hoàn thành' : 'Bỏ hoàn thành'} bước: ${p.steps[stepIndex].name}`); window.renderMissions(); window.saveDataToGAS(false); };
         
         window.toggleLinkForm = function(mIndex, pkgIndex, sIndex) { let el = document.getElementById(`link_form_${mIndex}_${pkgIndex}_${sIndex}`); if (el) el.classList.toggle('hidden'); };
-        
-        window.addLink = function(mIndex, pkgIndex, sIndex) { 
-            if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; 
-            const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); 
-            if (!u) return Swal.fire('Lỗi', 'Vui lòng nhập đường dẫn hợp lệ!', 'warning'); 
-            let step = pkg.steps[sIndex]; if (!step.links) step.links = []; step.links.push({ name: n || "Tài liệu", url: u }); window.logActivity(mIndex, pkgIndex, `Gắn tài liệu vào bước ${sIndex+1}`); window.renderMissions(); window.saveDataToGAS(false); 
-        };
+        window.addLink = function(mIndex, pkgIndex, sIndex) { if (currentUser.role === 'leader') return; let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); if (!u) return Swal.fire('Lỗi', 'Vui lòng nhập đường dẫn hợp lệ!', 'warning'); let step = pkg.steps[sIndex]; if (!step.links) step.links = []; step.links.push({ name: n || "Tài liệu", url: u }); window.logActivity(mIndex, pkgIndex, `Gắn tài liệu vào bước ${sIndex+1}`); window.renderMissions(); window.saveDataToGAS(false); };
 
-        // --- CÁC HÀM CÀI ĐẶT & THÊM MỚI ---
         window.openCreateMissionModal = function() { if (currentUser.role === 'leader') return; document.getElementById('createMissionModal').classList.remove('hidden'); };
         window.closeCreateMissionModal = function() { document.getElementById('createMissionModal').classList.add('hidden'); };
-        window.createMission = function() { 
-            const name = document.getElementById('missionName').value.trim(); const deadlineStr = document.getElementById('missionDeadline').value; 
-            if (!name || !deadlineStr) return Swal.fire('Lỗi', 'Vui lòng điền đủ thông tin!', 'warning'); 
-            db.missions.unshift({ id: Date.now(), name: name, deadline: new Date(deadlineStr).toISOString(), owner: currentUser.fullname, packages: [], completed: false }); document.getElementById('missionName').value = ''; window.closeCreateMissionModal(); window.renderMissions(); window.saveDataToGAS(false); 
-        };
-        
-        window.openCreatePackageModal = function(mIndex) { 
-            if (currentUser.role === 'leader') return; currentMissionIndexForNewPackage = mIndex; const sel = document.getElementById('pkgOwner'); sel.innerHTML = ''; 
-            db.users.forEach(u => { sel.innerHTML += `<option value="${u.fullname}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${u.fullname}</option>`; }); document.getElementById('createPackageModal').classList.remove('hidden'); 
-        };
+        window.createMission = function() { const name = document.getElementById('missionName').value.trim(); const deadlineStr = document.getElementById('missionDeadline').value; if (!name || !deadlineStr) return Swal.fire('Lỗi', 'Vui lòng điền đủ thông tin!', 'warning'); db.missions.unshift({ id: Date.now(), name: name, deadline: new Date(deadlineStr).toISOString(), owner: currentUser.fullname, packages: [], completed: false }); document.getElementById('missionName').value = ''; window.closeCreateMissionModal(); window.renderMissions(); window.saveDataToGAS(false); };
+        window.openCreatePackageModal = function(mIndex) { if (currentUser.role === 'leader') return; currentMissionIndexForNewPackage = mIndex; const sel = document.getElementById('pkgOwner'); sel.innerHTML = ''; db.users.forEach(u => { sel.innerHTML += `<option value="${u.fullname}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${u.fullname}</option>`; }); document.getElementById('createPackageModal').classList.remove('hidden'); };
         window.closeCreatePackageModal = function() { document.getElementById('createPackageModal').classList.add('hidden'); };
         window.createPackage = function() { 
             const mIndex = currentMissionIndexForNewPackage; const name = document.getElementById('projName').value.trim(); const startDateStr = document.getElementById('projStartDate').value; const typeKey = document.getElementById('projType').value; const owner = document.getElementById('pkgOwner').value; 
@@ -1230,12 +823,7 @@
             if (db.processTemplates[typeKey] && db.processTemplates[typeKey].steps) { steps = db.processTemplates[typeKey].steps.map(tmpl => { currentDt = window.addCustomDays(currentDt, tmpl.days, tmpl.dayType); return { name: tmpl.name, deadline: currentDt.toISOString(), note: "", subTasks: [], completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: tmpl.dayType }; }); }
             db.missions[mIndex].packages.push({ id: Date.now(), name: name, processTitle: db.processTemplates[typeKey].title, owner: owner, estimatePrice: 0, winningPrice: 0, archived: false, completed: false, logs: [`Khởi tạo gói thầu`], steps: steps }); window.closeCreatePackageModal(); document.getElementById('projName').value = ''; window.renderMissions(); window.saveDataToGAS(false); 
         };
-        
-        window.openFinanceLogModal = function(mIndex, pIndex) { 
-            currentFinanceMIndex = mIndex; currentFinancePIndex = pIndex; const pkg = db.missions[mIndex].packages[pIndex]; 
-            document.getElementById('finEstimate').value = pkg.estimatePrice ? pkg.estimatePrice.toLocaleString('vi-VN') : ''; document.getElementById('finWinning').value = pkg.winningPrice ? pkg.winningPrice.toLocaleString('vi-VN') : ''; const logBox = document.getElementById('activityLogs'); logBox.innerHTML = ''; 
-            if (pkg.logs && pkg.logs.length > 0) { pkg.logs.forEach(l => logBox.innerHTML += `<div>${l}</div>`); } else { logBox.innerHTML = '<div class="italic text-gray-400">Chưa có lịch sử.</div>'; } document.getElementById('financeLogModal').classList.remove('hidden'); 
-        };
+        window.openFinanceLogModal = function(mIndex, pIndex) { currentFinanceMIndex = mIndex; currentFinancePIndex = pIndex; const pkg = db.missions[mIndex].packages[pIndex]; document.getElementById('finEstimate').value = pkg.estimatePrice ? pkg.estimatePrice.toLocaleString('vi-VN') : ''; document.getElementById('finWinning').value = pkg.winningPrice ? pkg.winningPrice.toLocaleString('vi-VN') : ''; const logBox = document.getElementById('activityLogs'); logBox.innerHTML = ''; if (pkg.logs && pkg.logs.length > 0) { pkg.logs.forEach(l => logBox.innerHTML += `<div>${l}</div>`); } else { logBox.innerHTML = '<div class="italic text-gray-400">Chưa có lịch sử.</div>'; } document.getElementById('financeLogModal').classList.remove('hidden'); };
         window.closeFinanceLogModal = function() { document.getElementById('financeLogModal').classList.add('hidden'); };
         window.saveFinance = function() { 
             if (currentUser.role === 'leader') return Swal.fire('Cảnh báo','Lãnh đạo chỉ có quyền xem!','warning');
@@ -1247,8 +835,7 @@
         window.openProfileModal = function() { document.getElementById('profileFullname').value = currentUser.fullname; document.getElementById('profilePassword').value = ''; document.getElementById('profileModal').classList.remove('hidden'); };
         window.closeProfileModal = function() { document.getElementById('profileModal').classList.add('hidden'); };
         window.saveProfile = function() { 
-            const newName = document.getElementById('profileFullname').value.trim(); const newPass = document.getElementById('profilePassword').value.trim(); 
-            if (!newName) return Swal.fire('Lỗi','Tên hiển thị không được để trống!','warning'); 
+            const newName = document.getElementById('profileFullname').value.trim(); const newPass = document.getElementById('profilePassword').value.trim(); if (!newName) return Swal.fire('Lỗi','Tên hiển thị không được để trống!','warning'); 
             const oldName = currentUser.fullname; const userIndex = db.users.findIndex(u => u.username === currentUser.username); 
             if (userIndex !== -1) { 
                 db.users[userIndex].fullname = newName; if (newPass) db.users[userIndex].password = newPass; currentUser = db.users[userIndex]; 
@@ -1269,14 +856,12 @@
         window.renderDocs = function() { const b = document.getElementById('docsTableBody'); b.innerHTML = ''; if(!db.regulatoryDocs) db.regulatoryDocs=[]; db.regulatoryDocs.forEach((d, i) => { b.innerHTML += `<tr class="border-b dark:border-gray-700"><td class="p-3"><input value="${d.number}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td><td class="p-3"><input value="${d.title}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td><td class="p-3"><input type="url" value="${d.link||''}" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td><td class="p-3 text-center"><button onclick="window.deleteDoc(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`; }); };
         window.addNewDoc = function() { if(currentUser.role!=='admin') return; const num=document.getElementById('newDocNumber').value.trim(), tit=document.getElementById('newDocTitle').value.trim(), lnk=document.getElementById('newDocLink').value.trim(); if(num&&tit){ db.regulatoryDocs.push({number:num, title:tit, link:lnk}); document.getElementById('newDocNumber').value=''; document.getElementById('newDocTitle').value=''; document.getElementById('newDocLink').value=''; window.renderDocs(); window.saveDataToGAS(false); } };
         window.updateDoc = function(i, f, v) { if(currentUser.role!=='admin') return; db.regulatoryDocs[i][f]=v; window.saveDataToGAS(false); };
-        
         window.renderUsers = function() { const b = document.getElementById('userTableBody'); b.innerHTML = ''; db.users.forEach((u, i) => { b.innerHTML += `<tr class="border-b dark:border-gray-700"><td class="p-3">${u.username}</td><td class="p-3">${u.fullname}</td><td class="p-3">${u.role}</td><td class="p-3 text-right"><button onclick="window.openEditUserModal(${i})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button>${u.username!=='admin'?`<button onclick="window.deleteUser(${i})" class="text-red-500"><i class="fas fa-trash"></i></button>`:''}</td></tr>`; }); };
         window.addNewUser = function() { if(currentUser.role!=='admin') return; const u=document.getElementById('newUserUsername').value.trim(), p=document.getElementById('newUserPassword').value.trim(), f=document.getElementById('newUserFullname').value.trim(), r=document.getElementById('newUserRole').value; if(u&&p&&f){ if(db.users.some(usr=>usr.username===u)) return Swal.fire('Lỗi','Tên đăng nhập đã tồn tại!','error'); db.users.push({username:u, password:p, fullname:f, role:r}); document.getElementById('newUserUsername').value=''; document.getElementById('newUserPassword').value=''; document.getElementById('newUserFullname').value=''; window.renderUsers(); window.saveDataToGAS(false); } else Swal.fire('Lỗi','Vui lòng điền đủ thông tin!','warning'); };
         window.openEditUserModal = function(i) { if(currentUser.role!=='admin') return; currentEditUserIndex=i; const u=db.users[i]; document.getElementById('editUserUsername').value=u.username; document.getElementById('editUserFullname').value=u.fullname; document.getElementById('editUserRole').value=u.role; document.getElementById('editUserPassword').value=''; document.getElementById('editUserRole').disabled=(u.username==='admin'); document.getElementById('editUserModal').classList.remove('hidden'); };
         window.closeEditUserModal = function() { document.getElementById('editUserModal').classList.add('hidden'); };
         window.saveEditUser = function() { if(currentUser.role!=='admin') return; const f=document.getElementById('editUserFullname').value.trim(), p=document.getElementById('editUserPassword').value.trim(), r=document.getElementById('editUserRole').value; if(f){ db.users[currentEditUserIndex].fullname=f; if(db.users[currentEditUserIndex].username!=='admin') db.users[currentEditUserIndex].role=r; if(p) db.users[currentEditUserIndex].password=p; if(currentUser.username===db.users[currentEditUserIndex].username) currentUser=db.users[currentEditUserIndex]; window.closeEditUserModal(); window.renderUsers(); window.saveDataToGAS(false); window.renderUserBadge(); } else Swal.fire('Lỗi','Vui lòng nhập Tên hiển thị!','warning'); };
 
-        // --- IN ẤN VÀ XUẤT EXCEL ---
         window.exportGlobalExcel = function() {
             try {
                 let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>`;
