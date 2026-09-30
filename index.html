@@ -56,7 +56,7 @@
                         <i class="fas fa-folder-plus"></i> Tạo Nhiệm vụ
                     </button>
 
-                    <button onclick="forceSync()" id="syncStatus" class="hidden items-center gap-1.5 bg-blue-900 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow-inner" title="Bấm để đồng bộ thủ công">
+                    <button onclick="forceSync()" id="syncStatus" class="hidden items-center gap-1.5 bg-blue-900 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow-inner" title="Bấm để lưu thủ công">
                         <i class="fas fa-cloud text-blue-300"></i> <span id="syncText">Đã đồng bộ</span>
                     </button>
                     
@@ -342,6 +342,7 @@
 
         let currentUser = null;
         let syncTimeout = null;
+        let autoSyncInterval = null; // Biến kiểm soát vòng lặp tự đồng bộ
         let isDataSynchronized = false; 
         let currentMissionIndexForNewPackage = -1;
 
@@ -414,6 +415,10 @@
             populateProcessDropdowns();
             switchTab('projects');
             renderMissions();
+
+            // Khởi động trình đồng bộ ngầm
+            if(autoSyncInterval) clearInterval(autoSyncInterval);
+            autoSyncInterval = setInterval(backgroundSync, 60000); // 60 giây chạy 1 lần
         }
 
         async function handleLogin() {
@@ -455,6 +460,8 @@
         function handleLogout() {
             currentUser = null;
             localStorage.removeItem('bidAppUser'); 
+            if(autoSyncInterval) clearInterval(autoSyncInterval);
+            
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
             document.getElementById('rememberMe').checked = false;
@@ -464,7 +471,7 @@
             document.getElementById('btnCreateProject').classList.replace('flex', 'hidden');
         }
 
-        // --- CÁ NHÂN HÓA (ĐỔI PASS, ĐỔI TÊN) ---
+        // --- CÁ NHÂN HÓA ---
         function openProfileModal() {
             document.getElementById('profileFullname').value = currentUser.fullname;
             document.getElementById('profilePassword').value = '';
@@ -483,7 +490,6 @@
             
             const oldName = currentUser.fullname;
             
-            // Tìm và cập nhật user trong DB
             const userIndex = db.users.findIndex(u => u.username === currentUser.username);
             if (userIndex !== -1) {
                 db.users[userIndex].fullname = newName;
@@ -491,7 +497,6 @@
                 
                 currentUser = db.users[userIndex];
                 
-                // Quét và cập nhật tên trên toàn bộ các nhiệm vụ và gói thầu cũ
                 if (oldName !== newName) {
                     if(db.missions) {
                         db.missions.forEach(m => {
@@ -507,7 +512,6 @@
                     }
                 }
 
-                // Cập nhật Storage nếu có nhớ MK
                 if (localStorage.getItem('bidAppUser')) {
                     localStorage.setItem('bidAppUser', JSON.stringify(currentUser));
                 }
@@ -521,7 +525,7 @@
             }
         }
 
-        // --- MODAL NHIỆM VỤ VÀ GÓI THẦU ---
+        // --- MODAL ---
         function openCreateMissionModal() {
             document.getElementById('createMissionModal').classList.remove('hidden');
         }
@@ -570,7 +574,7 @@
             if (tab === 'users') renderUsers();
         }
 
-        // --- ĐỒNG BỘ DỮ LIỆU & CHUYỂN ĐỔI CẤU TRÚC 2 CẤP ---
+        // --- ĐỒNG BỘ DỮ LIỆU ---
         async function loadDataFromGAS() {
             try {
                 const response = await fetch(GAS_URL);
@@ -597,7 +601,6 @@
                         db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
                     }
                     
-                    // CHUYỂN ĐỔI DỮ LIỆU (Migration) TỪ DỰ ÁN (1 CẤP) SANG NHIỆM VỤ (2 CẤP)
                     if (db.projects && db.projects.length > 0) {
                         if (!db.missions) db.missions = [];
                         
@@ -606,11 +609,11 @@
                             name: "Nhiệm vụ: " + p.name,
                             deadline: p.steps && p.steps.length > 0 ? p.steps[p.steps.length-1].deadline : new Date().toISOString(),
                             owner: p.owner,
-                            packages: [p] // Gói thầu cũ trở thành 1 mảng package bên trong nhiệm vụ
+                            packages: [p] 
                         }));
                         
                         db.missions = db.missions.concat(migratedMissions);
-                        db.projects = []; // Xóa data cũ đi
+                        db.projects = []; 
                     }
 
                     if (!db.missions) db.missions = [];
@@ -669,6 +672,54 @@
             saveDataToGAS(alertSuccess);
         }
 
+        // --- ĐỒNG BỘ NGẦM (BACKGROUND SYNC) ---
+        async function backgroundSync() {
+            if (!isDataSynchronized || !currentUser) return;
+
+            const syncIcon = document.querySelector('#syncStatus i');
+            const syncText = document.getElementById('syncText');
+            
+            if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300";
+            if (syncText) syncText.innerText = "Đang làm mới...";
+
+            try {
+                const response = await fetch(GAS_URL);
+                if (!response.ok) throw new Error("HTTP Status " + response.status);
+                
+                const textData = await response.text();
+                const data = JSON.parse(textData);
+                
+                if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                    if (JSON.stringify(db) !== JSON.stringify(data)) {
+                        db = data;
+                        
+                        if (!db.processTemplates) db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
+                        if (!db.users) db.users = [{ username: "admin", password: "Xtdt@Sce", fullname: "Quản trị viên SCE", role: "admin" }];
+                        if (!db.regulatoryDocs) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+                        if (!db.missions) db.missions = [];
+
+                        // Cập nhật lại giao diện người dùng nếu họ đang mở tab tương ứng
+                        const currentTabObj = document.querySelector('.border-b-2.border-blue-600');
+                        if (currentTabObj) {
+                            const activeTabId = currentTabObj.id;
+                            if (activeTabId === 'tab-projects') renderMissions();
+                            else if (activeTabId === 'tab-settings') renderConfig();
+                            else if (activeTabId === 'tab-docs') renderDocs();
+                            else if (activeTabId === 'tab-users') renderUsers();
+                        }
+                        populateProcessDropdowns();
+                    }
+                }
+
+                if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300";
+                if (syncText) syncText.innerText = "Đã đồng bộ";
+            } catch (err) {
+                console.error("Lỗi đồng bộ ngầm:", err);
+                if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400";
+                if (syncText) syncText.innerText = "Mất kết nối";
+            }
+        }
+
         // --- CÁC HÀM TIỆN ÍCH ---
         function addCustomDays(dateObj, days, type) {
             let result = new Date(dateObj);
@@ -709,7 +760,7 @@
             return `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`;
         }
 
-        // --- QUẢN LÝ NHIỆM VỤ (CẤP 1) & GÓI THẦU (CẤP 2) ---
+        // --- QUẢN LÝ NHIỆM VỤ & GÓI THẦU ---
         function createMission() {
             const name = document.getElementById('missionName').value.trim();
             const deadlineStr = document.getElementById('missionDeadline').value;
@@ -875,7 +926,6 @@
             }
         }
 
-        // --- RENDER GIAO DIỆN CHÍNH (MISSIONS & PACKAGES) ---
         function renderMissions() {
             const container = document.getElementById('projectList');
             container.innerHTML = '';
@@ -1042,7 +1092,7 @@
                 let docsHtml = "";
                 if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
                     docsHtml = `<div class="mt-3 bg-white p-2 rounded border border-indigo-100 text-xs shadow-sm">
-                        <span class="font-semibold text-indigo-800">Căn cứ triển khai chung:</span>
+                        <span class="font-semibold text-indigo-800">Căn cứ chung:</span>
                         <span class="text-gray-600 ml-1">
                             ${db.regulatoryDocs.map(d => `${d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 hover:underline">` : ''}<b>${d.number}</b>${d.link ? `</a>` : ''}`).join(', ')}
                         </span>
@@ -1080,7 +1130,7 @@
             });
         }
 
-        // --- RENDER DỮ LIỆU CĂN CỨ PHÁP LÝ ---
+        // --- RENDER DỮ LIỆU TÀI KHOẢN VÀ CẤU HÌNH ---
         function renderDocs() {
             const tbody = document.getElementById('docsTableBody');
             tbody.innerHTML = '';
@@ -1117,6 +1167,7 @@
             const link = document.getElementById('newDocLink').value.trim();
 
             if (!number || !title) return alert("Vui lòng nhập Số hiệu và Tên văn bản!");
+            
             if(!db.regulatoryDocs) db.regulatoryDocs = [];
             db.regulatoryDocs.push({ number, title, link });
             
@@ -1141,7 +1192,6 @@
             }
         }
 
-        // --- XUẤT EXCEL & IN ẤN ---
         function exportExcel(mIndex, pkgIndex) {
             const mission = db.missions[mIndex];
             const pkg = mission.packages[pkgIndex];
@@ -1295,7 +1345,6 @@
             }, 300);
         }
 
-        // --- RENDER DỮ LIỆU TÀI KHOẢN VÀ CẤU HÌNH QUY TRÌNH ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
