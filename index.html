@@ -6,6 +6,8 @@
     <title>Quản lý Tiến độ Đấu thầu - SCE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Thêm thư viện hỗ trợ Kéo Thả (Drag & Drop) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
 
@@ -94,7 +96,7 @@
             <div id="view-settings" class="hidden bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <div class="mb-4">
                     <h2 class="text-lg font-bold text-gray-800">Quản lý các loại Quy trình (Cập nhật NĐ 214, NĐ 349)</h2>
-                    <p class="text-xs text-gray-500">Tạo mới, chỉnh sửa hoặc xóa các biểu mẫu quy trình áp dụng tại SCE</p>
+                    <p class="text-xs text-gray-500">Tạo mới, chỉnh sửa, kéo thả sắp xếp hoặc xóa các biểu mẫu quy trình</p>
                 </div>
                 
                 <div class="bg-blue-50 p-4 rounded border border-blue-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -111,6 +113,7 @@
                     </div>
                 </div>
                 
+                <!-- Khu vực chứa các bước để kéo thả -->
                 <div id="configSteps" class="space-y-2 mb-4"></div>
 
                 <div class="flex gap-2 p-3 bg-gray-50 rounded border border-gray-200 mb-6 mt-6">
@@ -342,9 +345,10 @@
 
         let currentUser = null;
         let syncTimeout = null;
-        let autoSyncInterval = null; // Biến kiểm soát vòng lặp tự đồng bộ
+        let autoSyncInterval = null; 
         let isDataSynchronized = false; 
         let currentMissionIndexForNewPackage = -1;
+        let configSortableInstance = null; // Quản lý instance của SortableJS
 
         // --- XỬ LÝ KHỞI ĐỘNG & ĐĂNG NHẬP ---
         window.addEventListener('DOMContentLoaded', async () => {
@@ -416,9 +420,8 @@
             switchTab('projects');
             renderMissions();
 
-            // Khởi động trình đồng bộ ngầm
             if(autoSyncInterval) clearInterval(autoSyncInterval);
-            autoSyncInterval = setInterval(backgroundSync, 60000); // 60 giây chạy 1 lần
+            autoSyncInterval = setInterval(backgroundSync, 60000); 
         }
 
         async function handleLogin() {
@@ -672,7 +675,6 @@
             saveDataToGAS(alertSuccess);
         }
 
-        // --- ĐỒNG BỘ NGẦM (BACKGROUND SYNC) ---
         async function backgroundSync() {
             if (!isDataSynchronized || !currentUser) return;
 
@@ -698,7 +700,6 @@
                         if (!db.regulatoryDocs) db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
                         if (!db.missions) db.missions = [];
 
-                        // Cập nhật lại giao diện người dùng nếu họ đang mở tab tương ứng
                         const currentTabObj = document.querySelector('.border-b-2.border-blue-600');
                         if (currentTabObj) {
                             const activeTabId = currentTabObj.id;
@@ -760,7 +761,7 @@
             return `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`;
         }
 
-        // --- QUẢN LÝ NHIỆM VỤ & GÓI THẦU ---
+        // --- QUẢN LÝ NHIỆM VỤ (CẤP 1) & GÓI THẦU (CẤP 2) ---
         function createMission() {
             const name = document.getElementById('missionName').value.trim();
             const deadlineStr = document.getElementById('missionDeadline').value;
@@ -1130,283 +1131,7 @@
             });
         }
 
-        // --- RENDER DỮ LIỆU TÀI KHOẢN VÀ CẤU HÌNH ---
-        function renderDocs() {
-            const tbody = document.getElementById('docsTableBody');
-            tbody.innerHTML = '';
-            if(!db.regulatoryDocs) db.regulatoryDocs = [];
-            
-            if(db.regulatoryDocs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400 italic">Chưa có văn bản pháp quy nào được cấu hình.</td></tr>`;
-                return;
-            }
-
-            db.regulatoryDocs.forEach((doc, index) => {
-                tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50 transition">
-                        <td class="p-3">
-                            <input type="text" value="${doc.number}" onchange="updateDoc(${index}, 'number', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm font-medium">
-                        </td>
-                        <td class="p-3">
-                            <input type="text" value="${doc.title}" onchange="updateDoc(${index}, 'title', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm">
-                        </td>
-                        <td class="p-3">
-                            <input type="url" value="${doc.link || ''}" onchange="updateDoc(${index}, 'link', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm" placeholder="https://...">
-                        </td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteDoc(${index})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function addNewDoc() {
-            const number = document.getElementById('newDocNumber').value.trim();
-            const title = document.getElementById('newDocTitle').value.trim();
-            const link = document.getElementById('newDocLink').value.trim();
-
-            if (!number || !title) return alert("Vui lòng nhập Số hiệu và Tên văn bản!");
-            
-            if(!db.regulatoryDocs) db.regulatoryDocs = [];
-            db.regulatoryDocs.push({ number, title, link });
-            
-            document.getElementById('newDocNumber').value = '';
-            document.getElementById('newDocTitle').value = '';
-            document.getElementById('newDocLink').value = '';
-            
-            renderDocs();
-            saveDataToGAS();
-        }
-
-        function updateDoc(index, field, value) {
-            db.regulatoryDocs[index][field] = value;
-            saveDataToGAS();
-        }
-
-        function deleteDoc(index) {
-            if(confirm("Xác nhận xóa văn bản pháp quy này khỏi hệ thống?")) {
-                db.regulatoryDocs.splice(index, 1);
-                renderDocs();
-                saveDataToGAS();
-            }
-        }
-
-        function exportExcel(mIndex, pkgIndex) {
-            const mission = db.missions[mIndex];
-            const pkg = mission.packages[pkgIndex];
-            const processLabel = pkg.processTitle || "Quy trình đấu thầu";
-            
-            let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8"></head><body>`;
-            
-            tableHtml += `<h3>NHIỆM VỤ: ${mission.name.toUpperCase()}</h3>`;
-            tableHtml += `<h4>GÓI THẦU: ${pkg.name}</h4>`;
-            tableHtml += `<p>Quy trình áp dụng: ${processLabel} | Phụ trách: ${mission.owner}</p>`;
-            
-            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                tableHtml += `<h4>Căn cứ triển khai chung:</h4><ul>`;
-                db.regulatoryDocs.forEach(d => {
-                    tableHtml += `<li><b>${d.number}</b>: ${d.title}</li>`;
-                });
-                tableHtml += `</ul><br>`;
-            }
-            
-            tableHtml += `<table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th style="background-color: #4CAF50; color: white;">STT</th>
-                        <th style="background-color: #4CAF50; color: white;">Nội dung công việc</th>
-                        <th style="background-color: #4CAF50; color: white;">Định mức</th>
-                        <th style="background-color: #4CAF50; color: white;">Hạn chót</th>
-                        <th style="background-color: #4CAF50; color: white;">Trạng thái</th>
-                        <th style="background-color: #4CAF50; color: white;">Tài liệu / Văn bản</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-                
-            pkg.steps.forEach((step, idx) => {
-                let timeBudget = "-";
-                if (step.originalDays !== undefined && step.originalDays > 0) {
-                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'Ngày LV' : 'Ngày lịch'}`;
-                }
-                const status = step.completed ? `Đã xong (${step.completedBy})` : 'Chưa xong';
-                
-                let linkText = "";
-                if (step.links && step.links.length > 0) {
-                    linkText = step.links.map(l => `${l.name} (${l.url})`).join(" \n ");
-                }
-
-                tableHtml += `
-                    <tr>
-                        <td align="center">${idx + 1}</td>
-                        <td>${step.name}</td>
-                        <td align="center">${timeBudget}</td>
-                        <td align="center">${formatDate(step.deadline)}</td>
-                        <td>${status}</td>
-                        <td>${linkText}</td>
-                    </tr>`;
-            });
-            
-            tableHtml += `</tbody></table></body></html>`;
-
-            const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const safeName = pkg.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
-            a.download = `TienDo_${safeName}.xls`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function printProject(mIndex, pkgIndex) {
-            const mission = db.missions[mIndex];
-            const pkg = mission.packages[pkgIndex];
-            const processLabel = pkg.processTitle || "Quy trình đấu thầu";
-            
-            let html = `<html><head><title>In Tiến độ - ${pkg.name}</title>`;
-            html += `<style>
-                body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; }
-                h1 { text-align: center; font-size: 18px; text-transform: uppercase; margin-bottom: 5px; }
-                h2 { text-align: center; font-size: 16px; margin-top: 5px; margin-bottom: 5px; }
-                h3 { text-align: center; font-size: 14px; font-weight: normal; margin-top: 0; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-                th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
-                th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
-                .text-center { text-align: center; }
-                .status-done { font-weight: bold; color: #000; }
-                .docs-section { margin-bottom: 15px; font-size: 12px; border-left: 3px solid #666; padding-left: 10px; }
-                .docs-section ul { margin: 5px 0 0 0; padding-left: 20px; }
-            </style></head><body>`;
-            
-            html += `<h1>NHIỆM VỤ: ${mission.name}</h1>`;
-            html += `<h2>GÓI THẦU: ${pkg.name}</h2>`;
-            html += `<h3>Loại: ${processLabel} | Phụ trách: ${mission.owner}</h3>`;
-            
-            if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                html += `<div class="docs-section"><b>Căn cứ triển khai chung:</b><ul>`;
-                db.regulatoryDocs.forEach(d => {
-                    html += `<li style="margin-bottom: 3px;"><b>${d.number}</b> - ${d.title}</li>`;
-                });
-                html += `</ul></div>`;
-            }
-
-            html += `<table>
-                <thead>
-                    <tr>
-                        <th style="width: 30px">STT</th>
-                        <th>Nội dung công việc</th>
-                        <th style="width: 70px">Định mức</th>
-                        <th style="width: 80px">Hạn chót</th>
-                        <th style="width: 120px">Trạng thái</th>
-                        <th style="width: 180px">Văn bản</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-            
-            pkg.steps.forEach((step, idx) => {
-                let timeBudget = "-";
-                if (step.originalDays !== undefined && step.originalDays > 0) {
-                    timeBudget = `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}`;
-                }
-                const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
-                
-                let linkText = "";
-                if (step.links && step.links.length > 0) {
-                    linkText = step.links.map(l => `- ${l.name}`).join("<br>");
-                }
-
-                html += `
-                    <tr>
-                        <td class="text-center">${idx + 1}</td>
-                        <td>${step.name}</td>
-                        <td class="text-center">${timeBudget}</td>
-                        <td class="text-center">${formatDate(step.deadline)}</td>
-                        <td class="text-center">${status}</td>
-                        <td>${linkText}</td>
-                    </tr>`;
-            });
-            
-            html += `</tbody></table>
-            <div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 12px;">
-                Ngày trích xuất: ${formatDate(new Date().toISOString())}
-            </div>
-            </body></html>`;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(html);
-            printWindow.document.close();
-            printWindow.focus();
-            
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 300);
-        }
-
-        function renderUsers() {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = '';
-            
-            db.users.forEach((u, index) => {
-                let roleName = 'Cán bộ';
-                let roleClass = 'bg-gray-100 text-gray-600';
-                if (u.role === 'admin') {
-                    roleName = 'Quản trị viên';
-                    roleClass = 'bg-purple-100 text-purple-700 font-bold';
-                } else if (u.role === 'leader') {
-                    roleName = 'Lãnh đạo';
-                    roleClass = 'bg-orange-100 text-orange-700 font-bold';
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-gray-50";
-                tr.innerHTML = `
-                    <td class="p-3 font-medium text-gray-800">${u.username}</td>
-                    <td class="p-3 text-gray-700">${u.fullname}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-0.5 rounded text-xs ${roleClass}">
-                            ${roleName}
-                        </span>
-                    </td>
-                    <td class="p-3 text-right">
-                        ${u.username !== 'admin' ? `
-                            <button onclick="deleteUser(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-trash"></i></button>
-                        ` : '<span class="text-xs text-gray-400 italic">Mặc định</span>'}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function addNewUser() {
-            const username = document.getElementById('newUserUsername').value.trim();
-            const password = document.getElementById('newUserPassword').value.trim();
-            const fullname = document.getElementById('newUserFullname').value.trim();
-            const role = document.getElementById('newUserRole').value;
-
-            if (!username || !password || !fullname) return alert("Vui lòng điền đầy đủ thông tin!");
-            if (db.users.some(u => u.username === username)) return alert("Tên đăng nhập này đã tồn tại!");
-
-            db.users.push({ username, password, fullname, role });
-            
-            document.getElementById('newUserUsername').value = '';
-            document.getElementById('newUserPassword').value = '';
-            document.getElementById('newUserFullname').value = '';
-
-            renderUsers();
-            saveDataToGAS();
-        }
-
-        function deleteUser(index) {
-            if (confirm(`Bạn có chắc muốn xóa tài khoản "${db.users[index].username}"?`)) {
-                db.users.splice(index, 1);
-                renderUsers();
-                saveDataToGAS();
-            }
-        }
-
+        // --- CẤU HÌNH QUY TRÌNH KÉO THẢ ---
         function renderConfig() {
             const activeType = document.getElementById('configProcessSelector').value;
             const container = document.getElementById('configSteps');
@@ -1419,8 +1144,11 @@
             steps.forEach((step, index) => {
                 const isWorkday = step.dayType === 'workday';
                 container.innerHTML += `
-                    <div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm hover:shadow-md transition">
-                        <span class="font-bold w-6 text-gray-400 text-sm text-center">${index + 1}.</span>
+                    <div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm hover:shadow-md transition drag-item" data-index="${index}">
+                        <div class="cursor-move text-gray-400 hover:text-blue-500 px-1 drag-handle" title="Kéo thả để sắp xếp">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
+                        <span class="font-bold w-6 text-gray-400 text-sm text-center step-number">${index + 1}.</span>
                         <input type="text" value="${step.name}" onchange="updateConfigStep('${activeType}', ${index}, 'name', this.value)" class="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none text-sm">
                         <input type="number" value="${step.days}" onchange="updateConfigStep('${activeType}', ${index}, 'days', this.value)" class="w-16 bg-gray-50 border border-gray-300 rounded p-1 text-center outline-none text-sm font-semibold text-blue-700"> 
                         <select onchange="updateConfigStep('${activeType}', ${index}, 'dayType', this.value)" class="border-b border-gray-300 bg-transparent text-sm text-gray-600 outline-none p-1">
@@ -1430,6 +1158,28 @@
                         <button onclick="removeConfigStep('${activeType}', ${index})" class="text-gray-400 hover:text-red-500 ml-2 px-2" title="Xóa bước này"><i class="fas fa-times"></i></button>
                     </div>
                 `;
+            });
+
+            // Khởi tạo SortableJS (Kéo thả)
+            if (configSortableInstance) {
+                configSortableInstance.destroy();
+            }
+            configSortableInstance = Sortable.create(container, {
+                handle: '.drag-handle',
+                animation: 150,
+                onEnd: function (evt) {
+                    const oldIndex = evt.oldIndex;
+                    const newIndex = evt.newIndex;
+                    
+                    if (oldIndex !== newIndex) {
+                        const stepsArr = db.processTemplates[activeType].steps;
+                        const movedItem = stepsArr.splice(oldIndex, 1)[0];
+                        stepsArr.splice(newIndex, 0, movedItem);
+                        
+                        renderConfig(); 
+                        saveDataToGAS();
+                    }
+                }
             });
         }
 
@@ -1489,7 +1239,6 @@
                 alert("Vui lòng nhập đủ tên bước và số ngày!");
             }
         }
-
     </script>
 </body>
 </html>
