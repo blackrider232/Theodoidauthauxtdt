@@ -14,7 +14,9 @@
     <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-200 px-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600">
             <div class="text-center mb-6">
+                <!-- Logo SCE từ GitHub -->
                 <img src="Logo (tách nền sát cạnh).png" alt="Logo SCE" class="h-20 w-auto mx-auto mb-4 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png'; this.classList.add('opacity-50', 'h-16');">
+                
                 <h2 class="text-2xl font-bold text-blue-900 tracking-tight">HỆ THỐNG ĐẤU THẦU</h2>
                 <p class="text-sm text-gray-500 mt-1">Quản trị Tiến độ & Dữ liệu</p>
             </div>
@@ -32,7 +34,9 @@
                 </div>
                 <div class="flex items-center">
                     <input type="checkbox" id="rememberMe" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">Ghi nhớ đăng nhập</label>
+                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                        Ghi nhớ đăng nhập
+                    </label>
                 </div>
                 <button onclick="handleLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 rounded-md shadow transition mt-2">
                     Đăng nhập hệ thống
@@ -312,7 +316,7 @@
             <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border p-2.5 rounded text-sm mb-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
             <input type="date" id="projStartDate" class="w-full border p-2.5 rounded text-sm mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Người phụ trách (Giao việc)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chuyên viên phụ trách</label>
             <select id="pkgOwner" class="w-full border p-2.5 rounded text-sm mb-4 bg-white"></select>
             <div class="flex justify-end gap-3"><button onclick="closeCreatePackageModal()" class="px-4 py-2 border rounded text-sm font-medium">Hủy bỏ</button><button onclick="createPackage()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">Thêm gói thầu</button></div>
         </div>
@@ -338,7 +342,9 @@
             <input type="text" id="editUserFullname" class="w-full border p-2.5 rounded text-sm mb-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
             <select id="editUserRole" class="w-full border p-2.5 rounded text-sm mb-3 bg-white">
-                <option value="user">Chuyên viên thực hiện</option><option value="leader">Lãnh đạo</option><option value="admin">Admin</option>
+                <option value="user">Chuyên viên thực hiện</option>
+                <option value="leader">Lãnh đạo</option>
+                <option value="admin">Admin</option>
             </select>
             <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới (Tùy chọn)</label>
             <input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border p-2.5 rounded text-sm mb-4">
@@ -414,17 +420,6 @@
                     if (m.packages.length !== originalLen) dataChanged = true;
                 }
             });
-
-            const origMissionsLen = db.missions.length;
-            db.missions = db.missions.filter(m => {
-                if (m.archived) {
-                    if (!m.archiveDate) { m.archiveDate = now.toISOString(); dataChanged = true; return true; }
-                    const diffDays = (now - new Date(m.archiveDate)) / (1000 * 60 * 60 * 24);
-                    if (diffDays > 30) return false;
-                }
-                return true;
-            });
-            if (db.missions.length !== origMissionsLen) dataChanged = true;
 
             if (dataChanged && currentUser && currentUser.role === 'admin') {
                 saveDataToGAS(false);
@@ -525,7 +520,7 @@
             }
         }
 
-        function forceSync(alertSuccess = false) {
+        window.forceSync = function(alertSuccess = false) {
             saveDataToGAS(alertSuccess);
         }
 
@@ -745,7 +740,336 @@
             if (tab === 'projects') renderMissions();
         }
 
-        function renderDashboard() {
+        window.renderMissions = function() {
+            try {
+                const container = document.getElementById('projectList');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                const searchInputEl = document.getElementById('searchInput');
+                const searchKw = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+                const filterStatusEl = document.getElementById('filterStatus');
+                const filterStat = filterStatusEl ? filterStatusEl.value : 'active';
+                const now = new Date(new Date().setHours(0,0,0,0));
+                
+                const warningEl = document.getElementById('archiveWarning');
+                if(warningEl) {
+                    if(filterStat === 'archived') warningEl.classList.remove('hidden');
+                    else warningEl.classList.add('hidden');
+                }
+
+                let visibleCount = 0;
+                
+                if (db.missions && Array.isArray(db.missions) && db.missions.length > 0) {
+                    db.missions.forEach((mission, mIndex) => {
+                        let matchSearch = searchKw === '' || (mission.name && mission.name.toLowerCase().includes(searchKw));
+                        
+                        let visiblePackages = [];
+                        if (mission.packages && Array.isArray(mission.packages)) {
+                            mission.packages.forEach(p => { if (!p.owner) p.owner = mission.owner; });
+
+                            visiblePackages = mission.packages.filter(pkg => {
+                                if (filterStat === 'active' && pkg.archived) return false;
+                                if (filterStat === 'archived' && !pkg.archived) return false;
+                                
+                                let matchSearchPkg = searchKw === '' || 
+                                                     (mission.name && mission.name.toLowerCase().includes(searchKw)) || 
+                                                     (pkg.name && pkg.name.toLowerCase().includes(searchKw));
+                                if (!matchSearchPkg) return false;
+
+                                let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
+                                if (currentUser.role === 'user' && !isPkgOwner) return false;
+
+                                return true;
+                            });
+                        }
+
+                        let showMission = false;
+                        let isMissionOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mission.owner;
+                        
+                        if (visiblePackages.length > 0) {
+                            showMission = true;
+                        } else if (filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch) {
+                            if (currentUser.role !== 'user' || isMissionOwner) showMission = true;
+                        }
+
+                        if (!showMission) return;
+                        
+                        visibleCount++;
+                        
+                        let isOwnerAdmin = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mission.owner;
+                        let btnCompleteMission = "";
+                        
+                        if (isOwnerAdmin && currentUser.role !== 'leader') {
+                            if (mission.completed) {
+                                btnCompleteMission = `<button onclick="toggleMissionComplete(${mIndex})" class="bg-emerald-600 border-2 border-emerald-600 text-white hover:bg-emerald-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-md transition flex items-center gap-2"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</button>`;
+                            } else {
+                                btnCompleteMission = `<button onclick="toggleMissionComplete(${mIndex})" class="bg-white border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="far fa-circle"></i> Chốt Nhiệm vụ</button>`;
+                            }
+                        } else if (mission.completed) {
+                            btnCompleteMission = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 border border-emerald-200"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`;
+                        }
+
+                        let btnPrintMission = `<button onclick="printMission(${mIndex})" class="bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-print"></i> In NV</button>`;
+
+                        let packagesHtml = "";
+                        if (visiblePackages.length === 0) {
+                            packagesHtml = `<div class="p-4 text-center text-sm text-gray-500 italic">Nhiệm vụ này chưa có gói thầu phù hợp bộ lọc.</div>`;
+                        } else {
+                            visiblePackages.forEach((pkg) => {
+                                let pkgIndex = mission.packages.indexOf(pkg);
+                                let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
+                                let canEditPkg = isPkgOwner && currentUser.role !== 'leader';
+                                
+                                const finalDate = pkg.steps && pkg.steps.length > 0 ? formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
+                                
+                                let stepsHtml = "";
+                                if (pkg.steps && Array.isArray(pkg.steps)) {
+                                    stepsHtml = pkg.steps.map((step, sIndex) => {
+                                        let isOverdue = false;
+                                        let isWarning = false;
+                                        if (!pkg.completed && !mission.completed && !step.completed) {
+                                            isOverdue = new Date(step.deadline) < now;
+                                            if(!isOverdue) {
+                                                isWarning = ((new Date(step.deadline) - now)/(1000*3600*24) <= 2);
+                                            }
+                                        }
+                                        
+                                        let dateColor = 'text-gray-700'; let bgRow = '';
+                                        if(step.completed) { dateColor = 'text-green-600'; }
+                                        else if(isOverdue) { dateColor = 'text-red-600 font-bold'; bgRow = 'bg-red-50'; }
+                                        else if(isWarning) { dateColor = 'text-orange-500 font-bold'; bgRow = 'bg-orange-50'; }
+
+                                        // Sử dụng replace để chống lỗi dấu ngoặc kép khi nhập tên công việc
+                                        let safeStepName = step.name ? step.name.replace(/"/g, '&quot;') : '';
+                                        
+                                        const nameHtml = canEditPkg ? 
+                                            `<input type="text" value="${safeStepName}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'name', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm ${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'}">` : 
+                                            `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-sm">${safeStepName}</div>`;
+                                            
+                                        const dateHtml = canEditPkg ? 
+                                            `<div class="relative inline-flex items-center group cursor-pointer" onclick="try{this.querySelector('input[type=date]').showPicker()}catch(e){}">
+                                                <span class="text-sm ${dateColor} whitespace-nowrap border-b border-dashed border-gray-400 pb-0.5">${formatDate(step.deadline)} <i class="fas fa-pencil-alt text-gray-300 ml-1"></i></span>
+                                                <input type="date" value="${formatForDateInput(step.deadline)}" onchange="updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'deadline', this.value)" class="absolute w-full h-full opacity-0 cursor-pointer left-0 top-0 pointer-events-none">
+                                            </div>` : 
+                                            `<span class="text-sm ${dateColor} whitespace-nowrap">${formatDate(step.deadline)}</span>`;
+                                        
+                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-white text-blue-700 text-xs px-2 py-0.5 rounded border border-blue-200 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-";
+                                        
+                                        let linksDisplayHtml = "";
+                                        if (step.links && Array.isArray(step.links)) {
+                                            linksDisplayHtml = step.links.map((l, lIndex) => {
+                                                return `<div class="inline-flex items-center gap-1 bg-white text-blue-700 border border-blue-200 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm">
+                                                    <a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[120px]" title="${l.url}"><i class="fas fa-link mr-1"></i>${l.name}</a>
+                                                    ${canEditPkg ? `<button onclick="removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : ''}
+                                                </div>`;
+                                            }).join('');
+                                        }
+                                        
+                                        const linkInputHtml = canEditPkg ? `<div class="mt-1"><button onclick="toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><i class="fas fa-plus"></i> Gắn file</button><div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white rounded shadow-lg absolute z-10 w-48"><input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên hiển thị" class="w-full mb-1 p-1 border rounded text-xs"><input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="URL" class="w-full mb-1 p-1 border rounded text-xs"><button onclick="addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Lưu</button></div></div>` : '';
+                                        
+                                        return `<tr class="border-b transition hover:bg-gray-100 ${bgRow}">
+                                            <td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${canEditPkg?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${!canEditPkg?'disabled':''} onchange="updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)"></td>
+                                            <td class="p-2 align-top">${nameHtml}${step.completedBy?`<div class="text-[10px] text-green-600 mt-1"><i class="fas fa-check"></i> ${step.completedBy}</div>`:''}</td>
+                                            <td class="p-2 text-center align-top">${timeBudget}</td>
+                                            <td class="p-2 align-top">${dateHtml}</td>
+                                            <td class="p-2 align-top"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>
+                                            ${canEditPkg ? `<td class="p-2 text-center align-top"><button onclick="deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button></td>` : ''}
+                                        </tr>`;
+                                    }).join('');
+                                }
+
+                                let savStr = "";
+                                if(pkg.estimatePrice && pkg.winningPrice) {
+                                    let sav = pkg.estimatePrice - pkg.winningPrice;
+                                    let pct = ((sav/pkg.estimatePrice)*100).toFixed(2);
+                                    savStr = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-bold shadow-sm ml-2" title="Tiết kiệm: ${sav.toLocaleString('vi-VN')} đ">TK: ${pct}%</span>`;
+                                }
+
+                                let archiveBtn = "";
+                                if (currentUser.role === 'admin' && currentUser.role !== 'leader') {
+                                    if (pkg.archived) {
+                                        archiveBtn = `<button onclick="archivePackage(${mIndex}, ${pkgIndex})" class="text-orange-500 hover:bg-orange-50 px-2 py-1.5 rounded border border-orange-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-trash-restore"></i> Khôi phục</button>`;
+                                    } else {
+                                        archiveBtn = `<button onclick="archivePackage(${mIndex}, ${pkgIndex})" class="text-gray-500 hover:bg-gray-100 px-2 py-1.5 rounded border border-gray-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-archive"></i> Lưu trữ</button>`;
+                                    }
+                                }
+
+                                let btnCompletePkg = "";
+                                if (canEditPkg) {
+                                    if (pkg.completed) {
+                                        btnCompletePkg = `<button onclick="togglePackageComplete(${mIndex}, ${pkgIndex})" class="bg-emerald-500 border-2 border-emerald-500 text-white hover:bg-emerald-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition flex items-center gap-1"><i class="fas fa-check-circle"></i> Đã xong</button>`;
+                                    } else {
+                                        btnCompletePkg = `<button onclick="togglePackageComplete(${mIndex}, ${pkgIndex})" class="bg-white border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 px-3 py-1 rounded-full text-xs font-bold shadow-sm transition flex items-center gap-1"><i class="far fa-circle"></i> Chốt Gói</button>`;
+                                    }
+                                } else if (pkg.completed) {
+                                    btnCompletePkg = `<span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-200"><i class="fas fa-check-circle"></i> Đã xong</span>`;
+                                }
+
+                                let headerBg = pkg.archived ? 'bg-gray-100' : (pkg.completed ? 'bg-emerald-50/50' : 'bg-blue-50/50');
+                                let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
+
+                                packagesHtml += `
+                                    <div class="bg-white rounded border border-gray-200 border-l-4 ${borderColor} overflow-visible mb-4 shadow-sm relative">
+                                        <div class="${headerBg} px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b ${pkg.archived ? 'border-gray-200' : 'border-blue-100'} gap-3">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <h4 class="font-bold text-[14px] ${pkg.archived ? 'text-gray-600 line-through' : (pkg.completed ? 'text-emerald-800' : 'text-blue-900')}">
+                                                        <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
+                                                        ${pkg.name}
+                                                    </h4>
+                                                    ${btnCompletePkg}
+                                                    ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''} ${savStr}
+                                                </div>
+                                                <div class="text-[11px] text-gray-600 mt-1.5">
+                                                    <span class="inline-block bg-white border border-gray-300 text-gray-700 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${pkg.processTitle}</span>
+                                                    Ký HĐ dự kiến: <span class="font-semibold text-gray-800">${finalDate}</span> | Chuyên viên: <b>${pkg.owner}</b>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                ${archiveBtn}
+                                                ${canEditPkg || currentUser.role === 'admin' ? `<button onclick="openFinanceLogModal(${mIndex}, ${pkgIndex})" class="text-blue-600 hover:bg-blue-50 px-2 py-1.5 rounded border border-blue-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-history"></i> Log/TC</button>` : ''}
+                                                <button onclick="exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 hover:bg-green-50 px-2 py-1.5 rounded border border-green-200 bg-white text-xs font-medium shadow-sm"><i class="fas fa-file-excel"></i> Xuất</button>
+                                                <button onclick="printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 hover:bg-gray-100 px-2 py-1.5 rounded border border-gray-300 bg-white text-xs font-medium shadow-sm"><i class="fas fa-print"></i> In</button>
+                                                ${currentUser.role === 'admin' ? `<button onclick="deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 hover:bg-red-50 px-2 py-1.5 rounded border border-red-200 bg-white shadow-sm"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
+                                            <table class="w-full text-left border-collapse text-sm">
+                                                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-20 text-center">Định mức</th><th class="p-2 w-28">Hạn chót</th><th class="p-2 min-w-[200px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-8"></th>' : ''}</tr>
+                                                </thead>
+                                                <tbody>${stepsHtml} ${canEditPkg ? `<tr><td colspan="6" class="p-1.5 text-center bg-gray-50"><button onclick="addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 text-xs font-medium"><i class="fas fa-plus"></i> Thêm việc</button></td></tr>` : ''}</tbody>
+                                            </table>
+                                        </div>
+                                    </div>`;
+                        });
+                    }
+
+                    let docsHtml = "";
+                    if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
+                        docsHtml = `<div class="mt-3 bg-white p-2 rounded border border-indigo-100 text-xs shadow-sm"><span class="font-semibold text-indigo-800">Căn cứ chung:</span><span class="text-gray-600 ml-1">${db.regulatoryDocs.map(d => `${d.link ? `<a href="${d.link}" target="_blank" class="text-blue-600 hover:underline">` : ''}<b>${d.number}</b>${d.link ? `</a>` : ''}`).join(', ')}</span></div>`;
+                    }
+
+                    let mBorderColor = mission.completed ? 'border-emerald-500' : 'border-indigo-300';
+                    let mBgColor = mission.completed ? 'bg-emerald-50' : 'bg-indigo-50';
+
+                    container.innerHTML += `
+                        <div class="mission-block border-2 ${mBorderColor} rounded-xl bg-white overflow-hidden shadow-sm mb-6">
+                            <div class="${mBgColor} p-4 border-b border-indigo-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-lg font-bold ${mission.completed ? 'text-emerald-800' : 'text-indigo-900'}">
+                                        <i class="fas fa-folder text-indigo-500 mr-2"></i>Nhiệm vụ: ${mission.name}
+                                    </h2>
+                                    <p class="text-sm text-indigo-700 mt-1">
+                                        <i class="far fa-clock mr-1"></i>Hạn tổng: <b>${formatDate(mission.deadline)}</b> | <i class="far fa-user mr-1"></i>Owner: <b>${mission.owner}</b>
+                                    </p>
+                                    ${docsHtml}
+                                </div>
+                                <div class="flex flex-wrap gap-2 shrink-0 items-center">
+                                    ${btnCompleteMission}
+                                    ${btnPrintMission}
+                                    ${isOwnerAdmin && currentUser.role !== 'leader' ? `
+                                    <button onclick="openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-sm transition"><i class="fas fa-plus"></i> Gói thầu</button>
+                                    <button onclick="deleteMission(${mIndex})" class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-full text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50/50 ${mission.completed ? 'hidden' : ''}">${packagesHtml}</div>
+                        </div>`;
+                });
+            }
+
+            if (visibleCount === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+                        <i class="fas fa-box-open text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp để hiển thị.</p>
+                        <p class="text-sm text-gray-400 mt-2">Nếu bạn bị mất dữ liệu, hãy đăng xuất, đăng nhập bằng tài khoản <b>Admin</b><br>và vào tab <b>Khôi phục Dữ liệu</b> để lấy lại bản lưu gần nhất.</p>
+                    </div>`;
+            }
+        } catch (e) {
+            console.error("Lỗi Render Nhiệm vụ:", e);
+            alert("Lỗi khi vẽ giao diện Nhiệm vụ, xem Console (F12) để biết chi tiết.");
+        }
+        };
+
+        // --- IN ẤN ---
+        window.printMission = function(mIndex) {
+            const mission = db.missions[mIndex];
+            const today = new Date();
+            const dateStr = `Ngày in: ${today.getDate().toString().padStart(2,'0')}/${(today.getMonth()+1).toString().padStart(2,'0')}/${today.getFullYear()}`;
+            
+            let html = `<html><head><title>In Nhiệm vụ - ${mission.name}</title><style>
+                body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; }
+                h1 { text-align: center; font-size: 20px; text-transform: uppercase; margin-bottom: 10px; }
+                .mission-info { font-size: 15px; margin-bottom: 20px; }
+                h2 { font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 5px; color: #1e3a8a; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+                th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; }
+                th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
+                .text-center { text-align: center; } 
+                .status-done { font-weight: bold; color: #166534; }
+            </style></head><body>`;
+            
+            html += `<h1>BÁO CÁO TIẾN ĐỘ NHIỆM VỤ</h1>`;
+            html += `<div class="mission-info">
+                <b>Tên nhiệm vụ:</b> ${mission.name}<br>
+                <b>Người chủ trì:</b> ${mission.owner}<br>
+                <b>Hạn hoàn thành:</b> ${formatDate(mission.deadline)}<br>
+                <b>Trạng thái:</b> ${mission.completed ? 'Đã hoàn thành' : 'Đang thực hiện'}
+            </div>`;
+
+            if (!mission.packages || mission.packages.length === 0) {
+                html += `<p style="font-style: italic;">Chưa có gói thầu nào trong nhiệm vụ này.</p>`;
+            } else {
+                let hasVisiblePkg = false;
+                mission.packages.forEach((pkg, pIdx) => {
+                    if (pkg.archived) return; 
+                    
+                    let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
+                    if (currentUser.role === 'user' && !isPkgOwner) return;
+
+                    hasVisiblePkg = true;
+                    html += `<h2>Gói thầu ${pIdx + 1}: ${pkg.name}</h2>`;
+                    html += `<p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${pkg.processTitle} | Phụ trách: ${pkg.owner}</i></p>`;
+                    
+                    html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th></tr></thead><tbody>`;
+                    
+                    if (pkg.steps && pkg.steps.length > 0) {
+                        pkg.steps.forEach((step, sIdx) => {
+                            let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
+                            const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
+                            html += `<tr>
+                                <td class="text-center">${sIdx + 1}</td>
+                                <td>${step.name}</td>
+                                <td class="text-center">${timeBudget}</td>
+                                <td class="text-center">${formatDate(step.deadline)}</td>
+                                <td class="text-center">${status}</td>
+                            </tr>`;
+                        });
+                    } else {
+                        html += `<tr><td colspan="5" class="text-center" style="font-style: italic;">Chưa có công việc</td></tr>`;
+                    }
+                    html += `</tbody></table>`;
+                });
+
+                if(!hasVisiblePkg) {
+                    html += `<p style="font-style: italic;">Không có gói thầu nào bạn được phép xem trong nhiệm vụ này.</p>`;
+                }
+            }
+            
+            html += `<div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 13px;">${dateStr}</div></body></html>`;
+
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
+            printWindow.document.write(html); 
+            printWindow.document.close(); 
+            printWindow.focus(); 
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
+        };
+
+        window.renderDashboard = function() {
             let activeMs = 0, overdue = 0, completedPkgs = 0, totalSav = 0;
             const now = new Date(new Date().setHours(0,0,0,0));
             globalOverdueTasksList = []; 
@@ -848,7 +1172,7 @@
 
             document.getElementById('dashMissionsTable').innerHTML = missionsHTML || `<tr><td colspan="3" class="p-6 text-center text-gray-400 italic">Chưa có nhiệm vụ đang thực hiện.</td></tr>`;
             document.getElementById('dashOverdueTable').innerHTML = overdueHTML || `<tr><td colspan="3" class="p-6 text-center text-emerald-600 font-medium italic"><i class="fas fa-check-circle mr-1"></i>Không có công việc nào trễ hạn.</td></tr>`;
-        }
+        };
 
         window.exportGlobalExcel = function() {
             let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>`;
@@ -980,81 +1304,6 @@
             printWindow.document.write(html); printWindow.document.close(); printWindow.focus(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
         };
 
-        window.printMission = function(mIndex) {
-            const mission = db.missions[mIndex];
-            const today = new Date();
-            const dateStr = `Ngày in: ${today.getDate().toString().padStart(2,'0')}/${(today.getMonth()+1).toString().padStart(2,'0')}/${today.getFullYear()}`;
-            
-            let html = `<html><head><title>In Nhiệm vụ - ${mission.name}</title><style>
-                body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; }
-                h1 { text-align: center; font-size: 20px; text-transform: uppercase; margin-bottom: 10px; }
-                .mission-info { font-size: 15px; margin-bottom: 20px; }
-                h2 { font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 5px; color: #1e3a8a; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-                th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; }
-                th { background-color: #f2f2f2; font-weight: bold; text-align: center; }
-                .text-center { text-align: center; } 
-                .status-done { font-weight: bold; color: #166534; }
-            </style></head><body>`;
-            
-            html += `<h1>BÁO CÁO TIẾN ĐỘ NHIỆM VỤ</h1>`;
-            html += `<div class="mission-info">
-                <b>Tên nhiệm vụ:</b> ${mission.name}<br>
-                <b>Người chủ trì:</b> ${mission.owner}<br>
-                <b>Hạn hoàn thành:</b> ${formatDate(mission.deadline)}<br>
-                <b>Trạng thái:</b> ${mission.completed ? 'Đã hoàn thành' : 'Đang thực hiện'}
-            </div>`;
-
-            if (!mission.packages || mission.packages.length === 0) {
-                html += `<p style="font-style: italic;">Chưa có gói thầu nào trong nhiệm vụ này.</p>`;
-            } else {
-                let hasVisiblePkg = false;
-                mission.packages.forEach((pkg, pIdx) => {
-                    if (pkg.archived) return; 
-                    
-                    // Kiểm tra quyền in chi tiết gói
-                    let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
-                    if (currentUser.role === 'user' && !isPkgOwner) return;
-
-                    hasVisiblePkg = true;
-                    html += `<h2>Gói thầu ${pIdx + 1}: ${pkg.name}</h2>`;
-                    html += `<p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${pkg.processTitle} | Phụ trách: ${pkg.owner}</i></p>`;
-                    
-                    html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th></tr></thead><tbody>`;
-                    
-                    if (pkg.steps && pkg.steps.length > 0) {
-                        pkg.steps.forEach((step, sIdx) => {
-                            let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
-                            const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
-                            html += `<tr>
-                                <td class="text-center">${sIdx + 1}</td>
-                                <td>${step.name}</td>
-                                <td class="text-center">${timeBudget}</td>
-                                <td class="text-center">${formatDate(step.deadline)}</td>
-                                <td class="text-center">${status}</td>
-                            </tr>`;
-                        });
-                    } else {
-                        html += `<tr><td colspan="5" class="text-center" style="font-style: italic;">Chưa có công việc</td></tr>`;
-                    }
-                    html += `</tbody></table>`;
-                });
-
-                if(!hasVisiblePkg) {
-                    html += `<p style="font-style: italic;">Không có gói thầu nào bạn được phép xem trong nhiệm vụ này.</p>`;
-                }
-            }
-            
-            html += `<div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 13px;">${dateStr}</div></body></html>`;
-
-            const printWindow = window.open('', '_blank');
-            if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
-            printWindow.document.write(html); 
-            printWindow.document.close(); 
-            printWindow.focus(); 
-            setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
-        };
-
         window.printProject = function(mIndex, pkgIndex) {
             const mission = db.missions[mIndex]; const pkg = mission.packages[pkgIndex]; const processLabel = pkg.processTitle || "Quy trình đấu thầu";
             let html = `<html><head><title>In Tiến độ - ${pkg.name}</title><style>
@@ -1093,7 +1342,7 @@
             printWindow.document.write(html); printWindow.document.close(); printWindow.focus(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
         };
 
-        // --- CÁC HÀM TIỆN ÍCH ---
+        // --- CÁC HÀM TIỆN ÍCH KHÁC ---
         function addCustomDays(dObj, days, type) { let r = new Date(dObj); if (type === 'workday') { let a = 0; while (a < days) { r.setDate(r.getDate() + 1); if (r.getDay() !== 0 && r.getDay() !== 6) a++; } } else { r.setDate(r.getDate() + days); } return r; }
         function formatDate(dIn) { if (!dIn) return ''; let dt = dIn.includes('T') ? new Date(dIn) : new Date(dIn.split('-')[0], dIn.split('-')[1]-1, dIn.split('-')[2]); return `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear()}`; }
         function formatForDateInput(dIn) { if (!dIn) return ''; if (!dIn.includes('T')) return dIn; let dt = new Date(dIn); return `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}`; }
@@ -1145,10 +1394,7 @@
         window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked) { 
             let m = db.missions[mIndex];
             let p = m.packages[pkgIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) {
-                // UI disables it, but block at backend level just in case
-                return alert("Bạn không có quyền sửa!");
-            }
+            if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!");
             p.steps[stepIndex].completed = checked; 
             p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; 
             logActivity(mIndex, pkgIndex, `${checked ? 'Hoàn thành' : 'Bỏ hoàn thành'} bước ${stepIndex+1}`); 
@@ -1157,7 +1403,10 @@
         };
         
         window.updateProjStep = function(mIndex, pkgIndex, sIndex, field, value) { 
-            let pkg = db.missions[mIndex].packages[pkgIndex]; 
+            let m = db.missions[mIndex];
+            let pkg = m.packages[pkgIndex];
+            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!");
+            
             if (field === 'deadline') { 
                 if (!value) return; 
                 pkg.steps[sIndex].deadline = new Date(value).toISOString(); 
@@ -1174,9 +1423,9 @@
             saveDataToGAS(false); 
         };
         
-        window.addProjStep = function(mIndex, pkgIndex) { let pkg = db.missions[mIndex].packages[pkgIndex]; let newDeadline = new Date(); if (pkg.steps.length > 0) { newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); newDeadline.setDate(newDeadline.getDate() + 1); } pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" }); logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); renderMissions(); saveDataToGAS(false); };
+        window.addProjStep = function(mIndex, pkgIndex) { let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!"); let newDeadline = new Date(); if (pkg.steps.length > 0) { newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); newDeadline.setDate(newDeadline.getDate() + 1); } pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" }); logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); renderMissions(); saveDataToGAS(false); };
         window.toggleLinkForm = function(mIndex, pkgIndex, sIndex) { document.getElementById(`link_form_${mIndex}_${pkgIndex}_${sIndex}`).classList.toggle('hidden'); };
-        window.addLink = function(mIndex, pkgIndex, sIndex) { const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); if (!u) return alert("Vui lòng nhập đường dẫn hợp lệ!"); let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex]; if (!step.links) step.links = []; step.links.push({ name: n || "Tài liệu", url: u }); logActivity(mIndex, pkgIndex, `Gắn tài liệu vào bước ${sIndex+1}`); renderMissions(); saveDataToGAS(false); };
+        window.addLink = function(mIndex, pkgIndex, sIndex) { let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!"); const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); if (!u) return alert("Vui lòng nhập đường dẫn hợp lệ!"); let step = pkg.steps[sIndex]; if (!step.links) step.links = []; step.links.push({ name: n || "Tài liệu", url: u }); logActivity(mIndex, pkgIndex, `Gắn tài liệu vào bước ${sIndex+1}`); renderMissions(); saveDataToGAS(false); };
 
         window.openProfileModal = function() { document.getElementById('profileFullname').value = currentUser.fullname; document.getElementById('profilePassword').value = ''; document.getElementById('profileModal').classList.remove('hidden'); };
         window.closeProfileModal = function() { document.getElementById('profileModal').classList.add('hidden'); };
@@ -1189,7 +1438,24 @@
         window.createPackage = function() { const mIndex = currentMissionIndexForNewPackage; const name = document.getElementById('projName').value.trim(); const startDateStr = document.getElementById('projStartDate').value; const typeKey = document.getElementById('projType').value; const owner = document.getElementById('pkgOwner').value; if (!name || !startDateStr) return alert("Vui lòng điền đủ thông tin gói thầu!"); let currentDt = new Date(startDateStr); let steps = db.processTemplates[typeKey].steps.map(tmpl => { currentDt = addCustomDays(currentDt, tmpl.days, tmpl.dayType); return { name: tmpl.name, deadline: currentDt.toISOString(), completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: tmpl.dayType }; }); db.missions[mIndex].packages.push({ id: Date.now(), name: name, processTitle: db.processTemplates[typeKey].title, owner: owner, estimatePrice: 0, winningPrice: 0, archived: false, completed: false, logs: [`Khởi tạo gói thầu`], steps: steps }); closeCreatePackageModal(); document.getElementById('projName').value = ''; renderMissions(); saveDataToGAS(false); };
         window.openFinanceLogModal = function(mIndex, pIndex) { currentFinanceMIndex = mIndex; currentFinancePIndex = pIndex; const pkg = db.missions[mIndex].packages[pIndex]; document.getElementById('finEstimate').value = pkg.estimatePrice ? pkg.estimatePrice.toLocaleString('vi-VN') : ''; document.getElementById('finWinning').value = pkg.winningPrice ? pkg.winningPrice.toLocaleString('vi-VN') : ''; const logBox = document.getElementById('activityLogs'); logBox.innerHTML = ''; if (pkg.logs && pkg.logs.length > 0) { pkg.logs.forEach(l => logBox.innerHTML += `<div>${l}</div>`); } else { logBox.innerHTML = '<div class="italic text-gray-400">Chưa có lịch sử.</div>'; } document.getElementById('financeLogModal').classList.remove('hidden'); };
         window.closeFinanceLogModal = function() { document.getElementById('financeLogModal').classList.add('hidden'); };
-        window.saveFinance = function() { let eVal = parseInt(document.getElementById('finEstimate').value.replace(/[^0-9]/g, '')) || 0; let wVal = parseInt(document.getElementById('finWinning').value.replace(/[^0-9]/g, '')) || 0; let pkg = db.missions[currentFinanceMIndex].packages[currentFinancePIndex]; if (pkg.estimatePrice !== eVal || pkg.winningPrice !== wVal) { pkg.estimatePrice = eVal; pkg.winningPrice = wVal; logActivity(currentFinanceMIndex, currentFinancePIndex, `Cập nhật tài chính`); saveDataToGAS(false); renderMissions(); } closeFinanceLogModal(); };
+        window.saveFinance = function() { let eVal = parseInt(document.getElementById('finEstimate').value.replace(/[^0-9]/g, '')) || 0; let wVal = parseInt(document.getElementById('finWinning').value.replace(/[^0-9]/g, '')) || 0; let m = db.missions[currentFinanceMIndex]; let pkg = m.packages[currentFinancePIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!"); if (pkg.estimatePrice !== eVal || pkg.winningPrice !== wVal) { pkg.estimatePrice = eVal; pkg.winningPrice = wVal; logActivity(currentFinanceMIndex, currentFinancePIndex, `Cập nhật tài chính`); saveDataToGAS(false); renderMissions(); } closeFinanceLogModal(); };
+        
+        // ADMIN CONFIGS
+        window.populateProcessDropdowns = function() { document.getElementById('projType').innerHTML = ''; document.getElementById('configProcessSelector').innerHTML = ''; for (const key in db.processTemplates) { document.getElementById('projType').innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`; document.getElementById('configProcessSelector').innerHTML += `<option value="${key}">${db.processTemplates[key].title}</option>`; } };
+        window.renderConfig = function() { const type = document.getElementById('configProcessSelector').value; const c = document.getElementById('configSteps'); c.innerHTML = ''; if (!type || !db.processTemplates[type]) return; db.processTemplates[type].steps.forEach((s, i) => { c.innerHTML += `<div class="flex items-center gap-2 bg-white p-2.5 rounded border border-gray-200 shadow-sm drag-item" data-index="${i}"><div class="cursor-move text-gray-400 hover:text-blue-500 px-1 drag-handle"><i class="fas fa-grip-vertical"></i></div><span class="font-bold w-6 text-gray-400 text-sm">${i + 1}.</span><input type="text" value="${s.name}" onchange="updateConfigStep('${type}', ${i}, 'name', this.value)" class="flex-1 border-b focus:border-blue-500 outline-none text-sm"><input type="number" value="${s.days}" onchange="updateConfigStep('${type}', ${i}, 'days', this.value)" class="w-16 border rounded text-center outline-none text-sm"><select onchange="updateConfigStep('${type}', ${i}, 'dayType', this.value)" class="border-b outline-none text-sm p-1"><option value="calendar" ${s.dayType !== 'workday' ? 'selected' : ''}>Ngày lịch</option><option value="workday" ${s.dayType === 'workday' ? 'selected' : ''}>Ngày LV</option></select><button onclick="removeConfigStep('${type}', ${i})" class="text-gray-400 hover:text-red-500 px-2"><i class="fas fa-times"></i></button></div>`; }); if (configSortableInstance) configSortableInstance.destroy(); configSortableInstance = Sortable.create(c, { handle: '.drag-handle', onEnd: function(evt) { if(evt.oldIndex!==evt.newIndex){ const arr=db.processTemplates[type].steps; arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]); renderConfig(); saveDataToGAS(false); } } }); };
+        window.addNewProcessTemplate = function() { if(currentUser.role!=='admin') return; const t=document.getElementById('newProcessTitle').value.trim(); if(t){ const id='proc_'+Date.now(); db.processTemplates[id]={title:t, steps:[]}; document.getElementById('newProcessTitle').value=''; populateProcessDropdowns(); document.getElementById('configProcessSelector').value=id; renderConfig(); saveDataToGAS(false); } };
+        window.deleteProcessTemplate = function() { if(currentUser.role!=='admin') return; const type=document.getElementById('configProcessSelector').value; if(type && confirm("Xóa?")){ delete db.processTemplates[type]; populateProcessDropdowns(); renderConfig(); saveDataToGAS(false); } };
+        window.updateConfigStep = function(k, i, f, v) { if(currentUser.role!=='admin') return; db.processTemplates[k].steps[i][f]=f==='days'?parseInt(v)||0:v; saveDataToGAS(false); };
+        window.removeConfigStep = function(k, i) { if(currentUser.role!=='admin') return; db.processTemplates[k].steps.splice(i, 1); renderConfig(); saveDataToGAS(false); };
+        window.addConfigStep = function() { if(currentUser.role!=='admin') return; const type=document.getElementById('configProcessSelector').value; const n=document.getElementById('newStepName').value.trim(); const d=parseInt(document.getElementById('newStepDays').value); if(n && !isNaN(d)){ db.processTemplates[type].steps.push({name:n, days:d, dayType:document.getElementById('newStepDayType').value}); document.getElementById('newStepName').value=''; document.getElementById('newStepDays').value=''; renderConfig(); saveDataToGAS(false); } else alert("Nhập đủ tên bước và số ngày!"); };
+        window.renderDocs = function() { const b = document.getElementById('docsTableBody'); b.innerHTML = ''; if(!db.regulatoryDocs) db.regulatoryDocs=[]; db.regulatoryDocs.forEach((d, i) => { b.innerHTML += `<tr><td class="p-3"><input value="${d.number}" onchange="updateDoc(${i}, 'number', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3"><input value="${d.title}" onchange="updateDoc(${i}, 'title', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3"><input type="url" value="${d.link||''}" onchange="updateDoc(${i}, 'link', this.value)" class="w-full border-b text-sm outline-none"></td><td class="p-3 text-center"><button onclick="deleteDoc(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`; }); };
+        window.addNewDoc = function() { if(currentUser.role!=='admin') return; const num=document.getElementById('newDocNumber').value.trim(), tit=document.getElementById('newDocTitle').value.trim(), lnk=document.getElementById('newDocLink').value.trim(); if(num&&tit){ db.regulatoryDocs.push({number:num, title:tit, link:lnk}); document.getElementById('newDocNumber').value=''; document.getElementById('newDocTitle').value=''; document.getElementById('newDocLink').value=''; renderDocs(); saveDataToGAS(false); } };
+        window.updateDoc = function(i, f, v) { if(currentUser.role!=='admin') return; db.regulatoryDocs[i][f]=v; saveDataToGAS(false); };
+        window.renderUsers = function() { const b = document.getElementById('userTableBody'); b.innerHTML = ''; db.users.forEach((u, i) => { b.innerHTML += `<tr><td class="p-3">${u.username}</td><td class="p-3">${u.fullname}</td><td class="p-3">${u.role}</td><td class="p-3 text-right"><button onclick="openEditUserModal(${i})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button>${u.username!=='admin'?`<button onclick="deleteUser(${i})" class="text-red-500"><i class="fas fa-trash"></i></button>`:''}</td></tr>`; }); };
+        window.addNewUser = function() { if(currentUser.role!=='admin') return; const u=document.getElementById('newUserUsername').value.trim(), p=document.getElementById('newUserPassword').value.trim(), f=document.getElementById('newUserFullname').value.trim(), r=document.getElementById('newUserRole').value; if(u&&p&&f){ if(db.users.some(usr=>usr.username===u)) return alert("Tên đăng nhập đã tồn tại!"); db.users.push({username:u, password:p, fullname:f, role:r}); document.getElementById('newUserUsername').value=''; document.getElementById('newUserPassword').value=''; document.getElementById('newUserFullname').value=''; renderUsers(); saveDataToGAS(false); } else alert("Vui lòng điền đủ thông tin!"); };
+        window.openEditUserModal = function(i) { if(currentUser.role!=='admin') return; currentEditUserIndex=i; const u=db.users[i]; document.getElementById('editUserUsername').value=u.username; document.getElementById('editUserFullname').value=u.fullname; document.getElementById('editUserRole').value=u.role; document.getElementById('editUserPassword').value=''; document.getElementById('editUserRole').disabled=(u.username==='admin'); document.getElementById('editUserModal').classList.remove('hidden'); };
+        window.closeEditUserModal = function() { document.getElementById('editUserModal').classList.add('hidden'); };
+        window.saveEditUser = function() { if(currentUser.role!=='admin') return; const f=document.getElementById('editUserFullname').value.trim(), p=document.getElementById('editUserPassword').value.trim(), r=document.getElementById('editUserRole').value; if(f){ db.users[currentEditUserIndex].fullname=f; if(db.users[currentEditUserIndex].username!=='admin') db.users[currentEditUserIndex].role=r; if(p) db.users[currentEditUserIndex].password=p; if(currentUser.username===db.users[currentEditUserIndex].username) currentUser=db.users[currentEditUserIndex]; closeEditUserModal(); renderUsers(); saveDataToGAS(false); renderUserBadge(); } else alert("Vui lòng nhập Tên hiển thị!"); };
 
     </script>
 </body>
