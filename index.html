@@ -14,9 +14,7 @@
     <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-200 px-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600">
             <div class="text-center mb-6">
-                <!-- Logo SCE từ GitHub -->
                 <img src="Logo (tách nền sát cạnh).png" alt="Logo SCE" class="h-20 w-auto mx-auto mb-4 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png'; this.classList.add('opacity-50', 'h-16');">
-                
                 <h2 class="text-2xl font-bold text-blue-900 tracking-tight">HỆ THỐNG ĐẤU THẦU</h2>
                 <p class="text-sm text-gray-500 mt-1">Quản trị Tiến độ & Dữ liệu</p>
             </div>
@@ -47,7 +45,6 @@
 
     <!-- Màn hình Ứng dụng chính -->
     <div id="appScreen" class="hidden">
-        <!-- Header -->
         <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div>
@@ -87,7 +84,7 @@
                         <p class="text-sm text-gray-500 mt-1" id="dashCurrentDate"></p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="window.printDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2"><i class="fas fa-print"></i> In Báo cáo Giao ban</button>
+                        <button onclick="window.printDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2"><i class="fas fa-print"></i> In Báo cáo</button>
                         <button onclick="window.exportGlobalExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2"><i class="fas fa-file-excel"></i> Xuất Excel</button>
                     </div>
                 </div>
@@ -249,7 +246,6 @@
                             <i class="fas fa-sync-alt"></i> Tải danh sách Bản sao lưu
                         </button>
                     </div>
-
                     <div class="overflow-x-auto bg-gray-50 rounded border border-gray-200 mt-4">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
@@ -270,7 +266,75 @@
         </div>
     </div>
 
-    <!-- ==================== CÁC MODAL HỆ THỐNG ==================== -->
+    <!-- ==================== CÁC MODAL HỆ THỐNG (BẢNG THÔNG TIN MỚI) ==================== -->
+    
+    <!-- Modal Chỉnh sửa Nhiệm vụ -->
+    <div id="editMissionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h2 class="text-lg font-bold text-indigo-800 mb-4 pb-2 border-b"><i class="fas fa-edit mr-2"></i>Chỉnh sửa Nhiệm vụ</h2>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Nhiệm vụ</label>
+            <input type="text" id="editMissionName" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Thời hạn hoàn thành</label>
+            <input type="date" id="editMissionDeadline" class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="flex justify-end gap-3">
+                <button onclick="window.closeEditMissionModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button onclick="window.saveEditMission()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh sửa Gói thầu -->
+    <div id="editPackageModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h2 class="text-lg font-bold text-blue-800 mb-4 pb-2 border-b"><i class="fas fa-edit mr-2"></i>Chỉnh sửa Gói thầu</h2>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Gói thầu</label>
+            <input type="text" id="editPackageName" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chuyên viên phụ trách</label>
+            <select id="editPackageOwner" class="w-full border p-2.5 rounded text-sm mb-4 bg-white focus:ring-2 focus:ring-blue-500 outline-none"></select>
+            <div class="flex justify-end gap-3">
+                <button onclick="window.closeEditPackageModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button onclick="window.saveEditPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh sửa Công việc con (Sửa thông tin + Thêm Ghi chú) -->
+    <div id="editStepModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h2 class="text-lg font-bold text-emerald-700 mb-4 pb-2 border-b"><i class="fas fa-edit mr-2"></i>Cập nhật Công việc</h2>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung công việc</label>
+            <input type="text" id="editStepName" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="flex gap-3 mb-3">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Hạn chót</label>
+                    <input type="date" id="editStepDeadline" class="w-full border p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <p class="text-[10px] text-gray-500 mt-1 italic">*Thay đổi sẽ tự động đẩy lùi lịch của các việc phía sau.</p>
+                </div>
+            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú / Báo cáo tóm tắt</label>
+            <textarea id="editStepNote" rows="3" placeholder="Nhập những lưu ý quan trọng, giải trình lý do trễ hạn..." class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="window.closeEditStepModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button onclick="window.saveEditStep()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium">Lưu cập nhật</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Công việc nhỏ (Subtask) -->
+    <div id="subTaskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md border-t-4 border-orange-500">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Thêm Công việc nhỏ</h2>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung việc cần làm:</label>
+            <input type="text" id="subTaskName" placeholder="VD: Gọi điện cho đối tác..." class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-orange-500 outline-none" onkeypress="if(event.key === 'Enter') window.saveSubTask()">
+            <div class="flex justify-end gap-3">
+                <button onclick="window.closeSubTaskModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button onclick="window.saveSubTask()" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-medium">Thêm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÁC MODAL CŨ GIỮ NGUYÊN BÊN DƯỚI -->
     <div id="financeLogModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
         <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
@@ -301,10 +365,10 @@
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
             <h2 class="text-lg font-bold text-emerald-700 mb-4 pb-2 border-b"><i class="fas fa-folder-plus mr-2"></i>Tạo Nhiệm vụ mới</h2>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tên Nhiệm vụ tổng</label>
-            <input type="text" id="missionName" placeholder="VD: Triển khai ứng dụng phần mềm SCE..." class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="text" id="missionName" placeholder="VD: Triển khai ứng dụng phần mềm SCE..." class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-emerald-500 outline-none">
             <label class="block text-sm font-medium text-gray-700 mb-1">Thời hạn hoàn thành</label>
-            <input type="date" id="missionDeadline" class="w-full border p-2.5 rounded text-sm mb-4">
-            <div class="flex justify-end gap-3"><button onclick="window.closeCreateMissionModal()" class="px-4 py-2 border rounded text-sm font-medium">Hủy bỏ</button><button onclick="window.createMission()" class="px-4 py-2 bg-emerald-600 text-white rounded text-sm font-medium">Tạo Nhiệm vụ</button></div>
+            <input type="date" id="missionDeadline" class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-emerald-500 outline-none">
+            <div class="flex justify-end gap-3"><button onclick="window.closeCreateMissionModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy bỏ</button><button onclick="window.createMission()" class="px-4 py-2 bg-emerald-600 text-white rounded text-sm font-medium hover:bg-emerald-700">Tạo Nhiệm vụ</button></div>
         </div>
     </div>
 
@@ -312,14 +376,14 @@
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
             <h2 class="text-lg font-bold text-blue-800 mb-4 pb-2 border-b">Thêm Gói thầu mới</h2>
             <label class="block text-sm font-medium text-gray-700 mb-1">Quy trình áp dụng</label>
-            <select id="projType" class="w-full border p-2.5 rounded text-sm mb-3 bg-white"></select>
+            <select id="projType" class="w-full border p-2.5 rounded text-sm mb-3 bg-white focus:ring-2 focus:ring-blue-500 outline-none"></select>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tên gói thầu</label>
-            <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
             <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
-            <input type="date" id="projStartDate" class="w-full border p-2.5 rounded text-sm mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Người phụ trách (Giao việc)</label>
-            <select id="pkgOwner" class="w-full border p-2.5 rounded text-sm mb-4 bg-white"></select>
-            <div class="flex justify-end gap-3"><button onclick="window.closeCreatePackageModal()" class="px-4 py-2 border rounded text-sm font-medium">Hủy bỏ</button><button onclick="window.createPackage()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">Thêm gói thầu</button></div>
+            <input type="date" id="projStartDate" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chuyên viên phụ trách</label>
+            <select id="pkgOwner" class="w-full border p-2.5 rounded text-sm mb-4 bg-white focus:ring-2 focus:ring-blue-500 outline-none"></select>
+            <div class="flex justify-end gap-3"><button onclick="window.closeCreatePackageModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy bỏ</button><button onclick="window.createPackage()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700">Thêm gói thầu</button></div>
         </div>
     </div>
     
@@ -327,10 +391,10 @@
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
             <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b"><i class="fas fa-user-edit mr-2 text-blue-600"></i>Cài đặt tài khoản</h2>
             <label class="block text-sm font-medium text-gray-700 mb-1">Họ và Tên</label>
-            <input type="text" id="profileFullname" class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="text" id="profileFullname" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
             <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới (Tùy chọn)</label>
-            <input type="password" id="profilePassword" placeholder="Bỏ trống nếu giữ nguyên" class="w-full border p-2.5 rounded text-sm mb-4">
-            <div class="flex justify-end gap-3"><button onclick="window.closeProfileModal()" class="px-4 py-2 border rounded text-sm font-medium">Đóng</button><button onclick="window.saveProfile()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">Lưu thay đổi</button></div>
+            <input type="password" id="profilePassword" placeholder="Bỏ trống nếu giữ nguyên" class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="flex justify-end gap-3"><button onclick="window.closeProfileModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Đóng</button><button onclick="window.saveProfile()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700">Lưu thay đổi</button></div>
         </div>
     </div>
     
@@ -340,16 +404,16 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">ID Đăng nhập</label>
             <input type="text" id="editUserUsername" disabled class="w-full border bg-gray-100 p-2.5 rounded text-sm mb-3 cursor-not-allowed">
             <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên chuyên viên</label>
-            <input type="text" id="editUserFullname" class="w-full border p-2.5 rounded text-sm mb-3">
+            <input type="text" id="editUserFullname" class="w-full border p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
             <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
-            <select id="editUserRole" class="w-full border p-2.5 rounded text-sm mb-3 bg-white">
+            <select id="editUserRole" class="w-full border p-2.5 rounded text-sm mb-3 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="user">Chuyên viên thực hiện</option>
                 <option value="leader">Lãnh đạo</option>
                 <option value="admin">Admin</option>
             </select>
             <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới (Tùy chọn)</label>
-            <input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border p-2.5 rounded text-sm mb-4">
-            <div class="flex justify-end gap-3"><button onclick="window.closeEditUserModal()" class="px-4 py-2 border rounded text-sm font-medium">Hủy bỏ</button><button onclick="window.saveEditUser()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">Lưu thay đổi</button></div>
+            <input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="flex justify-end gap-3"><button onclick="window.closeEditUserModal()" class="px-4 py-2 border rounded text-sm font-medium hover:bg-gray-50">Hủy bỏ</button><button onclick="window.saveEditUser()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700">Lưu thay đổi</button></div>
         </div>
     </div>
 
@@ -361,9 +425,8 @@
         </div>
     </div>
 
-    <!-- ==================== PHẦN MÃ JAVASCRIPT ==================== -->
+    <!-- ==================== PHẦN MÃ JAVASCRIPT CHÍNH ==================== -->
     <script>
-        // Cập nhật URL Google Apps Script của bạn vào đây
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
 
         const defaultTemplates = {
@@ -380,12 +443,18 @@
         let isDataSynchronized = false;
         let isSaving = false;
         let lastSaveTime = 0;
+        
+        // Biến cục bộ cho các Modal Sửa
         let currentMissionIndexForNewPackage = -1;
         let currentFinanceMIndex = -1;
         let currentFinancePIndex = -1;
         let configSortableInstance = null;
         let currentEditUserIndex = -1;
         let globalOverdueTasksList = [];
+        
+        let cEditM = -1;
+        let cEditP = -1;
+        let cEditS = -1;
 
         // ----------------------------------------------------------------------
         // CÁC HÀM TIỆN ÍCH DỮ LIỆU
@@ -431,7 +500,7 @@
             });
 
             if (dataChanged && currentUser && currentUser.role === 'admin') {
-                window.saveDataToGAS(false);
+                saveDataToGAS(false);
             }
         }
 
@@ -487,6 +556,7 @@
             if (pkg.logs.length > 50) pkg.logs.pop(); 
         }
 
+
         // ----------------------------------------------------------------------
         // KHỞI ĐỘNG VÀ QUẢN LÝ DỮ LIỆU
         // ----------------------------------------------------------------------
@@ -505,7 +575,7 @@
                     document.getElementById('loaderText').innerText = "Đang tải dữ liệu...";
                     document.getElementById('loader').style.display = 'flex';
                     
-                    await window.loadDataFromGAS();
+                    await loadDataFromGAS();
                     document.getElementById('loader').style.display = 'none';
                     
                     if (!isDataSynchronized) {
@@ -518,7 +588,7 @@
                     
                     if (found) {
                         currentUser = found;
-                        window.openAppScreen();
+                        openAppScreen();
                     } else {
                         localStorage.removeItem('bidAppUser');
                     }
@@ -528,7 +598,7 @@
             }
         });
 
-        window.loadDataFromGAS = async function() {
+        async function loadDataFromGAS() {
             try {
                 const response = await fetch(GAS_URL + "?t=" + Date.now());
                 const textData = await response.text();
@@ -589,8 +659,8 @@
             }
         }
 
-        window.forceSync = function(alertSuccess = false) {
-            window.saveDataToGAS(alertSuccess);
+        window.forceSync = function() {
+            window.saveDataToGAS(true);
         }
 
         window.fetchBackups = async function() {
@@ -599,31 +669,30 @@
             document.getElementById('loader').style.display = 'flex';
             
             try {
-                const response = await fetch(GAS_URL + "?action=getBackups&t=" + Date.now());
-                const backups = await response.json();
+                const response = await fetch(GAS_URL + "?action=getBackups&t=" + Date.now(), { redirect: 'follow' });
+                const textResponse = await response.text();
+                
+                let backups = null;
+                try { backups = JSON.parse(textResponse); } catch(e) {}
+                
+                if (!Array.isArray(backups)) {
+                    alert("⚠ HỆ THỐNG CẢNH BÁO:\nGoogle Apps Script của bạn chưa được cập nhật!\n\nHãy vào lại Google Sheets -> Tiện ích mở rộng -> Apps Script -> Bấm Deploy -> Manage Deployments -> Chọn Edit (Bút chì) -> Chọn 'New version' -> Bấm Deploy.");
+                    document.getElementById('loader').style.display = 'none';
+                    return;
+                }
+
                 const tbody = document.getElementById('backupsTableBody');
                 tbody.innerHTML = '';
                 
-                if (!Array.isArray(backups) || backups.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào. Hãy thử thao tác công việc để hệ thống ghi lại.</td></tr>`;
+                if (backups.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào. Hãy thử thao tác công việc để hệ thống ghi lại nhé.</td></tr>`;
                 } else {
                     backups.forEach(b => {
                         let displayTime = b.time;
                         try {
-                            let dt = new Date(b.time);
-                            if (!isNaN(dt.getTime())) {
-                                let d = ("0" + dt.getDate()).slice(-2);
-                                let m = ("0" + (dt.getMonth() + 1)).slice(-2);
-                                let y = dt.getFullYear();
-                                let hr = ("0" + dt.getHours()).slice(-2);
-                                let min = ("0" + dt.getMinutes()).slice(-2);
-                                let sec = ("0" + dt.getSeconds()).slice(-2);
-                                displayTime = `Lúc <span class="font-bold text-red-600">${hr}:${min}:${sec}</span> ngày <span class="font-bold text-gray-700">${d}/${m}/${y}</span>`;
-                            } else {
-                                let tParts = b.time.split(" ");
-                                if(tParts.length === 2 && tParts[0].includes("/")) {
-                                    displayTime = `Lúc <span class="font-bold text-red-600">${tParts[1]}</span> ngày <span class="font-bold text-gray-700">${tParts[0]}</span>`;
-                                }
+                            let tParts = b.time.split(" ");
+                            if(tParts.length === 2 && tParts[0].includes("/")) {
+                                displayTime = `Lúc <span class="font-bold text-red-600">${tParts[1]}</span> ngày <span class="font-bold text-gray-700">${tParts[0]}</span>`;
                             }
                         } catch(e) {}
 
@@ -632,8 +701,8 @@
                                 <td class="p-3 text-center font-bold text-gray-500">#${b.id}</td>
                                 <td class="p-3 text-sm">${displayTime}</td>
                                 <td class="p-3 text-center">
-                                    <button onclick="window.restoreBackup(${b.id})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm">
-                                        <i class="fas fa-undo-alt mr-1"></i> Khôi phục bản này
+                                    <button onclick="window.restoreBackup(${b.id}, '${b.time}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm">
+                                        <i class="fas fa-undo-alt mr-1"></i> Khôi phục
                                     </button>
                                 </td>
                             </tr>
@@ -641,21 +710,23 @@
                     });
                 }
             } catch (err) {
-                alert("Lỗi tải danh sách sao lưu (Có thể do mạng hoặc Google Apps Script lỗi trả về): " + err.message);
+                alert("Lỗi tải danh sách sao lưu: " + err.message);
             }
             document.getElementById('loader').style.display = 'none';
         }
 
-        window.restoreBackup = async function(id) {
+        window.restoreBackup = async function(id, timeStr) {
             if (currentUser.role !== 'admin') return;
-            if (!confirm(`CẢNH BÁO NGUY HIỂM!\nBạn có chắc chắn muốn XÓA BỎ dữ liệu hiện tại và GHI ĐÈ bằng bản sao lưu này không? Hành động này không thể hoàn tác.`)) return;
+            if (!confirm(`CẢNH BÁO NGUY HIỂM!\nBạn có chắc chắn muốn XÓA BỎ dữ liệu hiện tại và GHI ĐÈ bằng bản sao lưu lúc [${timeStr}] không? Hành động này không thể hoàn tác.`)) return;
 
             document.getElementById('loaderText').innerText = "Đang tải và khôi phục dữ liệu...";
             document.getElementById('loader').style.display = 'flex';
             
             try {
-                const response = await fetch(GAS_URL + "?action=loadBackup&id=" + id + "&t=" + Date.now());
-                const data = await response.json();
+                const response = await fetch(GAS_URL + "?action=loadBackup&id=" + id + "&t=" + Date.now(), { redirect: 'follow' });
+                const textData = await response.text();
+                let data = null;
+                if(textData && textData.trim() !== "") data = JSON.parse(textData);
                 
                 if (data && typeof data === 'object' && Object.keys(data).length > 0) {
                     db = data;
@@ -978,8 +1049,9 @@
             }
         }
 
+
         // ----------------------------------------------------------------------
-        // HIỂN THỊ TIẾN ĐỘ DỰ ÁN (NHIỆM VỤ CHÍNH)
+        // HIỂN THỊ TIẾN ĐỘ DỰ ÁN (CHẾ ĐỘ MỚI: READ-ONLY & NÚT SỬA)
         // ----------------------------------------------------------------------
         window.renderMissions = function() {
             try {
@@ -1055,6 +1127,8 @@
                             btnCompleteMission = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 border border-emerald-200"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`;
                         }
 
+                        // Nút Edit Nhiệm vụ
+                        let btnEditMission = canEditMission ? `<button onclick="window.openEditMissionModal(${mIndex})" class="text-indigo-500 hover:bg-indigo-100 bg-white border border-indigo-200 px-2 py-1 rounded shadow-sm text-xs transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
                         let btnPrintMission = `<button onclick="window.printMission(${mIndex})" class="bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-print"></i> In NV</button>`;
 
                         let packagesHtml = "";
@@ -1086,37 +1160,71 @@
                                         else if(isWarning) { dateColor = 'text-orange-500 font-bold'; bgRow = 'bg-orange-50'; }
 
                                         let safeStepName = step.name ? String(step.name).replace(/"/g, '&quot;') : '';
+                                        let safeNote = step.note ? String(step.note).replace(/"/g, '&quot;') : '';
                                         
-                                        const nameHtml = canEditPkg ? 
-                                            `<input type="text" value="${safeStepName}" onchange="window.updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'name', this.value)" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 outline-none text-sm ${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'}">` : 
-                                            `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-sm">${safeStepName}</div>`;
+                                        // Tên việc chính (Text)
+                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800'} text-[13px] leading-tight">${safeStepName}</div>`;
+                                        
+                                        // Vẽ Subtasks (Công việc con)
+                                        let subTasksHtml = "";
+                                        if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
+                                            subTasksHtml = `<div class="mt-1.5 ml-1 border-l-2 border-gray-200 pl-2 space-y-1">`;
+                                            step.subTasks.forEach((sub, subIdx) => {
+                                                let safeSubName = sub.name ? String(sub.name).replace(/"/g, '&quot;') : '';
+                                                let subClass = sub.completed ? "text-gray-400 line-through" : "text-gray-600";
+                                                let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : '';
+                                                
+                                                subTasksHtml += `
+                                                <div class="flex items-start gap-1.5 text-[12px]">
+                                                    <input type="checkbox" class="mt-0.5 ${canEditPkg?'cursor-pointer':'cursor-not-allowed'}" ${sub.completed ? 'checked' : ''} ${!canEditPkg?'disabled':''} onchange="window.toggleSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx}, this.checked)">
+                                                    <span class="${subClass} leading-tight flex-1">${safeSubName}</span>
+                                                    ${delSubBtn}
+                                                </div>`;
+                                            });
+                                            subTasksHtml += `</div>`;
+                                        }
+
+                                        // Kết hợp Tên việc + Subtasks
+                                        let fullTaskHtml = nameHtml + subTasksHtml;
                                             
-                                        const dateHtml = canEditPkg ? 
-                                            `<div class="relative inline-flex items-center group cursor-pointer" onclick="try{this.querySelector('input[type=date]').showPicker()}catch(e){}">
-                                                <span class="text-sm ${dateColor} whitespace-nowrap border-b border-dashed border-gray-400 pb-0.5">${window.formatDate(step.deadline)} <i class="fas fa-pencil-alt text-gray-300 ml-1"></i></span>
-                                                <input type="date" value="${window.formatForDateInput(step.deadline)}" onchange="window.updateProjStep(${mIndex}, ${pkgIndex}, ${sIndex}, 'deadline', this.value)" class="absolute w-full h-full opacity-0 cursor-pointer left-0 top-0 pointer-events-none">
-                                            </div>` : 
-                                            `<span class="text-sm ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`;
+                                        // Hạn chót (Text)
+                                        let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`;
                                         
-                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-white text-blue-700 text-xs px-2 py-0.5 rounded border border-blue-200 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-";
+                                        // Định mức
+                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-white text-blue-700 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-";
                                         
+                                        // Cột Ghi chú
+                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 italic bg-gray-50 border border-gray-200 p-1.5 rounded">${safeNote}</div>` : '';
+
+                                        // Cột Đính kèm
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links)) {
                                             linksDisplayHtml = step.links.map((l, lIndex) => {
                                                 let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : '';
-                                                return `<div class="inline-flex items-center gap-1 bg-white text-blue-700 border border-blue-200 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm"><a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[120px]" title="${l.url}"><i class="fas fa-link mr-1"></i>${l.name}</a>${actDelLink}</div>`;
+                                                return `<div class="inline-flex items-center gap-1 bg-white text-blue-700 border border-blue-200 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm"><a href="${l.url}" target="_blank" class="hover:underline font-medium truncate max-w-[100px]" title="${l.url}"><i class="fas fa-link mr-1"></i>${l.name}</a>${actDelLink}</div>`;
                                             }).join('');
                                         }
+                                        const linkInputHtml = canEditPkg ? `<div class="mt-1"><button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><i class="fas fa-paperclip"></i> Gắn file</button><div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white rounded shadow-lg absolute z-10 w-48"><input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file" class="w-full mb-1 p-1 border rounded text-xs"><input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1 p-1 border rounded text-xs"><button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Lưu</button></div></div>` : '';
                                         
-                                        const linkInputHtml = canEditPkg ? `<div class="mt-1"><button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><i class="fas fa-plus"></i> Gắn file</button><div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white rounded shadow-lg absolute z-10 w-48"><input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên hiển thị" class="w-full mb-1 p-1 border rounded text-xs"><input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="URL" class="w-full mb-1 p-1 border rounded text-xs"><button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Lưu</button></div></div>` : '';
+                                        // Cột Hành động (Sửa / Xóa / Thêm Việc con)
+                                        let actCell = "";
+                                        if (canEditPkg) {
+                                            actCell = `
+                                            <td class="p-2 text-right align-top min-w-[70px]">
+                                                <button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded transition" title="Sửa nội dung việc"><i class="fas fa-edit"></i></button>
+                                                <button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 hover:bg-orange-50 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button>
+                                                <button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button>
+                                            </td>`;
+                                        }
                                         
                                         return `<tr class="border-b transition hover:bg-gray-100 ${bgRow}">
                                             <td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${canEditPkg?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${!canEditPkg?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)"></td>
-                                            <td class="p-2 align-top">${nameHtml}${step.completedBy?`<div class="text-[10px] text-green-600 mt-1"><i class="fas fa-check"></i> ${step.completedBy}</div>`:''}</td>
+                                            <td class="p-2 align-top">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 mt-1"><i class="fas fa-check"></i> ${step.completedBy}</div>`:''}</td>
                                             <td class="p-2 text-center align-top">${timeBudget}</td>
                                             <td class="p-2 align-top">${dateHtml}</td>
-                                            <td class="p-2 align-top"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>
-                                            ${canEditPkg ? `<td class="p-2 text-center align-top"><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button></td>` : ''}
+                                            <td class="p-2 align-top min-w-[150px]">${noteHtml}</td>
+                                            <td class="p-2 align-top min-w-[120px]"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>
+                                            ${actCell}
                                         </tr>`;
                                     }).join('');
                                 }
@@ -1148,9 +1256,11 @@
                                     btnCompletePkg = `<span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-200"><i class="fas fa-check-circle"></i> Đã xong</span>`;
                                 }
 
+                                // Nút Edit Gói Thầu
+                                let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 hover:bg-blue-100 bg-white border border-blue-200 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
+
                                 let headerBg = pkg.archived ? 'bg-gray-100' : (pkg.completed ? 'bg-emerald-50/50' : 'bg-blue-50/50');
                                 let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
-
                                 let pkgNameSafe = pkg.name || "Gói thầu không tên";
                                 let pkgProcessTitle = pkg.processTitle || "Quy trình đấu thầu";
 
@@ -1158,10 +1268,10 @@
                                     <div class="bg-white rounded border border-gray-200 border-l-4 ${borderColor} overflow-visible mb-4 shadow-sm relative">
                                         <div class="${headerBg} px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b ${pkg.archived ? 'border-gray-200' : 'border-blue-100'} gap-3">
                                             <div class="flex-1">
-                                                <div class="flex items-center gap-2">
-                                                    <h4 class="font-bold text-[14px] ${pkg.archived ? 'text-gray-600 line-through' : (pkg.completed ? 'text-emerald-800' : 'text-blue-900')}">
-                                                        <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
-                                                        ${pkgNameSafe}
+                                                <div class="flex items-center gap-2 flex-wrap">
+                                                    <h4 class="font-bold text-[14px] flex items-center ${pkg.archived ? 'text-gray-600 line-through' : (pkg.completed ? 'text-emerald-800' : 'text-blue-900')}">
+                                                        <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
+                                                        ${pkgNameSafe} ${btnEditPkg}
                                                     </h4>
                                                     ${btnCompletePkg}
                                                     ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''} ${savStr}
@@ -1182,9 +1292,17 @@
                                         <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
                                             <table class="w-full text-left border-collapse text-sm">
                                                 <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-20 text-center">Định mức</th><th class="p-2 w-28">Hạn chót</th><th class="p-2 min-w-[200px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-8"></th>' : ''}</tr>
+                                                    <tr>
+                                                        <th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th>
+                                                        <th class="p-2">Chi tiết việc</th>
+                                                        <th class="p-2 w-16 text-center">Mức</th>
+                                                        <th class="p-2 w-24">Hạn chót</th>
+                                                        <th class="p-2 w-48">Ghi chú</th>
+                                                        <th class="p-2 min-w-[120px]">Đính kèm</th>
+                                                        ${canEditPkg ? '<th class="p-2 w-20 text-right"><i class="fas fa-cogs"></i></th>' : ''}
+                                                    </tr>
                                                 </thead>
-                                                <tbody>${stepsHtml} ${canEditPkg ? `<tr><td colspan="6" class="p-1.5 text-center bg-gray-50"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 text-xs font-medium"><i class="fas fa-plus"></i> Thêm việc</button></td></tr>` : ''}</tbody>
+                                                <tbody>${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-1.5 text-center bg-gray-50"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
                                         </div>
                                     </div>`;
@@ -1204,13 +1322,22 @@
                         let mBorderColor = mission.completed ? 'border-emerald-500' : 'border-indigo-300';
                         let mBgColor = mission.completed ? 'bg-emerald-50' : 'bg-indigo-50';
 
+                        let addPkgBtn = "";
+                        let delMissionBtn = "";
+                        if (canEditMission) {
+                            addPkgBtn = `<button onclick="window.openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-sm transition"><i class="fas fa-plus"></i> Gói thầu</button>`;
+                            delMissionBtn = `<button onclick="window.deleteMission(${mIndex})" class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-full text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>`;
+                        }
+
                         container.innerHTML += `
                             <div class="mission-block border-2 ${mBorderColor} rounded-xl bg-white overflow-hidden shadow-sm mb-6">
                                 <div class="${mBgColor} p-4 border-b border-indigo-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div class="flex-1">
-                                        <h2 class="text-lg font-bold ${mission.completed ? 'text-emerald-800' : 'text-indigo-900'}">
-                                            <i class="fas fa-folder text-indigo-500 mr-2"></i>Nhiệm vụ: ${mNameSafe}
-                                        </h2>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <h2 class="text-lg font-bold flex items-center ${mission.completed ? 'text-emerald-800' : 'text-indigo-900'}">
+                                                <i class="fas fa-folder text-indigo-500 mr-2"></i> Nhiệm vụ: ${mNameSafe} ${btnEditMission}
+                                            </h2>
+                                        </div>
                                         <p class="text-sm text-indigo-700 mt-1">
                                             <i class="far fa-clock mr-1"></i>Hạn tổng: <b>${window.formatDate(mission.deadline)}</b> | <i class="far fa-user mr-1"></i>Owner: <b>${mOwnerSafe}</b>
                                         </p>
@@ -1219,10 +1346,8 @@
                                     <div class="flex flex-wrap gap-2 shrink-0 items-center">
                                         ${btnCompleteMission}
                                         ${btnPrintMission}
-                                        ${canEditMission ? `
-                                        <button onclick="window.openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-sm transition"><i class="fas fa-plus"></i> Gói thầu</button>
-                                        <button onclick="window.deleteMission(${mIndex})" class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-full text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>
-                                        ` : ''}
+                                        ${addPkgBtn}
+                                        ${delMissionBtn}
                                     </div>
                                 </div>
                                 <div class="p-4 bg-gray-50/50 ${mission.completed ? 'hidden' : ''}">${packagesHtml}</div>
@@ -1244,8 +1369,154 @@
             }
         };
 
-        // --- CÁC HÀM CẬP NHẬT GIAO DIỆN & TƯƠNG TÁC DỮ LIỆU ---
+        // ----------------------------------------------------------------------
+        // CÁC HÀM XỬ LÝ MODAL "SỬA" MỚI (CHỐNG INLINE EDIT)
+        // ----------------------------------------------------------------------
         
+        // 1. SỬA NHIỆM VỤ
+        window.openEditMissionModal = function(mIndex) {
+            cEditM = mIndex;
+            let m = db.missions[mIndex];
+            document.getElementById('editMissionName').value = m.name || "";
+            document.getElementById('editMissionDeadline').value = window.formatForDateInput(m.deadline);
+            document.getElementById('editMissionModal').classList.remove('hidden');
+        };
+        window.closeEditMissionModal = function() {
+            document.getElementById('editMissionModal').classList.add('hidden');
+        };
+        window.saveEditMission = function() {
+            let name = document.getElementById('editMissionName').value.trim();
+            let date = document.getElementById('editMissionDeadline').value;
+            if(!name || !date) return alert("Vui lòng nhập đủ tên và hạn chót!");
+            
+            db.missions[cEditM].name = name;
+            db.missions[cEditM].deadline = new Date(date).toISOString();
+            
+            window.closeEditMissionModal();
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+        // 2. SỬA GÓI THẦU
+        window.openEditPackageModal = function(mIndex, pIndex) {
+            cEditM = mIndex;
+            cEditP = pIndex;
+            let p = db.missions[mIndex].packages[pIndex];
+            
+            document.getElementById('editPackageName').value = p.name || "";
+            
+            const sel = document.getElementById('editPackageOwner');
+            sel.innerHTML = ''; 
+            db.users.forEach(u => { 
+                let isSelected = (u.fullname === p.owner) ? 'selected' : '';
+                sel.innerHTML += `<option value="${u.fullname}" ${isSelected}>${u.fullname}</option>`; 
+            }); 
+
+            document.getElementById('editPackageModal').classList.remove('hidden');
+        };
+        window.closeEditPackageModal = function() {
+            document.getElementById('editPackageModal').classList.add('hidden');
+        };
+        window.saveEditPackage = function() {
+            let name = document.getElementById('editPackageName').value.trim();
+            let owner = document.getElementById('editPackageOwner').value;
+            if(!name) return alert("Tên gói thầu không được để trống!");
+            
+            db.missions[cEditM].packages[cEditP].name = name;
+            db.missions[cEditM].packages[cEditP].owner = owner;
+            
+            window.closeEditPackageModal();
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+        // 3. SỬA CÔNG VIỆC VÀ GHI CHÚ
+        window.openEditStepModal = function(mIndex, pIndex, sIndex) {
+            cEditM = mIndex;
+            cEditP = pIndex;
+            cEditS = sIndex;
+            let step = db.missions[mIndex].packages[pIndex].steps[sIndex];
+            
+            document.getElementById('editStepName').value = step.name || "";
+            document.getElementById('editStepDeadline').value = window.formatForDateInput(step.deadline);
+            document.getElementById('editStepNote').value = step.note || "";
+            
+            document.getElementById('editStepModal').classList.remove('hidden');
+        };
+        window.closeEditStepModal = function() {
+            document.getElementById('editStepModal').classList.add('hidden');
+        };
+        window.saveEditStep = function() {
+            let name = document.getElementById('editStepName').value.trim();
+            let date = document.getElementById('editStepDeadline').value;
+            let note = document.getElementById('editStepNote').value.trim();
+            
+            if(!name || !date) return alert("Vui lòng nhập đủ tên công việc và hạn chót!");
+            
+            let pkg = db.missions[cEditM].packages[cEditP];
+            pkg.steps[cEditS].name = name;
+            pkg.steps[cEditS].note = note;
+            
+            // Xử lý đẩy lùi lịch
+            pkg.steps[cEditS].deadline = new Date(date).toISOString(); 
+            let currentDt = new Date(date); 
+            for (let k = cEditS + 1; k < pkg.steps.length; k++) { 
+                currentDt = window.addCustomDays(currentDt, pkg.steps[k].originalDays || 0, pkg.steps[k].originalDayType || 'calendar'); 
+                pkg.steps[k].deadline = currentDt.toISOString(); 
+            } 
+            
+            window.logActivity(cEditM, cEditP, `Đã cập nhật công việc: ${name}`); 
+            window.closeEditStepModal();
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+        // 4. QUẢN LÝ VIỆC NHỎ (SUB-TASKS)
+        window.openSubTaskModal = function(mIndex, pIndex, sIndex) {
+            cEditM = mIndex;
+            cEditP = pIndex;
+            cEditS = sIndex;
+            document.getElementById('subTaskName').value = "";
+            document.getElementById('subTaskModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('subTaskName').focus(), 100);
+        };
+        window.closeSubTaskModal = function() {
+            document.getElementById('subTaskModal').classList.add('hidden');
+        };
+        window.saveSubTask = function() {
+            let name = document.getElementById('subTaskName').value.trim();
+            if(!name) return;
+            
+            let step = db.missions[cEditM].packages[cEditP].steps[cEditS];
+            if(!step.subTasks) step.subTasks = [];
+            
+            step.subTasks.push({
+                id: Date.now(),
+                name: name,
+                completed: false
+            });
+            
+            window.closeSubTaskModal();
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+        window.deleteSubTask = function(mIndex, pIndex, sIndex, subIndex) {
+            if(confirm("Xóa việc nhỏ này?")) {
+                db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks.splice(subIndex, 1);
+                window.renderMissions();
+                window.saveDataToGAS(false);
+            }
+        };
+        window.toggleSubTask = function(mIndex, pIndex, sIndex, subIndex, checked) {
+            db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks[subIndex].completed = checked;
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+
+        // ----------------------------------------------------------------------
+        // CÁC HÀM XÓA, LƯU TRỮ VÀ HOÀN THÀNH
+        // ----------------------------------------------------------------------
         window.deleteMission = function(mIndex) {
             if (currentUser.role === 'leader') return alert("Lãnh đạo chỉ có quyền xem!");
             try { if (confirm(`Xóa toàn bộ Nhiệm vụ "${db.missions[mIndex].name}" và tất cả gói thầu bên trong?`)) { db.missions.splice(mIndex, 1); window.renderMissions(); window.saveDataToGAS(false); } } catch(e) { console.error(e); alert("Có lỗi xảy ra khi xóa."); } 
@@ -1258,7 +1529,7 @@
         
         window.deleteProjStep = function(mIndex, pkgIndex, sIndex) { 
             if (currentUser.role === 'leader') return alert("Lãnh đạo chỉ có quyền xem!");
-            try { if (confirm("Xóa công việc này khỏi lộ trình?")) { db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1); window.logActivity(mIndex, pkgIndex, `Đã xóa bước công việc thứ ${sIndex+1}`); window.renderMissions(); window.saveDataToGAS(false); } } catch(e) { console.error(e); alert("Có lỗi xảy ra."); } 
+            try { if (confirm("Xóa công việc này khỏi lộ trình?")) { db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1); window.logActivity(mIndex, pkgIndex, `Đã xóa công việc`); window.renderMissions(); window.saveDataToGAS(false); } } catch(e) { console.error(e); alert("Có lỗi xảy ra."); } 
         };
         
         window.deleteDoc = function(index) { 
@@ -1326,31 +1597,10 @@
             let m = db.missions[mIndex];
             let p = m.packages[pkgIndex];
             if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!");
+            
             p.steps[stepIndex].completed = checked; 
             p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; 
             window.logActivity(mIndex, pkgIndex, `${checked ? 'Hoàn thành' : 'Bỏ hoàn thành'} bước ${stepIndex+1}`); 
-            window.renderMissions(); 
-            window.saveDataToGAS(false); 
-        };
-        
-        window.updateProjStep = function(mIndex, pkgIndex, sIndex, field, value) { 
-            if (currentUser.role === 'leader') return alert("Lãnh đạo chỉ có quyền xem!");
-            let m = db.missions[mIndex];
-            let pkg = m.packages[pkgIndex];
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Bạn không có quyền thao tác!");
-            
-            if (field === 'deadline') { 
-                if (!value) return; 
-                pkg.steps[sIndex].deadline = new Date(value).toISOString(); 
-                let currentDt = new Date(value); 
-                for (let k = sIndex + 1; k < pkg.steps.length; k++) { 
-                    currentDt = window.addCustomDays(currentDt, pkg.steps[k].originalDays || 0, pkg.steps[k].originalDayType || 'calendar'); 
-                    pkg.steps[k].deadline = currentDt.toISOString(); 
-                } 
-                window.logActivity(mIndex, pkgIndex, `Sửa hạn chót bước ${sIndex+1}`); 
-            } else { 
-                pkg.steps[sIndex][field] = value; 
-            } 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
         };
@@ -1365,7 +1615,7 @@
                 newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); 
                 newDeadline.setDate(newDeadline.getDate() + 1); 
             } 
-            pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" }); 
+            pkg.steps.push({ name: "Công việc phát sinh", deadline: newDeadline.toISOString(), note: "", subTasks: [], completed: false, links: [], completedBy: "", originalDays: 0, originalDayType: "calendar" }); 
             window.logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
@@ -1393,7 +1643,7 @@
             window.saveDataToGAS(false); 
         };
 
-        // --- CÁC HÀM CÀI ĐẶT & THÊM MỚI (MODAL) ---
+        // --- CÁC HÀM CÀI ĐẶT & THÊM MỚI ---
         window.openProfileModal = function() { document.getElementById('profileFullname').value = currentUser.fullname; document.getElementById('profilePassword').value = ''; document.getElementById('profileModal').classList.remove('hidden'); };
         window.closeProfileModal = function() { document.getElementById('profileModal').classList.add('hidden'); };
         window.saveProfile = function() { 
@@ -1418,7 +1668,7 @@
                     }); 
                 } 
                 if (localStorage.getItem('bidAppUser')) localStorage.setItem('bidAppUser', JSON.stringify(currentUser)); 
-                renderUserBadge(); 
+                window.renderUserBadge(); 
                 if(currentUser.role === 'admin') window.renderUsers(); 
                 window.renderMissions(); 
                 window.saveDataToGAS(false); 
@@ -1467,7 +1717,7 @@
             if (db.processTemplates[typeKey] && db.processTemplates[typeKey].steps) {
                 steps = db.processTemplates[typeKey].steps.map(tmpl => { 
                     currentDt = window.addCustomDays(currentDt, tmpl.days, tmpl.dayType); 
-                    return { name: tmpl.name, deadline: currentDt.toISOString(), completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: tmpl.dayType }; 
+                    return { name: tmpl.name, deadline: currentDt.toISOString(), note: "", subTasks: [], completed: false, links: [], completedBy: "", originalDays: tmpl.days, originalDayType: tmpl.dayType }; 
                 }); 
             }
             db.missions[mIndex].packages.push({ id: Date.now(), name: name, processTitle: db.processTemplates[typeKey].title, owner: owner, estimatePrice: 0, winningPrice: 0, archived: false, completed: false, logs: [`Khởi tạo gói thầu`], steps: steps }); 
@@ -1557,7 +1807,7 @@
         window.closeEditUserModal = function() { document.getElementById('editUserModal').classList.add('hidden'); };
         window.saveEditUser = function() { if(currentUser.role!=='admin') return; const f=document.getElementById('editUserFullname').value.trim(), p=document.getElementById('editUserPassword').value.trim(), r=document.getElementById('editUserRole').value; if(f){ db.users[currentEditUserIndex].fullname=f; if(db.users[currentEditUserIndex].username!=='admin') db.users[currentEditUserIndex].role=r; if(p) db.users[currentEditUserIndex].password=p; if(currentUser.username===db.users[currentEditUserIndex].username) currentUser=db.users[currentEditUserIndex]; window.closeEditUserModal(); window.renderUsers(); window.saveDataToGAS(false); window.renderUserBadge(); } else alert("Vui lòng nhập Tên hiển thị!"); };
 
-        // --- CÁC HÀM IN ẤN VÀ XUẤT EXCEL TÍCH HỢP HOÀN CHỈNH ---
+        // --- CÁC HÀM IN ẤN VÀ XUẤT EXCEL -----------------------------------------------------
         window.exportGlobalExcel = function() {
             try {
                 let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>`;
@@ -1612,14 +1862,22 @@
                     tableHtml += `</ul><br>`;
                 }
                 
-                tableHtml += `<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th style="background-color: #4CAF50; color: white;">STT</th><th style="background-color: #4CAF50; color: white;">Nội dung công việc</th><th style="background-color: #4CAF50; color: white;">Định mức</th><th style="background-color: #4CAF50; color: white;">Hạn chót</th><th style="background-color: #4CAF50; color: white;">Trạng thái</th><th style="background-color: #4CAF50; color: white;">Tài liệu / Văn bản</th></tr></thead><tbody>`;
+                tableHtml += `<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th style="background-color: #4CAF50; color: white;">STT</th><th style="background-color: #4CAF50; color: white;">Nội dung công việc (Bao gồm việc nhỏ)</th><th style="background-color: #4CAF50; color: white;">Định mức</th><th style="background-color: #4CAF50; color: white;">Hạn chót</th><th style="background-color: #4CAF50; color: white;">Trạng thái</th><th style="background-color: #4CAF50; color: white;">Ghi chú</th><th style="background-color: #4CAF50; color: white;">Tài liệu / Văn bản</th></tr></thead><tbody>`;
                     
                 if (pkg.steps) {
                     pkg.steps.forEach((step, idx) => {
                         let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'Ngày LV' : 'Ngày lịch'}` : "-";
                         const status = step.completed ? `Đã xong (${step.completedBy})` : 'Chưa xong';
                         let linkText = (step.links && step.links.length > 0) ? step.links.map(l => `${l.name} (${l.url})`).join(" \n ") : "";
-                        tableHtml += `<tr><td align="center">${idx + 1}</td><td>${step.name}</td><td align="center">${timeBudget}</td><td align="center">${window.formatDate(step.deadline)}</td><td>${status}</td><td>${linkText}</td></tr>`;
+                        
+                        let nameTxt = step.name;
+                        if(step.subTasks && step.subTasks.length > 0) {
+                            step.subTasks.forEach(sub => {
+                                nameTxt += `\n  - ${sub.name} (${sub.completed ? 'Xong' : 'Chưa'})`;
+                            });
+                        }
+                        
+                        tableHtml += `<tr><td align="center">${idx + 1}</td><td style="white-space: pre-wrap;">${nameTxt}</td><td align="center">${timeBudget}</td><td align="center">${window.formatDate(step.deadline)}</td><td>${status}</td><td>${step.note || ""}</td><td>${linkText}</td></tr>`;
                     });
                 }
                 tableHtml += `</tbody></table></body></html>`;
@@ -1739,22 +1997,31 @@
                         html += `<h2>Gói thầu ${pIdx + 1}: ${pkg.name}</h2>`;
                         html += `<p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${pkg.processTitle} | Phụ trách: ${pkg.owner}</i></p>`;
                         
-                        html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th></tr></thead><tbody>`;
+                        html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 180px">Ghi chú</th></tr></thead><tbody>`;
                         
                         if (pkg.steps && pkg.steps.length > 0) {
                             pkg.steps.forEach((step, sIdx) => {
                                 let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
                                 const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
+                                
+                                let nameTxt = step.name;
+                                if(step.subTasks && step.subTasks.length > 0) {
+                                    step.subTasks.forEach(sub => {
+                                        nameTxt += `<br><span style="color:#666; font-size:12px;">- ${sub.name} (${sub.completed ? 'Xong' : 'Chưa'})</span>`;
+                                    });
+                                }
+
                                 html += `<tr>
                                     <td class="text-center">${sIdx + 1}</td>
-                                    <td>${step.name}</td>
+                                    <td>${nameTxt}</td>
                                     <td class="text-center">${timeBudget}</td>
                                     <td class="text-center">${window.formatDate(step.deadline)}</td>
                                     <td class="text-center">${status}</td>
+                                    <td>${step.note || ''}</td>
                                 </tr>`;
                             });
                         } else {
-                            html += `<tr><td colspan="5" class="text-center" style="font-style: italic;">Chưa có công việc</td></tr>`;
+                            html += `<tr><td colspan="6" class="text-center" style="font-style: italic;">Chưa có công việc</td></tr>`;
                         }
                         html += `</tbody></table>`;
                     });
@@ -1798,14 +2065,22 @@
                     html += `</ul></div>`;
                 }
 
-                html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 180px">Văn bản</th></tr></thead><tbody>`;
+                html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 150px">Ghi chú</th><th style="width: 150px">Văn bản đính kèm</th></tr></thead><tbody>`;
                 
                 if (pkg.steps) {
                     pkg.steps.forEach((step, idx) => {
                         let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
                         const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${step.completedBy})</span>` : 'Chưa xong';
                         let linkText = (step.links && step.links.length > 0) ? step.links.map(l => `- ${l.name}`).join("<br>") : "";
-                        html += `<tr><td class="text-center">${idx + 1}</td><td>${step.name}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${linkText}</td></tr>`;
+                        
+                        let nameTxt = step.name;
+                        if(step.subTasks && step.subTasks.length > 0) {
+                            step.subTasks.forEach(sub => {
+                                nameTxt += `<br><span style="color:#666; font-size:12px;">- ${sub.name} (${sub.completed ? 'Xong' : 'Chưa'})</span>`;
+                            });
+                        }
+
+                        html += `<tr><td class="text-center">${idx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${step.note || ""}</td><td>${linkText}</td></tr>`;
                     });
                 }
                 
