@@ -34,7 +34,9 @@
                 </div>
                 <div class="flex items-center">
                     <input type="checkbox" id="rememberMe" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">Ghi nhớ đăng nhập</label>
+                    <label for="rememberMe" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                        Ghi nhớ đăng nhập
+                    </label>
                 </div>
                 <button onclick="handleLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 rounded-md shadow transition mt-2">
                     Đăng nhập hệ thống
@@ -59,8 +61,8 @@
                     <button onclick="forceSync()" id="syncStatus" class="flex items-center gap-1 bg-blue-800 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer">
                         <i class="fas fa-cloud text-blue-300"></i> <span id="syncText">Đã đồng bộ</span>
                     </button>
-                    <button onclick="openProfileModal()" id="userBadge" class="bg-blue-800 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-sm font-medium transition flex items-center gap-1.5 title='Đổi thông tin cá nhân'></button>
-                    <button onclick="handleLogout()" class="text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow" title="Đăng xuất"><i class="fas fa-sign-out-alt"></i></button>
+                    <button onclick="openProfileModal()" id="userBadge" class="bg-blue-800 border border-blue-700 hover:bg-blue-700 px-3 py-1.5 rounded text-sm font-medium transition flex items-center gap-1.5" title="Đổi thông tin cá nhân"></button>
+                    <button onclick="handleLogout()" class="text-white text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow" title="Đăng xuất"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </header>
@@ -244,10 +246,15 @@
                             <i class="fas fa-sync-alt"></i> Tải danh sách Bản sao lưu
                         </button>
                     </div>
+
                     <div class="overflow-x-auto bg-gray-50 rounded border border-gray-200 mt-4">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
-                                <tr><th class="p-3 w-16 text-center">ID</th><th class="p-3">Thời gian Sao lưu</th><th class="p-3 w-40 text-center">Thao tác</th></tr>
+                                <tr>
+                                    <th class="p-3 w-16 text-center">ID</th>
+                                    <th class="p-3">Thời gian Sao lưu</th>
+                                    <th class="p-3 w-40 text-center">Thao tác</th>
+                                </tr>
                             </thead>
                             <tbody id="backupsTableBody">
                                 <tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Bấm "Tải danh sách Bản sao lưu" để hiển thị.</td></tr>
@@ -345,7 +352,7 @@
     <div id="loader" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
         <div class="bg-white px-6 py-5 rounded-lg shadow-2xl font-bold text-blue-900 flex flex-col items-center gap-3">
             <i class="fas fa-circle-notch fa-spin text-4xl text-blue-600"></i> 
-            <span id="loaderText" class="text-base mt-2">Đang kết nối hệ thống...</span>
+            <span id="loaderText" class="text-base mt-2">Đang tải dữ liệu...</span>
         </div>
     </div>
 
@@ -989,9 +996,37 @@
         window.deleteProcessTemplate = function() { try { if (currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!"); const type = document.getElementById('configProcessSelector').value; if (!type) return; if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn quy trình này không?`)) { delete db.processTemplates[type]; populateProcessDropdowns(); renderConfig(); saveDataToGAS(false); } } catch(e) { console.error(e); alert("Có lỗi xảy ra."); } };
         window.removeConfigStep = function(typeKey, index) { try { if (currentUser.role !== 'admin') return alert("Chỉ Quản trị viên mới được thao tác!"); db.processTemplates[typeKey].steps.splice(index, 1); renderConfig(); saveDataToGAS(false); } catch(e) { console.error(e); } };
         window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { try { if (confirm("Xóa tài liệu đính kèm này?")) { db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1); logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm ở bước ${sIndex+1}`); renderMissions(); saveDataToGAS(false); } } catch(e) { console.error(e); } };
-        window.archivePackage = function(mIndex, pkgIndex) { try { let pkg = db.missions[mIndex].packages[pkgIndex]; let action = pkg.archived ? "Khôi phục" : "Lưu trữ"; if (confirm(`Bạn muốn ${action} gói thầu "${pkg.name}"?`)) { pkg.archived = !pkg.archived; renderMissions(); saveDataToGAS(false); } } catch(e) { console.error(e); } };
-        window.toggleMissionComplete = function(mIndex) { let m = db.missions[mIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== m.owner) return alert("Chỉ người tạo Nhiệm vụ mới được phép chốt Hoàn thành!"); m.completed = !m.completed; renderMissions(); saveDataToGAS(false); };
-        window.togglePackageComplete = function(mIndex, pkgIndex) { let m = db.missions[mIndex]; let pkg = m.packages[pkgIndex]; if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Chỉ Chuyên viên phụ trách mới được phép chốt Hoàn thành!"); pkg.completed = !pkg.completed; logActivity(mIndex, pkgIndex, pkg.completed ? "Đã chốt Hoàn thành toàn bộ Gói thầu" : "Đã hủy chốt Hoàn thành Gói thầu"); renderMissions(); saveDataToGAS(false); };
+
+        window.archivePackage = function(mIndex, pkgIndex) {
+            try {
+                let pkg = db.missions[mIndex].packages[pkgIndex];
+                let action = pkg.archived ? "Khôi phục" : "Lưu trữ";
+                if (confirm(`Bạn muốn ${action} gói thầu "${pkg.name}"?`)) {
+                    pkg.archived = !pkg.archived;
+                    renderMissions();
+                    saveDataToGAS(false);
+                }
+            } catch(e) { console.error(e); }
+        };
+
+        window.toggleMissionComplete = function(mIndex) {
+            let m = db.missions[mIndex];
+            if (currentUser.role !== 'admin' && currentUser.fullname !== m.owner) return alert("Chỉ người tạo Nhiệm vụ mới được phép chốt Hoàn thành!");
+            m.completed = !m.completed;
+            renderMissions();
+            saveDataToGAS(false);
+        };
+
+        window.togglePackageComplete = function(mIndex, pkgIndex) {
+            let m = db.missions[mIndex];
+            let pkg = m.packages[pkgIndex];
+            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return alert("Chỉ Chuyên viên phụ trách mới được phép chốt Hoàn thành!");
+            pkg.completed = !pkg.completed;
+            logActivity(mIndex, pkgIndex, pkg.completed ? "Đã chốt Hoàn thành toàn bộ Gói thầu" : "Đã hủy chốt Hoàn thành Gói thầu");
+            renderMissions();
+            saveDataToGAS(false);
+        };
+
         window.openProfileModal = function() { document.getElementById('profileFullname').value = currentUser.fullname; document.getElementById('profilePassword').value = ''; document.getElementById('profileModal').classList.remove('hidden'); };
         window.closeProfileModal = function() { document.getElementById('profileModal').classList.add('hidden'); };
         window.saveProfile = function() { const newName = document.getElementById('profileFullname').value.trim(); const newPass = document.getElementById('profilePassword').value.trim(); if (!newName) return alert("Tên hiển thị không được để trống!"); const oldName = currentUser.fullname; const userIndex = db.users.findIndex(u => u.username === currentUser.username); if (userIndex !== -1) { db.users[userIndex].fullname = newName; if (newPass) db.users[userIndex].password = newPass; currentUser = db.users[userIndex]; if (oldName !== newName && db.missions) { db.missions.forEach(m => { if (m.owner === oldName) m.owner = newName; if (m.packages) m.packages.forEach(p => { if(p.owner === oldName) p.owner = newName; p.steps.forEach(s => { if (s.completedBy === oldName) s.completedBy = newName; }); }); }); } if (localStorage.getItem('bidAppUser')) localStorage.setItem('bidAppUser', JSON.stringify(currentUser)); renderUserBadge(); if(currentUser.role === 'admin') renderUsers(); renderMissions(); saveDataToGAS(); closeProfileModal(); alert("Cập nhật thông tin cá nhân thành công!"); } };
