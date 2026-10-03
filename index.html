@@ -1306,7 +1306,7 @@ const LUNAR_HOLIDAYS = [
                         m.packages.forEach(p => {
                             if (p.archived || p.completed) return;
                             let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                            if (currentUser.role === 'user' && !isOwner) return;
+                            if ((currentUser.role || '').toLowerCase() === 'user' && !isOwner) return;
                             
                             if (p.steps && Array.isArray(p.steps)) {
                                 p.steps.forEach(s => {
@@ -1366,7 +1366,7 @@ const LUNAR_HOLIDAYS = [
                         m.packages.forEach(p => {
                             if (p.archived) return; 
                             let isPkgOwner = isViewer || p.owner === currentUser.fullname; 
-                            if (currentUser.role === 'user' && !isPkgOwner) return;
+                            if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
                             if (p.completed || m.completed) { 
                                 sDone++; 
                             } else {
@@ -1423,7 +1423,7 @@ const LUNAR_HOLIDAYS = [
                 let missionsHTML = ""; 
                 let overdueHTML = "";
                 
-                if (currentUser.role === 'user') { 
+                if ((currentUser.role || '').toLowerCase() === 'user') { 
                     document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; 
                 } else { 
                     document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể`; 
@@ -1446,7 +1446,7 @@ const LUNAR_HOLIDAYS = [
                                 } 
                             });
                         }
-                        if (currentUser.role === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
                         if (!m.completed) activeMs++; 
                         let mTotalSteps = 0; 
                         let mCompletedSteps = 0;
@@ -1536,7 +1536,7 @@ const LUNAR_HOLIDAYS = [
                             m.packages.forEach((p) => {
                                 if (p.archived) return; 
                                 let isPkgOwner = isMissionViewer || p.owner === currentUser.fullname; 
-                                if (currentUser.role === 'user' && !isPkgOwner) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
                                 
                                 let safePkgName = p.name || 'Gói thầu'; 
                                 let ownerName = p.owner || m.owner; 
@@ -1626,7 +1626,7 @@ const LUNAR_HOLIDAYS = [
                                 if (!matchSearchPkg) return false;
                                 
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
-                                if (currentUser.role === 'user' && !isPkgViewer) return false; 
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return false; 
                                 return true;
                             });
                         }
@@ -1775,7 +1775,8 @@ const LUNAR_HOLIDAYS = [
                                     btnCompletePkg = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã xong</span>`; 
                                 }
 
-                                let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
+                                let btnLogPkg = (['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
+let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
 
                                 let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (pkg.completed ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'bg-blue-50/50 dark:bg-blue-900/10');
                                 let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
@@ -1789,7 +1790,7 @@ const LUNAR_HOLIDAYS = [
                                                 <div class="flex items-center gap-2 flex-wrap">
                                                     <h4 class="font-bold text-[14px] flex items-center ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (pkg.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-blue-900 dark:text-blue-300')}">
                                                         <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
-                                                        ${pkgNameSafe} ${btnEditPkg}
+                                                        ${pkgNameSafe} ${btnEditPkg} ${btnLogPkg}
                                                     </h4>
 
 <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] w-full">
@@ -1806,7 +1807,6 @@ const LUNAR_HOLIDAYS = [
                                             </div>
                                             <div class="flex items-center gap-1 mt-2 md:mt-0 flex-wrap">
                                                 ${archiveBtn}
-                                                <button onclick="window.openActivityLogModal(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2 py-1.5 rounded border border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm"><i class="fas fa-history"></i> Nhật ký</button>
                                                 <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm" title="Xuất Excel gói thầu"><i class="fas fa-file-excel"></i> Xuất</button>
                                                 <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm"><i class="fas fa-print"></i> In Gói</button>
                                                 ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm"><i class="fas fa-trash-alt"></i></button>` : ''}
@@ -2991,14 +2991,14 @@ const latestDocs = [
                         let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         let hasOwnedPackage = false;
                         if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if (currentUser.role === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
                         
                         let mStatusStr = m.completed ? "Hoàn thành" : "Đang thực hiện";
                         if(m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return; 
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === p.owner || currentUser.fullname === m.owner;
-                                if (currentUser.role === 'user' && !isPkgViewer) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                                 
                                 let total = 0, done = 0;
                                 if(p.steps) { 
@@ -3242,13 +3242,13 @@ const latestDocs = [
                         let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         let hasOwnedPackage = false;
                         if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if (currentUser.role === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
                         let mTotalSteps = 0, mCompletedSteps = 0, hasActive = false;
                         if (m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return;
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                                if (currentUser.role === 'user' && !isPkgViewer) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                                 hasActive = true; 
                                 if (p.steps) p.steps.forEach(s => { mTotalSteps++; if(s.completed) mCompletedSteps++; });
                             });
@@ -3271,7 +3271,10 @@ const latestDocs = [
                     });
                     html += `</tbody></table>`;
                 }
-                html += `<div class="footer"><div class="signature"><p style="font-weight:bold; margin-bottom: 80px;">NGƯỜI LẬP BÁO CÁO</p><p style="font-weight:bold">${escapeHtml(currentUser.fullname)}</p></div></div></body></html>`;
+                html += `<div class="footer"><div class="signature"><p style="font-weight:bold; margin-bottom: 80px;">NGƯỜI LẬP BÁO CÁO</p><p style="font-weight:bold">${escapeHtml(currentUser.fullname)}</p></div></div>
+
+
+</body></html>`;
                 
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
@@ -3299,7 +3302,7 @@ const latestDocs = [
                     mission.packages.forEach((pkg, pIdx) => {
                         if (pkg.archived) return; 
                         let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
-                        if (currentUser.role === 'user' && !isPkgViewer) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                         hasVisiblePkg = true;
                         html += `<h2>Gói thầu ${pIdx + 1}: ${escapeHtml(pkg.name)}</h2><p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${escapeHtml(pkg.processTitle)} | Phụ trách: ${escapeHtml(pkg.owner)}</i></p>`;
                         html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 180px">Ghi chú</th></tr></thead><tbody>`;
@@ -3324,7 +3327,10 @@ const latestDocs = [
                         html += `<p style="font-style: italic;">Không có gói thầu nào bạn được phép xem trong nhiệm vụ này.</p>`; 
                     }
                 }
-                html += `<div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 13px;">${dateStr}</div></body></html>`;
+                html += `<div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 13px;">${dateStr}</div>
+
+
+</body></html>`;
                 
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
@@ -3367,7 +3373,10 @@ const latestDocs = [
                         html += `<tr><td class="text-center">${idx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${escapeHtml(step.note || "")}</td><td>${linkText}</td></tr>`;
                     });
                 }
-                html += `</tbody></table><div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 12px;">Ngày trích xuất: ${window.formatDate(new Date().toISOString())}</div></body></html>`;
+                html += `</tbody></table><div style="margin-top: 20px; text-align: right; font-style: italic; font-size: 12px;">Ngày trích xuất: ${window.formatDate(new Date().toISOString())}</div>
+
+
+</body></html>`;
                 
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
@@ -3533,7 +3542,10 @@ window.printDashboard = function() {
 window.printReportDirectly = function() {
     let content = document.getElementById('reportContentArea').innerHTML;
     let printWin = window.open('', '', 'width=900,height=650');
-    printWin.document.write(`<html><head><title>In Báo cáo</title><style>body { font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; }</style></head><body>${content}</body></html>`);
+    printWin.document.write(`<html><head><title>In Báo cáo</title><style>body { font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; }</style></head><body>${content}
+
+
+</body></html>`);
     printWin.document.close();
     printWin.focus();
     setTimeout(() => { printWin.print(); printWin.close(); }, 500);
@@ -3561,5 +3573,64 @@ window.exportReportToWord = function() {
     document.body.removeChild(downloadLink);
 };
 </script>
+
+
+
+
+<!-- Modal Nhật ký Hoạt động (Audit Logs) -->
+<div id="auditLogModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[80] px-4">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-slate-500 flex flex-col max-h-[85vh]">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 pb-2 border-b dark:border-gray-700 flex justify-between items-center">
+            <span><i class="fas fa-history text-slate-500 mr-2"></i>Nhật ký Hoạt động</span>
+            <button onclick="document.getElementById('auditLogModal').classList.add('hidden')" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
+        </h2>
+        <div class="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-4" id="auditLogPkgName"></div>
+        
+        <div id="auditLogContent" class="flex-1 overflow-y-auto pr-2 space-y-3">
+            <!-- Logs go here -->
+        </div>
+        
+        <div class="mt-4 pt-3 border-t dark:border-gray-700 flex justify-end">
+            <button onclick="document.getElementById('auditLogModal').classList.add('hidden')" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+window.openAuditLogModal = function(mIndex, pIndex) {
+    if (!['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký', 'error');
+    let pkg = db.missions[mIndex].packages[pIndex];
+    document.getElementById('auditLogPkgName').innerText = "Gói thầu: " + (pkg.name || "");
+    
+    let container = document.getElementById('auditLogContent');
+    container.innerHTML = "";
+    
+    if (!pkg.logs || pkg.logs.length === 0) {
+        container.innerHTML = `<div class="text-center text-gray-400 text-sm italic py-4">Chưa có lịch sử hoạt động nào được ghi nhận.</div>`;
+    } else {
+        pkg.logs.forEach(log => {
+            let match = log.match(/^(\[.*?\])\s+(.*?):\s+(.*)$/);
+            if (match) {
+                let time = match[1];
+                let author = match[2];
+                let action = match[3];
+                container.innerHTML += `
+                    <div class="bg-gray-50 dark:bg-gray-900 border-l-2 border-slate-400 p-2 rounded text-[13px] shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fas fa-user-edit text-[10px] mr-1"></i>${escapeHtml(author)}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${time}</span>
+                        </div>
+                        <div class="text-gray-600 dark:text-gray-400">${escapeHtml(action)}</div>
+                    </div>`;
+            } else {
+                container.innerHTML += `<div class="bg-gray-50 dark:bg-gray-900 border-l-2 border-slate-400 p-2 rounded text-[13px] text-gray-600 dark:text-gray-400 shadow-sm">${escapeHtml(log)}</div>`;
+            }
+        });
+    }
+    
+    document.getElementById('auditLogModal').classList.remove('hidden');
+};
+</script>
+
 </body>
 </html>
