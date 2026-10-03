@@ -167,11 +167,13 @@
             <!-- 3. PROJECTS / MISSIONS -->
             <div id="view-projects" class="hidden">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col xl:flex-row gap-4 justify-between items-center">
-                    <div class="flex gap-2 w-full xl:w-auto items-center flex-1 flex-wrap">
-                        <div class="relative flex-1 min-w-[200px]"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border dark:border-gray-600 rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                        <select id="filterStatus" onchange="window.renderMissions()" class="border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="active">Gói đang chạy</option><option value="archived">Đã lưu trữ</option><option value="all">Tất cả</option></select>
-                        <select id="filterOwner" onchange="window.renderMissions()" class="border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
-                        <div class="flex items-center gap-1 text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md"><span class="text-gray-500 dark:text-gray-300">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white"><span class="text-gray-500 dark:text-gray-300">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white"></div>
+                    <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto items-center flex-1 flex-wrap">
+                        <div class="relative w-full md:flex-1 md:min-w-[200px]"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border dark:border-gray-600 rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <select id="filterStatus" onchange="window.renderMissions()" class="flex-1 md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="active">Đang chạy</option><option value="archived">Lưu trữ</option><option value="all">Tất cả</option></select>
+                            <select id="filterOwner" onchange="window.renderMissions()" class="flex-[2] md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
+                        </div>
+                        <div class="flex items-center justify-between w-full md:w-auto gap-1 text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md"><span class="text-gray-500 dark:text-gray-300">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"><span class="text-gray-500 dark:text-gray-300 text-center">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"></div>
                     </div>
                     <div id="archiveWarning" class="hidden text-[11px] md:text-xs text-red-600 font-medium bg-red-50 dark:bg-red-900/30 px-3 py-2 rounded-md border border-red-200 dark:border-red-800 flex items-center gap-1.5 whitespace-nowrap shadow-sm"><i class="fas fa-trash-alt"></i> Tự động xóa sau 30 ngày</div>
                 </div>
@@ -192,14 +194,16 @@
                     </div>
                 </div>
                 <div id="configSteps" class="space-y-2 mb-4"></div>
-                <div class="flex gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900 mt-6">
+                <div class="flex flex-col md:flex-row gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900 mt-6">
                     <input type="text" id="newStepName" placeholder="Tên bước mới..." class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm flex-1 outline-none dark:text-white">
-                    <input type="number" id="newStepDays" placeholder="Số ngày" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm w-24 text-center outline-none dark:text-white">
-                    <select id="newStepDayType" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-36 dark:text-white">
-                        <option value="calendar">Ngày lịch</option>
-                        <option value="workday">Ngày làm việc</option>
-                    </select>
-                    <button onclick="window.addConfigStep()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">Thêm</button>
+                    <div class="flex gap-2">
+                        <input type="number" id="newStepDays" placeholder="Số ngày" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm w-full md:w-24 text-center outline-none dark:text-white flex-1">
+                        <select id="newStepDayType" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-36 dark:text-white flex-[2]">
+                            <option value="calendar">Ngày lịch</option>
+                            <option value="workday">Ngày làm việc</option>
+                        </select>
+                        <button onclick="window.addConfigStep()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium w-full md:w-auto">Thêm</button>
+                    </div>
                 </div>
             </div>
 
@@ -207,13 +211,15 @@
             <div id="view-docs" class="hidden space-y-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Căn cứ triển khai chung</h2>
-                    <div class="flex gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded">
+                    <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded">
                         <input type="text" id="newDocNumber" placeholder="Số hiệu..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
                         <input type="text" id="newDocTitle" placeholder="Tên văn bản..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-[2] dark:text-white">
                         <input type="url" id="newDocLink" placeholder="Link (Tùy chọn)..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
-                        <button onclick="window.addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"><i class="fas fa-plus"></i></button>
+                        <button onclick="window.addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium w-full md:w-auto"><i class="fas fa-plus mr-1 md:mr-0"></i><span class="md:hidden"> Thêm văn bản</span></button>
                     </div>
-                    <table class="w-full text-left border-collapse text-sm"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link tra cứu</th><th class="p-3 w-16 text-center">Xóa</th></tr></thead><tbody id="docsTableBody" class="dark:text-gray-300"></tbody></table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm min-w-[700px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link tra cứu</th><th class="p-3 w-16 text-center">Xóa</th></tr></thead><tbody id="docsTableBody" class="dark:text-gray-300"></tbody></table>
+                    </div>
                 </div>
             </div>
 
@@ -233,8 +239,8 @@
                     </div>
                     <button onclick="window.addNewUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow-sm">Thêm tài khoản</button>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <table class="w-full text-left border-collapse text-sm"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3">Tài khoản (ID)</th><th class="p-3">Họ và tên</th><th class="p-3">Vai trò</th><th class="p-3 text-right">Thao tác</th></tr></thead><tbody id="userTableBody" class="dark:text-gray-300"></tbody></table>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm min-w-[600px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3">Tài khoản (ID)</th><th class="p-3">Họ và tên</th><th class="p-3">Vai trò</th><th class="p-3 text-right">Thao tác</th></tr></thead><tbody id="userTableBody" class="dark:text-gray-300"></tbody></table>
                 </div>
             </div>
 
