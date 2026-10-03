@@ -107,8 +107,8 @@
                 <button onclick="window.switchTab('projects')" id="tab-projects" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-tasks mr-1.5"></i>Danh sách Dự án</button>
                 <button onclick="window.switchTab('kanban')" id="tab-kanban" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-columns mr-1.5"></i>Bảng Kanban</button>
                 <button onclick="window.switchTab('calendar')" id="tab-calendar" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-calendar-alt mr-1.5"></i>Lịch biểu</button>
+                <button onclick="window.switchTab('docs')" id="tab-docs" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-book mr-1.5"></i>Pháp lý</button>
                 <button onclick="window.switchTab('settings')" id="tab-settings" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-sliders mr-1.5"></i>Quy trình</button>
-                <button onclick="window.switchTab('docs')" id="tab-docs" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-book mr-1.5"></i>Pháp lý</button>
                 <button onclick="window.switchTab('users')" id="tab-users" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-users-gear mr-1.5"></i>Tài khoản</button>
                 <button onclick="window.switchTab('backups')" id="tab-backups" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-history mr-1.5"></i>Khôi phục</button>
             </div>
@@ -215,8 +215,11 @@
             <!-- 5. REGULATORY DOCUMENTS -->
             <div id="view-docs" class="hidden space-y-6">
                 <!-- THÊM VĂN BẢN -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Thêm Văn bản Pháp lý</h2>
+                <div class="admin-only hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Thêm Văn bản Pháp lý</h2>
+                        <button onclick="window.loadLatestBiddingLaws()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition"><i class="fas fa-magic mr-1"></i> Bộ CSDL Luật Đấu Thầu (Mới nhất)</button>
+                    </div>
                     <div class="flex flex-col md:flex-row gap-3 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded items-center">
                         <select id="newDocCategory" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-48 dark:text-white">
                             <option value="chung">Căn cứ chung</option>
@@ -224,7 +227,7 @@
                         </select>
                         <input type="text" id="newDocNumber" placeholder="Số hiệu..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
                         <input type="text" id="newDocTitle" placeholder="Tên văn bản..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-[2] dark:text-white">
-                        <input type="url" id="newDocLink" placeholder="Link web (nếu có)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
+                        <textarea id="newDocLink" rows="1" placeholder="Link web (nếu có nhiều link, mỗi link 1 dòng)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white resize-y"></textarea>
                         <div class="flex gap-2 w-full md:w-auto">
                             <button onclick="document.getElementById('uploadDocFile').click()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded text-sm font-medium whitespace-nowrap" title="Tải file lên Drive"><i class="fas fa-cloud-upload-alt"></i> Tải file</button>
                             <input type="file" id="uploadDocFile" class="hidden" onchange="window.uploadDocDrive(this)">
@@ -1124,6 +1127,18 @@
             window.renderUserBadge(); 
             autoCleanArchivedData();
             
+            // Tự động kiểm tra và cập nhật CSDL Luật 1 lần/ngày
+            if (currentUser && currentUser.role === 'admin') {
+                const today = new Date().toLocaleDateString('vi-VN');
+                const lastLawUpdate = localStorage.getItem('lastLawUpdateDate');
+                if (lastLawUpdate !== today) {
+                    setTimeout(() => {
+                        window.silentUpdateBiddingLaws();
+                        localStorage.setItem('lastLawUpdateDate', today);
+                    }, 1500); // Đợi giao diện render xong rồi mới báo
+                }
+            }
+
             const btnCreate = document.getElementById('btnCreateProject');
             if (currentUser.role !== 'leader') { 
                 btnCreate.classList.replace('hidden', 'flex'); 
@@ -1161,7 +1176,7 @@
         };
 
         window.switchTab = function(tab) {
-            if (currentUser.role !== 'admin' && ['settings', 'docs', 'users', 'backups'].includes(tab)) { 
+            if (currentUser.role !== 'admin' && ['settings', 'users', 'backups'].includes(tab)) { 
                 return Swal.fire('Lỗi', 'Không có quyền truy cập khu vực này!', 'error'); 
             }
             ['dashboard', 'projects', 'kanban', 'calendar', 'settings', 'docs', 'users', 'backups'].forEach(t => {
@@ -1723,12 +1738,15 @@
 
                         let docsHtml = "";
                         if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
-                            let docLinks = db.regulatoryDocs.map(d => { 
-                                let linkPart = d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : ''; 
-                                let linkClose = d.link ? `</a>` : ''; 
-                                return `${linkPart}<b>${escapeHtml(d.number)}</b>${linkClose}`; 
-                            }).join(', ');
-                            docsHtml = `<div class="mt-3 bg-white dark:bg-gray-800 p-2 rounded border border-indigo-100 dark:border-indigo-900 text-xs shadow-sm"><span class="font-semibold text-indigo-800 dark:text-indigo-400">Căn cứ chung:</span><span class="text-gray-600 dark:text-gray-400 ml-1">${docLinks}</span></div>`;
+                            const chungDocs = db.regulatoryDocs.filter(d => d.category === 'chung');
+                            if (chungDocs.length > 0) {
+                                let docLinks = chungDocs.map(d => { 
+                                    let linkPart = d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : ''; 
+                                    let linkClose = d.link ? `</a>` : ''; 
+                                    return `${linkPart}<b>${escapeHtml(d.number)}</b>${linkClose}`; 
+                                }).join(', ');
+                                docsHtml = `<div class="mt-3 bg-white dark:bg-gray-800 p-2 rounded border border-indigo-100 dark:border-indigo-900 text-xs shadow-sm"><span class="font-semibold text-indigo-800 dark:text-indigo-400">Căn cứ chung:</span><span class="text-gray-600 dark:text-gray-400 ml-1">${docLinks}</span></div>`;
+                            }
                         }
 
                         let mBorderColor = mission.completed ? 'border-emerald-500' : 'border-indigo-300 dark:border-indigo-700';
@@ -2527,17 +2545,40 @@
             
             if(!db.regulatoryDocs) db.regulatoryDocs = []; 
             db.regulatoryDocs.forEach((d, i) => { 
+                const isAdmin = currentUser && currentUser.role === 'admin';
+                let numberCell, titleCell, linkCell;
+                
+                if (isAdmin) {
+                    numberCell = `<input value="${escapeHtml(d.number)}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
+                    titleCell = `<input value="${escapeHtml(d.title)}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
+                    linkCell = `<div class="flex flex-col gap-1">
+                                    <textarea rows="2" placeholder="Mỗi link một dòng" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 p-1 rounded text-sm outline-none resize-y">${escapeHtml(d.link||'')}</textarea>
+                                </div>`;
+                } else {
+                    numberCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal font-medium">${escapeHtml(d.number)}</div>`;
+                    titleCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal leading-relaxed">${escapeHtml(d.title)}</div>`;
+                    
+                    let linksHtml = '';
+                    if (d.link) {
+                        let urls = d.link.split(/[\n\s,]+/).filter(u => u.trim().length > 0);
+                        if (urls.length > 0) {
+                            linksHtml = `<div class="flex flex-wrap gap-2">` + urls.map((u, idx) => {
+                                let label = urls.length > 1 ? `Đọc văn bản ${idx + 1}` : `Đọc văn bản`;
+                                return `<a href="${escapeHtml(u)}" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded text-xs font-semibold transition border border-blue-200 dark:border-blue-800"><i class="fas fa-book-open"></i> ${label}</a>`;
+                            }).join('') + `</div>`;
+                        }
+                    }
+                    if (!linksHtml) linksHtml = `<span class="text-xs text-gray-400 italic">Không có link</span>`;
+                    
+                    linkCell = linksHtml;
+                }
+
                 let rowHtml = `
                     <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                        <td class="p-3"><input value="${escapeHtml(d.number)}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td>
-                        <td class="p-3"><input value="${escapeHtml(d.title)}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td>
-                        <td class="p-3">
-                            <div class="flex items-center gap-2">
-                                <input type="url" value="${escapeHtml(d.link||'')}" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">
-                                ${d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-500 hover:text-blue-700" title="Mở link"><i class="fas fa-external-link-alt"></i></a>` : ''}
-                            </div>
-                        </td>
-                        <td class="p-3 text-center"><button onclick="window.deleteDoc(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>
+                        <td class="p-3 align-top">${numberCell}</td>
+                        <td class="p-3 align-top">${titleCell}</td>
+                        <td class="p-3 align-top">${linkCell}</td>
+                        ${isAdmin ? `<td class="p-3 text-center align-top"><button onclick="window.deleteDoc(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>` : `<td class="p-3 text-center text-gray-400 align-top"><i class="fas fa-lock text-[10px]"></i></td>`}
                     </tr>`; 
                     
                 if (d.category === 'thamkhao') {
@@ -2564,6 +2605,92 @@
                 window.saveDataToGAS(false); 
             } else {
                 Swal.fire('Lỗi', 'Vui lòng nhập số hiệu và tên văn bản', 'warning');
+            }
+        };
+
+        window.loadLatestBiddingLaws = function() {
+            if(currentUser.role !== 'admin') return; 
+            Swal.fire({
+                title: 'Nạp CSDL Luật Đấu thầu 2026?',
+                text: "Hệ thống sẽ tự động thêm các văn bản cốt lõi mới nhất (bao gồm Nghị định 349/2026/NĐ-CP, Nghị định 214/2025/NĐ-CP...) vào Các văn bản tham khảo.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý nạp',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const latestDocs = [
+                        { category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', link: 'https://www.google.com/search?q=Luật+Đấu+thầu+22%2F2023%2FQH15' },
+                        { category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu (Mới nhất)', link: 'https://www.google.com/search?q=Nghị+định+349%2F2026%2FNĐ-CP+lựa+chọn+nhà+thầu' },
+                        { category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu (Sửa đổi bởi NĐ 349/2026)', link: 'https://www.google.com/search?q=Nghị+định+214%2F2025%2FNĐ-CP' },
+                        { category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', link: 'https://www.google.com/search?q=Văn+bản+hợp+nhất+36%2F2026%2FVBHN-BTC+Bộ+Tài+chính' },
+                        { category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', link: 'https://www.google.com/search?q=Nghị+quyết+HĐND+Hà+Nội+phân+cấp+đấu+thầu+2026' }
+                    ];
+                    
+                    if(!db.regulatoryDocs) db.regulatoryDocs = [];
+                    
+                    let addedCount = 0;
+                    latestDocs.forEach(newDoc => {
+                        // Tránh thêm trùng lặp
+                        if (!db.regulatoryDocs.find(d => d.number === newDoc.number)) {
+                            db.regulatoryDocs.push(newDoc);
+                            addedCount++;
+                        }
+                    });
+                    
+                    if (addedCount > 0) {
+                        window.renderDocs();
+                        window.saveDataToGAS(false);
+                        Swal.fire('Thành công', `Đã nạp ${addedCount} văn bản Luật đấu thầu mới nhất!`, 'success');
+                    } else {
+                        Swal.fire('Thông báo', 'Hệ thống của bạn đã có sẵn các văn bản này, không cần nạp thêm.', 'info');
+                    }
+                }
+            });
+        };
+
+        window.silentUpdateBiddingLaws = function() {
+            const latestDocs = [
+                { category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', link: 'https://www.google.com/search?q=Luật+Đấu+thầu+22%2F2023%2FQH15' },
+                { category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu (Mới nhất)', link: 'https://www.google.com/search?q=Nghị+định+349%2F2026%2FNĐ-CP+lựa+chọn+nhà+thầu' },
+                { category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu (Sửa đổi bởi NĐ 349/2026)', link: 'https://www.google.com/search?q=Nghị+định+214%2F2025%2FNĐ-CP' },
+                { category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', link: 'https://www.google.com/search?q=Văn+bản+hợp+nhất+36%2F2026%2FVBHN-BTC+Bộ+Tài+chính' },
+                { category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', link: 'https://www.google.com/search?q=Nghị+quyết+HĐND+Hà+Nội+phân+cấp+đấu+thầu+2026' }
+            ];
+            
+            if(!db.regulatoryDocs) db.regulatoryDocs = [];
+            
+            let addedCount = 0;
+            latestDocs.forEach(newDoc => {
+                if (!db.regulatoryDocs.find(d => d.number === newDoc.number)) {
+                    db.regulatoryDocs.push(newDoc);
+                    addedCount++;
+                }
+            });
+            
+            if (addedCount > 0) {
+                if (document.getElementById('view-docs') && !document.getElementById('view-docs').classList.contains('hidden')) {
+                    window.renderDocs();
+                }
+                window.saveDataToGAS(true); // background silent save
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: `Đã tự động cập nhật ${addedCount} văn bản Luật đấu thầu mới nhất (2026)!`,
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            } else {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: `CSDL Luật Đấu thầu của bạn đã là bản mới nhất!`,
+                    showConfirmButton: false,
+                    timer: 4000
+                });
             }
         };
 
@@ -2600,7 +2727,8 @@
 
                     if (result.status === 'success') {
                         // Tự động điền link vào ô input
-                        document.getElementById('newDocLink').value = result.link;
+                        let currentLink = document.getElementById('newDocLink').value.trim();
+                        document.getElementById('newDocLink').value = currentLink ? (currentLink + "\n" + result.link) : result.link;
                         Swal.fire('Thành công', 'Đã lưu trữ văn bản vào Drive! Vui lòng nhập số hiệu, tên văn bản và bấm Thêm.', 'success');
                     } else {
                         Swal.fire('Lỗi', result.message || 'Lỗi tải lên', 'error');
