@@ -801,11 +801,13 @@
                     }
                 }, 3000);
                 if (alertSuccess) window.toast.fire({ icon: 'success', title: 'Đã lưu dữ liệu lên máy chủ!' });
+                return true;
             } catch (err) {
                 console.error("Lỗi khi lưu:", err);
                 if (alertSuccess) window.toast.fire({ icon: 'error', title: 'Không thể lưu lên máy chủ!' });
                 if (syncIcon) syncIcon.className = 'fas fa-exclamation-triangle text-red-500';
                 if (syncText) syncText.innerText = 'Lỗi lưu';
+                return false;
             }
             isSaving = false;
         };
@@ -2852,12 +2854,39 @@
             if(f){ 
                 db.users[currentEditUserIndex].fullname = f; 
                 if(db.users[currentEditUserIndex].username !== 'admin') db.users[currentEditUserIndex].role = r; 
-                if(p) db.users[currentEditUserIndex].password = p; 
-                if(currentUser.username === db.users[currentEditUserIndex].username) currentUser = db.users[currentEditUserIndex]; 
-                window.closeEditUserModal(); 
-                window.renderUsers(); 
-                window.saveDataToGAS(false); 
-                window.renderUserBadge(); 
+                let oldPass = null;
+                let isChangingOwnPass = (currentUser.username === db.users[currentEditUserIndex].username);
+                if(p) {
+                    oldPass = db.users[currentEditUserIndex].password;
+                    db.users[currentEditUserIndex].password = p; 
+                }
+                
+                window.closeEditUserModal();
+                window.renderUsers();
+                
+                if (isChangingOwnPass && oldPass !== null) {
+                    let tempUser = JSON.parse(JSON.stringify(currentUser));
+                    tempUser.password = oldPass;
+                    const originalUser = currentUser;
+                    currentUser = tempUser; 
+                    
+                    window.saveDataToGAS(false).then((success) => {
+                        if (success) {
+                            currentUser = db.users[currentEditUserIndex];
+                            localStorage.setItem('bidAppUser', JSON.stringify({username: currentUser.username, token: btoa(currentUser.password)}));
+                            window.renderUserBadge();
+                        } else {
+                            currentUser = originalUser;
+                            db.users[currentEditUserIndex].password = oldPass;
+                        }
+                    });
+                } else {
+                    if (isChangingOwnPass) {
+                        currentUser = db.users[currentEditUserIndex];
+                    }
+                    window.saveDataToGAS(false);
+                    window.renderUserBadge();
+                } 
             } else {
                 Swal.fire('Lỗi','Vui lòng nhập Tên hiển thị!','warning'); 
             }
