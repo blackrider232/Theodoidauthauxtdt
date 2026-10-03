@@ -35,6 +35,54 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
+<style id="mobile-ux">
+@media (max-width: 768px) {
+    /* 1. Tự động ẩn nút Nhật ký cũ (mà không cần xóa code) */
+    button[onclick*="openActivityLogModal"] { display: none !important; }
+
+    /* Đổi vị trí Dashboard: Việc quá hạn lên đầu */
+    #tab-dashboard { display: flex; flex-direction: column; }
+    #tab-dashboard > div:nth-child(3) { order: -1; margin-bottom: 15px; }
+
+    /* 2. Biến danh sách công việc (Table) thành Thẻ Mobile (Card View) */
+    table thead { display: none !important; } /* Ẩn tiêu đề cột */
+    
+    table tbody tr {
+        display: block;
+        background-color: #ffffff; 
+        border: 1px solid #e2e8f0;
+        border-radius: 12px; 
+        padding: 12px; 
+        margin-bottom: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .dark table tbody tr { background-color: #1e293b; border-color: #334155; }
+    
+    table tbody td {
+        display: block;
+        padding: 4px 0 !important;
+        border: none !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+
+    /* Thu gọn nút bấm thao tác thành thanh công cụ Icon ở dưới đáy */
+    table tbody td:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 8px !important;
+        border-top: 1px solid #f1f5f9 !important;
+        justify-content: flex-start !important;
+    }
+    .dark table tbody td:last-child { border-color: #334155 !important; }
+    
+    /* Làm đẹp thẻ Thêm việc phát sinh */
+    table tbody tr:last-child td { border-top: none !important; margin-top: 0 !important; justify-content: center !important; }
+}
+</style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
 
