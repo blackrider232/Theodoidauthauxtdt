@@ -647,7 +647,6 @@
                         showLoginError("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng hoặc đăng nhập lại."); 
                         return; 
                     }
-                    const pU = JSON.parse(savedUser); 
                     const found = db.users.find(u => u.username === pU.username && u.password === pU.password);
                     if (found) { 
                         currentUser = found; 
