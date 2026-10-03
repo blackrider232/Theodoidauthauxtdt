@@ -639,7 +639,8 @@
                     if (lText) lText.innerText = "Đang tải dữ liệu..."; 
                     if (loader) loader.style.display = 'flex';
 
-                    await window.loadDataFromGAS(); 
+                    const pU = JSON.parse(savedUser); 
+                    await window.loadDataFromGAS(pU.username, pU.password); 
                     if (loader) loader.style.display = 'none';
 
                     if (!isDataSynchronized) { 
@@ -1005,7 +1006,7 @@
                 if (lText) lText.innerText = "Đang kết nối máy chủ..."; 
                 if (loader) loader.style.display = 'flex';
 
-                await window.loadDataFromGAS(); 
+                await window.loadDataFromGAS(u, p); 
                 if (loader) loader.style.display = 'none';
 
                 if (!isDataSynchronized) { 
