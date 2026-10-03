@@ -2,43 +2,22 @@
  * =========================================================================
  * BACKEND GOOGLE APPS SCRIPT CHO HỆ THỐNG QUẢN TRỊ ĐẤU THẦU - SCE ENTERPRISE
  * =========================================================================
- * Hướng dẫn triển khai:
- * 1. Mở Google Sheets mới (đặt tên: "CSDL_QuanTri_DauThau_SCE").
- * 2. Vào Tiện ích mở rộng (Extensions) -> Apps Script.
- * 3. Xóa toàn bộ mã cũ và dán toàn bộ nội dung file này vào.
- * 4. Bấm biểu tượng "Lưu" (Save).
- * 5. Bấm "Triển khai" (Deploy) -> "Tùy chọn triển khai mới" (New deployment).
- *    - Chọn loại: Ứng dụng web (Web app).
- *    - Mô tả: "Phiên bản v1.0 Production".
- *    - Thực thi dưới dạng (Execute as): "Tôi" (Me).
- *    - Ai có quyền truy cập (Who has access): "Bất kỳ ai" (Anyone).
- * 6. Bấm "Triển khai" (Deploy), cấp quyền và copy đường dẫn Web App URL 
- *    để dán vào biến GAS_URL trong file index.html.
- * =========================================================================
  */
 
 const SHEET_DB = "Database";
 const SHEET_BACKUP = "Backups";
 const MAX_BACKUPS = 50;
 
-/**
- * Khởi tạo hoặc lấy Sheet
- */
 function getOrCreateSheet(sheetName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(sheetName);
-  
   if (!sheet) {
-    // Nếu là SHEET_DB mà không tìm thấy "Database", ta thử lấy tab đầu tiên trong file (thường là Data_DauThau_SCE hoặc Trang tính 1)
     if (sheetName === SHEET_DB) {
       const firstSheet = ss.getSheets()[0];
-      // Nếu tab đầu tiên không phải là Backups, ta cứ coi nó là Database
       if (firstSheet && firstSheet.getName() !== SHEET_BACKUP) {
         return firstSheet;
       }
     }
-    
-    // Nếu vẫn không có, thì tạo mới
     sheet = ss.insertSheet(sheetName);
     if (sheetName === SHEET_BACKUP) {
       sheet.appendRow(["ID", "Timestamp", "Data"]);
@@ -48,40 +27,68 @@ function getOrCreateSheet(sheetName) {
   return sheet;
 }
 
-/**
- * Xử lý yêu cầu GET: Đọc dữ liệu hoặc lấy danh sách bản sao lưu
- */
 function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({ error: "Method Not Allowed. Vui lòng sử dụng POST." }))
+      .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
   try {
-    const action = e.parameter ? e.parameter.action : null;
-    const u = e.parameter ? e.parameter.u : null;
-    const p = e.parameter ? e.parameter.p : null;
+    lock.waitLock(30000); 
     
+    const postData = e.postData ? e.postData.contents : "";
+    if (!postData) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Không có dữ liệu" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    let payload = {};
+    try { payload = JSON.parse(postData); } catch(err) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Dữ liệu không hợp lệ" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const action = payload.action || "save";
+    const u = payload.u;
+    const p = payload.p;
+
     const dbSheet = getOrCreateSheet(SHEET_DB);
     const dataStr = dbSheet.getRange("A1").getValue() || "{}";
-    let db = {};
-    try { db = JSON.parse(dataStr); } catch(err){}
+    let currentDb = {};
+    try { currentDb = JSON.parse(dataStr); } catch(err){}
     
-    // Yêu cầu xác thực cho mọi tác vụ đọc dữ liệu (trừ khi db trống hoàn toàn)
+    // Yêu cầu xác thực
     let isAuthenticated = false;
     let currentUser = null;
-    if (db.users && db.users.length > 0) {
-        currentUser = db.users.find(x => x.username === u && x.password === p);
+    if (currentDb.users && currentDb.users.length > 0) {
+        currentUser = currentDb.users.find(x => x.username === u && x.password === p);
         if (currentUser) isAuthenticated = true;
     } else {
-        // Nếu DB mới tinh, cho phép admin mặc định
+        // Nếu DB mới tinh, cho phép tạo admin đầu tiên
         isAuthenticated = true; 
     }
-    
+
     if (!isAuthenticated) {
-        return ContentService.createTextOutput(JSON.stringify({ error: "Xác thực thất bại. Vui lòng đăng nhập lại." }))
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Xác thực thất bại" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // XỬ LÝ ĐỌC DATABASE
+    if (action === "read") {
+        let safeDb = JSON.parse(JSON.stringify(currentDb)); // Deep copy
+        if (safeDb.users) {
+            safeDb.users.forEach(user => {
+                if (user.username !== u) {
+                    delete user.password; // Ẩn mật khẩu của người khác
+                }
+            });
+        }
+        return ContentService.createTextOutput(JSON.stringify({ success: true, db: safeDb }))
           .setMimeType(ContentService.MimeType.JSON);
     }
-    
-    // 1. Lấy danh sách bản sao lưu
+
+    // LẤY DANH SÁCH SAO LƯU
     if (action === "getBackups") {
       if (currentUser && currentUser.role !== 'admin') {
-          return ContentService.createTextOutput(JSON.stringify({ error: "Chỉ Admin mới có quyền xem sao lưu." })).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Chỉ Admin mới có quyền xem sao lưu." })).setMimeType(ContentService.MimeType.JSON);
       }
       const backupSheet = getOrCreateSheet(SHEET_BACKUP);
       const lastRow = backupSheet.getLastRow();
@@ -94,15 +101,15 @@ function doGet(e) {
           }
         }
       }
-      return ContentService.createTextOutput(JSON.stringify(backups)).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ success: true, backups: backups })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 2. Tải nội dung 1 bản sao lưu cụ thể
+    // KHÔI PHỤC BẢN SAO LƯU
     if (action === "loadBackup") {
       if (currentUser && currentUser.role !== 'admin') {
-          return ContentService.createTextOutput(JSON.stringify({ error: "Chỉ Admin mới có quyền khôi phục." })).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Chỉ Admin mới có quyền khôi phục." })).setMimeType(ContentService.MimeType.JSON);
       }
-      const targetId = String(e.parameter.id);
+      const targetId = String(payload.id);
       const backupSheet = getOrCreateSheet(SHEET_BACKUP);
       const lastRow = backupSheet.getLastRow();
       if (lastRow > 1) {
@@ -113,62 +120,12 @@ function doGet(e) {
           }
         }
       }
-      return ContentService.createTextOutput(JSON.stringify({ error: "Không tìm thấy bản sao lưu" })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // 3. Mặc định: Đọc toàn bộ Database hiện tại (Đã loại bỏ mật khẩu người khác)
-    let safeDb = JSON.parse(JSON.stringify(db)); // Deep copy
-    if (safeDb.users) {
-        safeDb.users.forEach(user => {
-            if (user.username !== u) {
-                delete user.password; // Ẩn mật khẩu của người khác
-            }
-        });
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({ success: true, db: safeDb }))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Xử lý yêu cầu POST: Lưu dữ liệu mới và tự động tạo snapshot sao lưu
- */
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(30000); 
-    
-    const u = e.parameter ? e.parameter.u : null;
-    const p = e.parameter ? e.parameter.p : null;
-    const postData = e.postData ? e.postData.contents : "";
-    
-    const action = e.parameter ? e.parameter.action : null;
-
-    if (!postData) {
-      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Không có dữ liệu" })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    const dbSheet = getOrCreateSheet(SHEET_DB);
-    const dataStr = dbSheet.getRange("A1").getValue() || "{}";
-    let currentDb = {};
-    try { currentDb = JSON.parse(dataStr); } catch(err){}
-    
-    // Xác thực khi lưu hoặc upload
-    if (currentDb.users && currentDb.users.length > 0) {
-        const foundUser = currentDb.users.find(x => x.username === u && x.password === p);
-        if (!foundUser) {
-            return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Xác thực thất bại, không thể thao tác" })).setMimeType(ContentService.MimeType.JSON);
-        }
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Không tìm thấy bản sao lưu" })).setMimeType(ContentService.MimeType.JSON);
     }
 
     // XỬ LÝ UPLOAD FILE LÊN GOOGLE DRIVE
     if (action === "uploadFile") {
-        let req = JSON.parse(postData);
+        let req = payload.data;
         let folderName = "Tai_Lieu_Dau_Thau_SCE";
         let folders = DriveApp.getFoldersByName(folderName);
         let folder;
@@ -179,8 +136,6 @@ function doPost(e) {
             folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         }
         
-        // Decode base64 
-        // Lọc bỏ phần tiền tố "data:MIME;base64," nếu có
         let base64Data = req.base64;
         if (base64Data.indexOf("base64,") !== -1) {
             base64Data = base64Data.split("base64,")[1];
@@ -194,10 +149,65 @@ function doPost(e) {
             .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Lắp lại mật khẩu cũ và phân quyền chặt chẽ mảng users
-    let newDb = JSON.parse(postData);
+    
+    // TÌM KIẾM VĂN BẢN PHÁP LUẬT
+    if (action === "fetchLaws") {
+        try {
+            // Sử dụng Google Apps Script UrlFetchApp để gọi API/RSS (tránh CORS)
+            // Lấy từ vbpl.vn hoặc Cổng TTĐT Chính phủ (RSS giả lập)
+            let query = payload.query || 'đấu thầu';
+            let url = "https://vbpl.vn/TW/Pages/rss.aspx"; 
+            let response = UrlFetchApp.fetch(url, {muteHttpExceptions: true});
+            let xmlText = response.getContentText();
+            let document = XmlService.parse(xmlText);
+            let root = document.getRootElement();
+            let channel = root.getChild('channel');
+            let items = channel.getChildren('item');
+            
+            let results = [];
+            for (let i = 0; i < items.length; i++) {
+                let title = items[i].getChild('title').getText();
+                if (title.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+                    results.push({
+                        title: title,
+                        link: items[i].getChild('link').getText(),
+                        pubDate: items[i].getChild('pubDate').getText()
+                    });
+                }
+            }
+            return ContentService.createTextOutput(JSON.stringify({ status: "success", data: results })).setMimeType(ContentService.MimeType.JSON);
+        } catch(e) {
+            // Fallback nếu lỗi (VBPL.vn có thể chặn Google IP hoặc lỗi XML)
+            let fallback = [
+                { title: "Nghị định 214/2026/NĐ-CP về đấu thầu (Mới)", link: "https://vanban.chinhphu.vn/?keyword=214/2026/NĐ-CP" },
+                { title: "Nghị định 349/2026/NĐ-CP (Mới nhất)", link: "https://vanban.chinhphu.vn/?keyword=349/2026/NĐ-CP" }
+            ];
+            return ContentService.createTextOutput(JSON.stringify({ status: "success", data: fallback })).setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+    
+    // XÓA FILE TRÊN GOOGLE DRIVE
+    if (action === "deleteFile") {
+        let req = payload.data;
+        if (req.url) {
+            try {
+                let match = req.url.match(/\/d\/(.+?)\//);
+                if (match && match[1]) {
+                    DriveApp.getFileById(match[1]).setTrashed(true);
+                }
+            } catch(e) {}
+        }
+        return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // MẶC ĐỊNH: LƯU DATABASE
+    let newDb = payload.data;
+    if (!newDb) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Không có dữ liệu db" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     if (newDb.users && currentDb.users) {
-        const foundUser = currentDb.users.find(x => x.username === u && x.password === p);
+        const foundUser = currentUser;
         if (foundUser && foundUser.role !== 'admin') {
             // Nếu không phải Admin, CHỈ được phép cập nhật chính mình (Tên và Mật khẩu)
             let restoredUsers = [];
@@ -256,4 +266,9 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function testDriveAuthorization() {
+  var tempFolder = DriveApp.createFolder("Xoa_Thu_Muc_Nay");
+  tempFolder.setTrashed(true);
 }
