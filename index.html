@@ -17,6 +17,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- SheetJS (XLSX) for Native Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="Logo (tách nền sát cạnh).png">
     <style>
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -69,6 +74,12 @@
                     <p class="text-xs text-blue-200 mt-0.5">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
                 </div>
                 <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
+                    <a href="https://thuvienphapluat.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-blue-800 dark:bg-gray-800 border border-blue-700 dark:border-gray-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer text-white" title="Tra cứu Thư viện pháp luật">
+                        <i class="fas fa-scale-balanced text-yellow-300"></i> <span class="hidden xl:inline">Thư viện PL</span>
+                    </a>
+                    <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-blue-800 dark:bg-gray-800 border border-blue-700 dark:border-gray-700 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer text-white" title="Tra cứu LuatVietnam">
+                        <i class="fas fa-gavel text-yellow-300"></i> <span class="hidden xl:inline">Luật VN</span>
+                    </a>
                     <button onclick="window.openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-3 md:px-4 py-1.5 rounded text-sm font-bold shadow transition">
                         <i class="fas fa-folder-plus"></i> <span class="hidden md:inline">Tạo Nhiệm vụ</span>
                     </button>
@@ -90,6 +101,7 @@
                 <button onclick="window.switchTab('dashboard')" id="tab-dashboard" class="py-2.5 px-4 font-semibold text-blue-700 dark:text-blue-400 border-b-2 border-blue-700 dark:border-blue-400 whitespace-nowrap"><i class="fas fa-chart-pie mr-1.5"></i>Tổng quan</button>
                 <button onclick="window.switchTab('projects')" id="tab-projects" class="py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-tasks mr-1.5"></i>Danh sách Dự án</button>
                 <button onclick="window.switchTab('kanban')" id="tab-kanban" class="py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-columns mr-1.5"></i>Bảng Kanban</button>
+                <button onclick="window.switchTab('calendar')" id="tab-calendar" class="py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-calendar-alt mr-1.5"></i>Lịch biểu</button>
                 <button onclick="window.switchTab('settings')" id="tab-settings" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-sliders mr-1.5"></i>Quy trình</button>
                 <button onclick="window.switchTab('docs')" id="tab-docs" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-book mr-1.5"></i>Pháp lý</button>
                 <button onclick="window.switchTab('users')" id="tab-users" class="admin-only hidden py-2.5 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap"><i class="fas fa-users-gear mr-1.5"></i>Tài khoản</button>
@@ -141,6 +153,14 @@
                     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg flex flex-col kanban-col border border-blue-100 dark:border-blue-900/40 p-2"><div class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-spinner fa-spin mr-1"></i> Đang thực hiện</span><span class="bg-white dark:bg-blue-900 text-xs px-2 py-0.5 rounded-full" id="kb-doing-count">0</span></div><div id="kb-doing" class="flex-1 space-y-3"></div></div>
                     <div class="bg-red-50 dark:bg-red-900/20 rounded-lg flex flex-col kanban-col border border-red-100 dark:border-red-900/40 p-2"><div class="bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-fire mr-1"></i> Có việc trễ hạn</span><span class="bg-white dark:bg-red-900 text-xs px-2 py-0.5 rounded-full" id="kb-late-count">0</span></div><div id="kb-late" class="flex-1 space-y-3"></div></div>
                     <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex flex-col kanban-col border border-emerald-100 dark:border-emerald-900/40 p-2"><div class="bg-emerald-200 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-check-double mr-1"></i> Đã hoàn thành</span><span class="bg-white dark:bg-emerald-900 text-xs px-2 py-0.5 rounded-full" id="kb-done-count">0</span></div><div id="kb-done" class="flex-1 space-y-3"></div></div>
+                </div>
+            </div>
+
+            <!-- 2.5 CALENDAR -->
+            <div id="view-calendar" class="hidden">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Lịch Công Việc</h2>
+                    <div id="calendar" class="min-h-[600px] text-sm"></div>
                 </div>
             </div>
 
@@ -832,6 +852,87 @@
             }
         }
 
+        window.checkAndShowPopups = function() {
+            const LAW_VERSION = "2026_10_03";
+            const lawHtml = `
+                <div class="text-left text-sm">
+                    <h4 class="font-bold text-blue-800 dark:text-blue-400 mb-2">Tóm tắt điểm mới Luật Đấu thầu mới nhất:</h4>
+                    <ul class="list-disc pl-5 space-y-1 mb-2">
+                        <li>Bổ sung quy định chi tiết về đấu thầu qua mạng.</li>
+                        <li>Thay đổi tiêu chí đánh giá năng lực nhà thầu và biểu mẫu hồ sơ.</li>
+                        <li>Cắt giảm thủ tục và thời gian thẩm định, phê duyệt kết quả.</li>
+                    </ul>
+                    <p class="text-xs text-gray-500 italic">Vui lòng tra cứu tại mục "Thư viện PL" hoặc "Luật VN" ở thanh menu để xem toàn văn.</p>
+                </div>
+            `;
+
+            const showDeadlinePopup = () => {
+                let urgentTasks = [];
+                const now = new Date(new Date().setHours(0,0,0,0));
+                
+                if (db.missions && Array.isArray(db.missions)) {
+                    db.missions.forEach((m) => {
+                        if (m.archived || m.completed) return;
+                        if (m.packages && Array.isArray(m.packages)) {
+                            m.packages.forEach(p => {
+                                if (p.archived || p.completed) return;
+                                let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
+                                if (!isOwner) return;
+                                
+                                if (p.steps && Array.isArray(p.steps)) {
+                                    p.steps.forEach(s => {
+                                        if (s.completed) return;
+                                        let sDate = new Date(s.deadline);
+                                        let diffDays = Math.ceil((sDate - now) / (1000 * 60 * 60 * 24));
+                                        
+                                        if (diffDays < 0) {
+                                            urgentTasks.push({ type: 'overdue', name: s.name, days: Math.abs(diffDays), pkgName: p.name });
+                                        } else if (diffDays <= 3) {
+                                            urgentTasks.push({ type: 'upcoming', name: s.name, days: diffDays, pkgName: p.name });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                if (urgentTasks.length > 0) {
+                    let htmlList = '<ul class="text-left text-sm max-h-60 overflow-y-auto pl-4">';
+                    urgentTasks.forEach(t => {
+                        if (t.type === 'overdue') {
+                            htmlList += `<li class="text-red-600 dark:text-red-400 font-medium mb-1"><i class="fas fa-exclamation-circle mr-1"></i> [Trễ ${t.days} ngày] ${escapeHtml(t.name)} <br><span class="text-xs text-gray-500 font-normal">Gói: ${escapeHtml(t.pkgName)}</span></li>`;
+                        } else {
+                            htmlList += `<li class="text-orange-600 dark:text-orange-400 font-medium mb-1"><i class="fas fa-clock mr-1"></i> [Còn ${t.days} ngày] ${escapeHtml(t.name)} <br><span class="text-xs text-gray-500 font-normal">Gói: ${escapeHtml(t.pkgName)}</span></li>`;
+                        }
+                    });
+                    htmlList += '</ul>';
+                    
+                    Swal.fire({
+                        title: 'Công việc sắp/quá hạn',
+                        html: htmlList,
+                        icon: 'warning',
+                        confirmButtonText: 'Đã hiểu'
+                    });
+                }
+            };
+
+            if (localStorage.getItem('seenLawVersion') !== LAW_VERSION) {
+                Swal.fire({
+                    title: 'Cập nhật Luật Đấu thầu',
+                    html: lawHtml,
+                    icon: 'info',
+                    confirmButtonText: 'Đã hiểu',
+                    allowOutsideClick: false
+                }).then(() => {
+                    localStorage.setItem('seenLawVersion', LAW_VERSION);
+                    showDeadlinePopup();
+                });
+            } else {
+                showDeadlinePopup();
+            }
+        };
+
         function showLoginError(msg) { 
             const el = document.getElementById('loginError'); 
             if (el) { 
@@ -924,6 +1025,8 @@
             
             if (autoSyncInterval) clearInterval(autoSyncInterval); 
             autoSyncInterval = setInterval(backgroundSync, 60000);
+            
+            setTimeout(() => { window.checkAndShowPopups(); }, 500);
         };
 
         window.renderUserBadge = function() {
@@ -937,7 +1040,7 @@
             if (currentUser.role !== 'admin' && ['settings', 'docs', 'users', 'backups'].includes(tab)) { 
                 return Swal.fire('Lỗi', 'Không có quyền truy cập khu vực này!', 'error'); 
             }
-            ['dashboard', 'projects', 'kanban', 'settings', 'docs', 'users', 'backups'].forEach(t => {
+            ['dashboard', 'projects', 'kanban', 'calendar', 'settings', 'docs', 'users', 'backups'].forEach(t => {
                 const viewEl = document.getElementById(`view-${t}`); 
                 if (viewEl) viewEl.classList.add('hidden');
                 const tabEl = document.getElementById(`tab-${t}`);
@@ -963,10 +1066,74 @@
             }
             if (tab === 'dashboard') window.renderDashboard(); 
             if (tab === 'kanban') window.renderKanban(); 
+            if (tab === 'calendar') window.renderCalendar();
             if (tab === 'settings') window.renderConfig(); 
             if (tab === 'docs') window.renderDocs(); 
             if (tab === 'users') window.renderUsers(); 
             if (tab === 'projects') window.renderMissions();
+        };
+
+        window.renderCalendar = function() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) return;
+            
+            let events = [];
+            const now = new Date();
+            
+            if (db.missions && Array.isArray(db.missions)) {
+                db.missions.forEach(m => {
+                    if (m.archived || m.completed) return;
+                    if (m.packages && Array.isArray(m.packages)) {
+                        m.packages.forEach(p => {
+                            if (p.archived || p.completed) return;
+                            let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
+                            if (currentUser.role === 'user' && !isOwner) return;
+                            
+                            if (p.steps && Array.isArray(p.steps)) {
+                                p.steps.forEach(s => {
+                                    if (s.completed) return;
+                                    let deadline = new Date(s.deadline);
+                                    let diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+                                    
+                                    let color = '#3b82f6'; // blue
+                                    if (diffDays < 0) color = '#ef4444'; // red (overdue)
+                                    else if (diffDays <= 3) color = '#f97316'; // orange (approaching)
+                                    
+                                    events.push({
+                                        title: s.name + ' (' + p.name + ')',
+                                        start: deadline.toISOString().split('T')[0],
+                                        color: color,
+                                        allDay: true
+                                    });
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            let isDark = document.documentElement.classList.contains('dark');
+            if (window.calendarInstance) {
+                window.calendarInstance.destroy();
+            }
+            
+            window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'vi',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                buttonText: {
+                    today: 'Hôm nay',
+                    month: 'Tháng',
+                    week: 'Tuần'
+                },
+                events: events,
+                height: 600
+            });
+            window.calendarInstance.render();
         };
 
         window.renderCharts = function() {
@@ -2492,6 +2659,15 @@
             }
             return false;
         };
+
+        // Đăng ký Service Worker cho PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
