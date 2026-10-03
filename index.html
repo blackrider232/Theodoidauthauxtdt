@@ -15,7 +15,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- SheetJS (XLSX) for Native Excel Export -->
+    <!-- html2pdf for PDF Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- SheetJS (XLSX) for Native Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- FullCalendar -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -122,7 +124,7 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="dashCurrentDate"></p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="window.printDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2 transition"><i class="fas fa-print"></i> In Báo cáo</button>
+                        <button onclick="window.printDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2 transition" title="Tạo báo cáo, chỉnh sửa và xuất Word"><i class="fas fa-file-word"></i> Báo cáo (Word / In)</button>
                         <button onclick="window.exportGlobalExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2 transition"><i class="fas fa-file-excel"></i> Xuất Excel (.xlsx)</button>
                     </div>
                 </div>
@@ -3113,6 +3115,114 @@ const latestDocs = [
         };
 
         // --- IN ẤN VĂN BẢN CHUẨN THỂ THỨC HÀNH CHÍNH ---
+        
+        window.exportPDF = function() {
+            try {
+                Swal.fire({
+                    title: 'Đang tạo báo cáo PDF...',
+                    html: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading() }
+                });
+                const today = new Date();
+                const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
+                
+                let txtActive = document.getElementById('dashActiveMissions') ? document.getElementById('dashActiveMissions').innerText : 0;
+                let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0;
+                let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
+                
+                let reportHtml = `<div id="pdfPrintArea" style="font-family: 'Times New Roman', Times, serif; padding: 30px 40px; color: #000; line-height: 1.5; background: #fff;">`;
+                reportHtml += `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
+                    <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>
+                    <div><span style="font-size: 14px; font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span style="font-size: 14px; font-weight: bold; text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></div>
+                </div>`;
+                reportHtml += `<div style="text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px;">${dateStr}</div>`;
+                reportHtml += `<h1 style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
+                reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">I. KẾT QUẢ TỔNG QUAN</h2>`;
+                reportHtml += `<ul style="margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px;">
+                    <li>Tổng số nhiệm vụ đang triển khai: <b>${txtActive}</b></li>
+                    <li>Tổng số gói thầu đã hoàn thành: <b>${txtDone}</b></li>
+                    <li>Số lượng công việc đang trễ hạn: <b>${txtLate}</b></li>
+                </ul>`;
+                reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">II. CHI TIẾT TÌNH HÌNH THỰC HIỆN DỰ ÁN</h2>`;
+                
+                if (db.missions && db.missions.length > 0) {
+                    db.missions.forEach((m, mIndex) => {
+                        let mName = m.name || "Chưa có tên";
+                        let mOwner = m.owner || "Không rõ";
+                        reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${mIndex + 1}. Dự án: ${mName} (Phụ trách: ${mOwner})</h3>`;
+                        if (m.packages && m.packages.length > 0) {
+                            reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
+                            reportHtml += `<tr>
+                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 5%;">STT</th>
+                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 30%;">Tên gói thầu</th>
+                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 25%;">Trạng thái / Bước hiện tại</th>
+                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ngân sách / Trúng thầu</th>
+                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ghi chú</th>
+                            </tr>`;
+                            m.packages.forEach((pkg, pIndex) => {
+                                let pkgName = pkg.name || "";
+                                let budgetInfo = ``;
+                                if (pkg.budget) budgetInfo += `Dự toán: ${pkg.budget}<br>`;
+                                if (pkg.winningBid) budgetInfo += `Trúng: ${pkg.winningBid}`;
+                                let currentStep = "Đã hoàn thành";
+                                let note = "";
+                                if (!pkg.completed && pkg.steps) {
+                                    let activeStep = pkg.steps.find(s => !s.completed);
+                                    if (activeStep) {
+                                        currentStep = `Đang làm: ${activeStep.name || ""}`;
+                                        note = activeStep.note || "";
+                                    }
+                                }
+                                reportHtml += `<tr>
+                                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${pIndex + 1}</td>
+                                    <td style="border: 1px solid #000; padding: 6px;">${pkgName}</td>
+                                    <td style="border: 1px solid #000; padding: 6px;">${currentStep}</td>
+                                    <td style="border: 1px solid #000; padding: 6px;">${budgetInfo}</td>
+                                    <td style="border: 1px solid #000; padding: 6px;">${note}</td>
+                                </tr>`;
+                            });
+                            reportHtml += `</table>`;
+                        } else {
+                            reportHtml += `<p style="font-size: 13px; font-style: italic;">Chưa có gói thầu nào.</p>`;
+                        }
+                    });
+                } else {
+                    reportHtml += `<p style="font-size: 14px; font-style: italic;">Chưa có dữ liệu dự án.</p>`;
+                }
+                
+                reportHtml += `<div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+                    <div style="text-align: center; width: 300px;">
+                        <span style="font-weight: bold; font-size: 14px;">NGƯỜI LẬP BÁO CÁO</span><br><br><br><br>
+                        <span style="font-size: 14px;">${currentUser.fullname}</span>
+                    </div>
+                </div>`;
+                reportHtml += `</div>`;
+
+                let container = document.createElement('div');
+                container.innerHTML = reportHtml;
+                document.body.appendChild(container);
+                container.style.position = 'absolute';
+                container.style.left = '-9999px';
+
+                let opt = {
+                    margin:       10,
+                    filename:     'Bao_Cao_Tien_Do_Dau_Thau.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(container.firstElementChild).save().then(() => {
+                    document.body.removeChild(container);
+                    Swal.fire('Thành công', 'Đã tải xuống báo cáo PDF', 'success');
+                });
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Lỗi', 'Không thể tạo file PDF', 'error');
+            }
+        };
+
         window.printDashboard = function() {
             try {
                 const today = new Date(); 
@@ -3122,7 +3232,7 @@ const latestDocs = [
                 let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0; 
                 let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
                 
-                html += `<div class="header-flex"><div class="agency-name">SỞ TÀI CHÍNH HÀ NỘI<br><span class="agency-name-bold">TRUNG TÂM XÚC TIẾN ĐẦU TƯ & HTDN</span></div><div><span class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</span></div></div><div class="report-date">${dateStr}</div><h1>BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
+                html += `<div class="header-flex"><div class="agency-name">SỞ TÀI CHÍNH HÀ NỘI<br><span class="agency-name-bold">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div><div><span class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</span></div></div><div class="report-date">${dateStr}</div><h1>BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
                 html += `<h2>1. Số liệu tổng quan</h2><ul><li>Tổng số Nhiệm vụ đang triển khai: <b>${txtActive}</b></li><li>Tổng số Gói thầu đã hoàn thành: <b>${txtDone}</b></li><li>Số lượng công việc đang chậm tiến độ: <b>${txtLate}</b></li></ul>`;
                 html += `<h2>2. Tiến độ chi tiết các Nhiệm vụ đang thực hiện</h2><table><thead><tr><th style="width: 40px">STT</th><th>Tên Nhiệm vụ</th><th style="width: 150px">Chuyên viên Phụ trách</th><th style="width: 100px">Hạn chót</th><th style="width: 80px">Tiến độ</th></tr></thead><tbody>`;
                 
@@ -3317,6 +3427,139 @@ const latestDocs = [
             XLSX.utils.book_append_sheet(wb, ws, 'Tien do');
             XLSX.writeFile(wb, 'Tien_Do_Dau_Thau.xlsx');
         };
+</script>
+
+<!-- Modal Chỉnh sửa Báo cáo -->
+<div id="reportEditorModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] px-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl border-t-4 border-indigo-500 flex flex-col h-[90vh]">
+        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+            <h2 class="text-lg font-bold text-indigo-800 dark:text-indigo-400"><i class="fas fa-file-word mr-2"></i>Chỉnh sửa Báo cáo trước khi Xuất / In</h2>
+            <div class="text-sm text-gray-500 italic">Có thể click trực tiếp vào văn bản để chỉnh sửa nội dung</div>
+        </div>
+        
+        <div class="flex-1 overflow-auto p-6 bg-gray-200 dark:bg-gray-700">
+            <!-- Vùng giấy A4 mô phỏng -->
+            <div id="reportContentArea" contenteditable="true" class="mx-auto bg-white p-10 shadow-lg outline-none" style="max-width: 800px; min-height: 1122px; color: black; font-family: 'Times New Roman', Times, serif;">
+            </div>
+        </div>
+        
+        <div class="p-4 border-t dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
+            <button onclick="document.getElementById('reportEditorModal').classList.add('hidden')" class="px-5 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 transition">Hủy đóng</button>
+            <button onclick="window.printReportDirectly()" class="px-5 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded text-sm font-medium shadow-md transition flex items-center gap-2"><i class="fas fa-print"></i> In văn bản</button>
+            <button onclick="window.exportReportToWord()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md transition flex items-center gap-2"><i class="fas fa-file-download"></i> Tải file Word (.doc)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+window.printDashboard = function() {
+    const today = new Date();
+    const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
+    
+    let txtActive = document.getElementById('dashActiveMissions') ? document.getElementById('dashActiveMissions').innerText : 0;
+    let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0;
+    let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
+    
+    let reportHtml = `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
+        <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>
+        <div><span style="font-size: 14px; font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span style="font-size: 14px; font-weight: bold; text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></div>
+    </div>`;
+    reportHtml += `<div style="text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px;">${dateStr}</div>`;
+    reportHtml += `<h1 style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
+    reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">I. KẾT QUẢ TỔNG QUAN</h2>`;
+    reportHtml += `<ul style="margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px;">
+        <li>Tổng số nhiệm vụ đang triển khai: <b>${txtActive}</b></li>
+        <li>Tổng số gói thầu đã hoàn thành: <b>${txtDone}</b></li>
+        <li>Số lượng công việc đang trễ hạn: <b>${txtLate}</b></li>
+    </ul>`;
+    reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">II. CHI TIẾT TÌNH HÌNH THỰC HIỆN DỰ ÁN</h2>`;
+    
+    if (db.missions && db.missions.length > 0) {
+        db.missions.forEach((m, mIndex) => {
+            let mName = m.name || "Chưa có tên";
+            let mOwner = m.owner || "Không rõ";
+            reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${mIndex + 1}. Dự án: ${mName} (Phụ trách: ${mOwner})</h3>`;
+            if (m.packages && m.packages.length > 0) {
+                reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
+                reportHtml += `<tr>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 5%;">STT</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 30%;">Tên gói thầu</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 25%;">Trạng thái / Bước hiện tại</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ngân sách / Trúng thầu</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ghi chú</th>
+                </tr>`;
+                m.packages.forEach((pkg, pIndex) => {
+                    let pkgName = pkg.name || "";
+                    let budgetInfo = ``;
+                    if (pkg.budget) budgetInfo += `Dự toán: ${pkg.budget}<br>`;
+                    if (pkg.winningBid) budgetInfo += `Trúng: ${pkg.winningBid}`;
+                    let currentStep = "Đã hoàn thành";
+                    let note = "";
+                    if (!pkg.completed && pkg.steps) {
+                        let activeStep = pkg.steps.find(s => !s.completed);
+                        if (activeStep) {
+                            currentStep = `Đang làm: ${activeStep.name || ""}`;
+                            note = activeStep.note || "";
+                        }
+                    }
+                    reportHtml += `<tr>
+                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${pIndex + 1}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${pkgName}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${currentStep}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${budgetInfo}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${note}</td>
+                    </tr>`;
+                });
+                reportHtml += `</table>`;
+            } else {
+                reportHtml += `<p style="font-size: 13px; font-style: italic;">Chưa có gói thầu nào.</p>`;
+            }
+        });
+    } else {
+        reportHtml += `<p style="font-size: 14px; font-style: italic;">Chưa có dữ liệu dự án.</p>`;
+    }
+    
+    reportHtml += `<div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+        <div style="text-align: center; width: 300px;">
+            <span style="font-weight: bold; font-size: 14px;">NGƯỜI LẬP BÁO CÁO</span><br><br><br><br>
+            <span style="font-size: 14px;">${currentUser.fullname}</span>
+        </div>
+    </div>`;
+
+    document.getElementById('reportContentArea').innerHTML = reportHtml;
+    document.getElementById('reportEditorModal').classList.remove('hidden');
+};
+
+window.printReportDirectly = function() {
+    let content = document.getElementById('reportContentArea').innerHTML;
+    let printWin = window.open('', '', 'width=900,height=650');
+    printWin.document.write(`<html><head><title>In Báo cáo</title><style>body { font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; }</style></head><body>${content}</body></html>`);
+    printWin.document.close();
+    printWin.focus();
+    setTimeout(() => { printWin.print(); printWin.close(); }, 500);
+};
+
+window.exportReportToWord = function() {
+    var content = document.getElementById('reportContentArea').innerHTML;
+    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Báo Cáo</title></head><body>";
+    var postHtml = "</body></html>";
+    var html = preHtml + content + postHtml;
+    
+    var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+    var filename = 'Bao_Cao_Tien_Do_Dau_Thau.doc';
+    
+    var downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+    if (navigator.msSaveOrOpenBlob) {
+        navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        downloadLink.click();
+    }
+    document.body.removeChild(downloadLink);
+};
 </script>
 </body>
 </html>
