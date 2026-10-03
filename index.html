@@ -321,6 +321,23 @@
         </div>
     </div>
 
+    <!-- Modal Bình luận -->
+    <div id="commentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] px-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500 flex flex-col max-h-[90vh]">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 pb-2 border-b dark:border-gray-700 flex justify-between items-center">
+                <span><i class="fas fa-comments text-blue-500 mr-2"></i>Trao đổi: <span id="commentStepName" class="text-blue-600 dark:text-blue-400 text-sm font-normal"></span></span>
+                <button onclick="window.closeCommentsModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
+            </h2>
+            <div id="commentsList" class="flex-1 overflow-y-auto space-y-3 mb-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg min-h-[250px] max-h-[400px]">
+                <!-- Comments will be injected here -->
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="newCommentText" placeholder="Nhập nội dung trao đổi, báo cáo..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" onkeypress="if(event.key === 'Enter') window.saveComment()">
+                <button onclick="window.saveComment()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md whitespace-nowrap"><i class="fas fa-paper-plane mr-1"></i>Gửi</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Việc nhỏ (Sub-Task) -->
     <div id="subTaskModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-orange-500">
@@ -644,28 +661,41 @@
         });
 
         // Kết nối Google Apps Script
-        window.loadDataFromGAS = async function() {
+        window.loadDataFromGAS = async function(u = null, p = null) {
             try {
-                const response = await fetch(GAS_URL, { cache: "no-store" });
+                let fetchUrl = GAS_URL;
+                if (u && p) {
+                    fetchUrl += `?action=login&u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`;
+                } else if (currentUser) {
+                    fetchUrl += `?action=login&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                }
+                const response = await fetch(fetchUrl, { cache: "no-store" });
                 if (!response.ok) throw new Error("HTTP error " + response.status);
                 const textData = await response.text();
-                let data = {};
-                if (textData && textData.trim() !== "") { 
-                    try { data = JSON.parse(textData); } catch(e) { console.warn("Lỗi đọc JSON từ GAS:", e); } 
-                }
-                if (data && typeof data === 'object' && Object.keys(data).length > 0) { 
-                    db = data; 
+                let res = {};
+                try { res = JSON.parse(textData); } catch(e) { console.warn("Lỗi đọc JSON từ GAS:", e); } 
+                
+                if (res.error) throw new Error(res.error);
+                
+                if (res.db && typeof res.db === 'object') { 
+                    db = res.db; 
+                } else if (res && !res.success && res.users) {
+                    // Fallback for old unauthenticated backend output
+                    db = res;
+                } else {
+                    db = {};
                 }
                 applyDefaultsIfMissing(); 
                 isDataSynchronized = true; 
             } catch (err) { 
                 console.error("Lỗi fetch API:", err); 
                 isDataSynchronized = false; 
+                throw err;
             }
         };
 
         window.saveDataToGAS = async function(alertSuccess = false) {
-            if (!isDataSynchronized) return; 
+            if (!isDataSynchronized || !currentUser) return; 
             isSaving = true; 
             const syncIcon = document.querySelector('#syncStatus i'); 
             const syncText = document.getElementById('syncText');
@@ -673,7 +703,8 @@
             if (syncText) syncText.innerText = "Đang lưu...";
             
             try {
-                await fetch(GAS_URL, { 
+                let saveUrl = `${GAS_URL}?u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                await fetch(saveUrl, { 
                     method: 'POST', 
                     body: JSON.stringify(db), 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
@@ -712,11 +743,17 @@
             if (loader) loader.style.display = 'flex';
             
             try {
-                const response = await fetch(GAS_URL + "?action=getBackups", { cache: "no-store" });
+                let fetchUrl = `${GAS_URL}?action=getBackups&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                const response = await fetch(fetchUrl, { cache: "no-store" });
                 const textResponse = await response.text();
                 let backups = null; 
                 try { backups = JSON.parse(textResponse); } catch(e) {}
                 
+                if (backups && backups.error) {
+                    Swal.fire('Lỗi', backups.error, 'error');
+                    if (loader) loader.style.display = 'none';
+                    return;
+                }
                 if (!Array.isArray(backups)) { 
                     Swal.fire({ 
                         title: 'Cần cập nhật Google Apps Script', 
@@ -786,10 +823,16 @@
                     if (lText) lText.innerText = "Đang tải và khôi phục..."; 
                     if (loader) loader.style.display = 'flex';
                     try {
-                        const response = await fetch(GAS_URL + "?action=loadBackup&id=" + id, { cache: "no-store" });
+                        let fetchUrl = `${GAS_URL}?action=loadBackup&id=${id}&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                        const response = await fetch(fetchUrl, { cache: "no-store" });
                         const textData = await response.text(); 
                         let data = null; 
                         if(textData && textData.trim() !== "") data = JSON.parse(textData);
+                        if (data && data.error) {
+                            Swal.fire('Lỗi', data.error, 'error');
+                            if (loader) loader.style.display = 'none';
+                            return;
+                        }
                         if (data && typeof data === 'object' && Object.keys(data).length > 0) {
                             db = data; 
                             applyDefaultsIfMissing(); 
@@ -823,10 +866,13 @@
             if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300"; 
             if (syncText) syncText.innerText = "Làm mới...";
             try {
-                const response = await fetch(GAS_URL, { cache: "no-store" });
+                let fetchUrl = `${GAS_URL}?action=login&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                const response = await fetch(fetchUrl, { cache: "no-store" });
                 const textData = await response.text(); 
-                let data = null; 
-                if (textData && textData.trim() !== "") data = JSON.parse(textData);
+                let res = null; 
+                if (textData && textData.trim() !== "") res = JSON.parse(textData);
+                if (res && res.error) throw new Error(res.error);
+                let data = res && res.db ? res.db : (res && !res.success && res.users ? res : null);
                 if (data && typeof data === 'object' && Object.keys(data).length > 0) {
                     if (JSON.stringify(db) !== JSON.stringify(data)) {
                         db = data; 
@@ -1493,7 +1539,10 @@
                                         let fullTaskHtml = nameHtml + subTasksHtml; 
                                         let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-"; 
-                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded">${safeNote}</div>` : '';
+                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded mb-1">${safeNote}</div>` : '';
+                                        let cCount = (step.comments && step.comments.length > 0) ? step.comments.length : 0;
+                                        let cClass = cCount > 0 ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 font-bold" : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
+                                        noteHtml += `<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] ${cClass} px-2 py-1 rounded border shadow-sm transition hover:opacity-80"><i class="fas fa-comments mr-1"></i>Trao đổi (${cCount})</button>`;
                                         
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links)) {
@@ -1758,6 +1807,68 @@
             window.logActivity(cEditM, cEditP, `Sửa chi tiết việc: ${name}`); 
             window.closeEditStepModal(); 
             window.renderMissions(); 
+            window.saveDataToGAS(false);
+        };
+
+        window.openCommentsModal = function(mIndex, pIndex, sIndex) {
+            cEditM = mIndex;
+            cEditP = pIndex;
+            cEditS = sIndex;
+            const step = db.missions[mIndex].packages[pIndex].steps[sIndex];
+            document.getElementById('commentStepName').innerText = step.name;
+            document.getElementById('newCommentText').value = "";
+            window.renderCommentsList();
+            document.getElementById('commentsModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('newCommentText').focus(), 100);
+        };
+
+        window.closeCommentsModal = function() {
+            document.getElementById('commentsModal').classList.add('hidden');
+        };
+
+        window.renderCommentsList = function() {
+            const step = db.missions[cEditM].packages[cEditP].steps[cEditS];
+            const listEl = document.getElementById('commentsList');
+            listEl.innerHTML = "";
+            if (!step.comments || step.comments.length === 0) {
+                listEl.innerHTML = `<div class="text-center text-gray-500 italic mt-10">Chưa có trao đổi nào. Hãy là người đầu tiên!</div>`;
+                return;
+            }
+            step.comments.forEach(c => {
+                let isMe = c.author === currentUser.fullname;
+                let align = isMe ? "justify-end" : "justify-start";
+                let bg = isMe ? "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700";
+                let timeStr = window.formatDate(c.timestamp) + " " + new Date(c.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                
+                listEl.innerHTML += `
+                    <div class="flex ${align} mb-3">
+                        <div class="max-w-[85%] border ${bg} rounded-lg p-3 shadow-sm">
+                            <div class="flex justify-between items-baseline mb-1 gap-4">
+                                <span class="font-bold text-xs ${isMe ? 'text-blue-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}">${escapeHtml(c.author)}</span>
+                                <span class="text-[10px] text-gray-500">${timeStr}</span>
+                            </div>
+                            <div class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">${escapeHtml(c.text)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            setTimeout(() => { listEl.scrollTop = listEl.scrollHeight; }, 50);
+        };
+
+        window.saveComment = function() {
+            const txt = document.getElementById('newCommentText').value.trim();
+            if (!txt) return;
+            const step = db.missions[cEditM].packages[cEditP].steps[cEditS];
+            if (!step.comments) step.comments = [];
+            step.comments.push({
+                author: currentUser.fullname,
+                text: txt,
+                timestamp: new Date().toISOString()
+            });
+            document.getElementById('newCommentText').value = "";
+            window.logActivity(cEditM, cEditP, `Bình luận vào công việc: ${step.name}`);
+            window.renderCommentsList();
+            window.renderMissions();
             window.saveDataToGAS(false);
         };
 
