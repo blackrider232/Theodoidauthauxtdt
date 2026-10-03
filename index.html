@@ -209,16 +209,38 @@
 
             <!-- 5. REGULATORY DOCUMENTS -->
             <div id="view-docs" class="hidden space-y-6">
+                <!-- THÊM VĂN BẢN -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Căn cứ triển khai chung</h2>
-                    <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Thêm Văn bản Pháp lý</h2>
+                    <div class="flex flex-col md:flex-row gap-3 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded items-center">
+                        <select id="newDocCategory" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-48 dark:text-white">
+                            <option value="chung">Căn cứ chung</option>
+                            <option value="thamkhao">Văn bản tham khảo</option>
+                        </select>
                         <input type="text" id="newDocNumber" placeholder="Số hiệu..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
                         <input type="text" id="newDocTitle" placeholder="Tên văn bản..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-[2] dark:text-white">
-                        <input type="url" id="newDocLink" placeholder="Link (Tùy chọn)..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
-                        <button onclick="window.addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium w-full md:w-auto"><i class="fas fa-plus mr-1 md:mr-0"></i><span class="md:hidden"> Thêm văn bản</span></button>
+                        <input type="url" id="newDocLink" placeholder="Link web (nếu có)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white">
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <button onclick="document.getElementById('uploadDocFile').click()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded text-sm font-medium whitespace-nowrap" title="Tải file lên Drive"><i class="fas fa-cloud-upload-alt"></i> Tải file</button>
+                            <input type="file" id="uploadDocFile" class="hidden" onchange="window.uploadDocDrive(this)">
+                            <button onclick="window.addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap w-full md:w-auto"><i class="fas fa-plus"></i> Thêm</button>
+                        </div>
                     </div>
+                </div>
+
+                <!-- CĂN CỨ CHUNG -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-md font-bold text-gray-800 dark:text-white mb-2 text-indigo-700 dark:text-indigo-400"><i class="fas fa-gavel mr-2"></i>Căn cứ triển khai chung</h2>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm min-w-[700px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link tra cứu</th><th class="p-3 w-16 text-center">Xóa</th></tr></thead><tbody id="docsTableBody" class="dark:text-gray-300"></tbody></table>
+                        <table class="w-full text-left border-collapse text-sm min-w-[700px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link tra cứu</th><th class="p-3 w-16 text-center">Xóa</th></tr></thead><tbody id="docsTableBodyChung" class="dark:text-gray-300"></tbody></table>
+                    </div>
+                </div>
+
+                <!-- VĂN BẢN THAM KHẢO -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-md font-bold text-gray-800 dark:text-white mb-2 text-blue-700 dark:text-blue-400"><i class="fas fa-book mr-2"></i>Các văn bản pháp lý tham khảo</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm min-w-[700px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3 w-40">Số hiệu</th><th class="p-3">Tên văn bản</th><th class="p-3 w-48">Link tra cứu</th><th class="p-3 w-16 text-center">Xóa</th></tr></thead><tbody id="docsTableBodyThamKhao" class="dark:text-gray-300"></tbody></table>
                     </div>
                 </div>
             </div>
@@ -2023,6 +2045,12 @@
                 confirmButtonText: 'Xóa' 
             }).then((r) => { 
                 if(r.isConfirmed) { 
+                    let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
+                    if (step.links && Array.isArray(step.links)) {
+                        step.links.forEach(l => {
+                            if (l.url) window.deleteFileFromDrive(l.url);
+                        });
+                    }
                     db.missions[mIndex].packages[pkgIndex].steps.splice(sIndex, 1); 
                     window.logActivity(mIndex, pkgIndex, `Đã xóa công việc`); 
                     window.renderMissions(); 
@@ -2031,10 +2059,25 @@
             }); 
         };
 
+        window.deleteFileFromDrive = async function(url) {
+            if (!url || !url.includes("drive.google.com/file/d/")) return;
+            try {
+                let fetchUrl = GAS_URL + `?action=deleteFile&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                await fetch(fetchUrl, {
+                    method: "POST",
+                    body: JSON.stringify({ url: url })
+                });
+            } catch(e) {
+                console.error("Lỗi xóa file trên Drive", e);
+            }
+        };
+
         window.deleteDoc = function(index) { 
             if (currentUser.role !== 'admin') return; 
             Swal.fire({title: 'Xóa văn bản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
                 if(r.isConfirmed){ 
+                    let doc = db.regulatoryDocs[index];
+                    if (doc.link) window.deleteFileFromDrive(doc.link);
                     db.regulatoryDocs.splice(index, 1); 
                     window.renderDocs(); 
                     window.saveDataToGAS(false); 
@@ -2086,7 +2129,10 @@
             if (currentUser.role === 'leader') return; 
             Swal.fire({title: 'Xóa đính kèm?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
                 if(r.isConfirmed){ 
-                    db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.splice(lIndex, 1); 
+                    let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
+                    let link = step.links[lIndex];
+                    if (link && link.url) window.deleteFileFromDrive(link.url);
+                    step.links.splice(lIndex, 1); 
                     window.logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm`); 
                     window.renderMissions(); 
                     window.saveDataToGAS(false); 
@@ -2472,33 +2518,97 @@
         };
         
         window.renderDocs = function() { 
-            const b = document.getElementById('docsTableBody'); 
-            b.innerHTML = ''; 
+            const tbodyChung = document.getElementById('docsTableBodyChung'); 
+            const tbodyThamKhao = document.getElementById('docsTableBodyThamKhao'); 
+            tbodyChung.innerHTML = ''; 
+            tbodyThamKhao.innerHTML = ''; 
+            
             if(!db.regulatoryDocs) db.regulatoryDocs = []; 
             db.regulatoryDocs.forEach((d, i) => { 
-                b.innerHTML += `
-                    <tr class="border-b dark:border-gray-700">
+                let rowHtml = `
+                    <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                         <td class="p-3"><input value="${escapeHtml(d.number)}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td>
                         <td class="p-3"><input value="${escapeHtml(d.title)}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td>
-                        <td class="p-3"><input type="url" value="${escapeHtml(d.link||'')}" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none"></td>
+                        <td class="p-3">
+                            <div class="flex items-center gap-2">
+                                <input type="url" value="${escapeHtml(d.link||'')}" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">
+                                ${d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-500 hover:text-blue-700" title="Mở link"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                            </div>
+                        </td>
                         <td class="p-3 text-center"><button onclick="window.deleteDoc(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>
                     </tr>`; 
+                    
+                if (d.category === 'thamkhao') {
+                    tbodyThamKhao.innerHTML += rowHtml;
+                } else {
+                    tbodyChung.innerHTML += rowHtml;
+                }
             }); 
         };
 
         window.addNewDoc = function() { 
             if(currentUser.role !== 'admin') return; 
+            const cat = document.getElementById('newDocCategory').value;
             const num = document.getElementById('newDocNumber').value.trim();
             const tit = document.getElementById('newDocTitle').value.trim();
             const lnk = document.getElementById('newDocLink').value.trim(); 
             if(num && tit){ 
-                db.regulatoryDocs.push({ number: num, title: tit, link: lnk }); 
+                if(!db.regulatoryDocs) db.regulatoryDocs = [];
+                db.regulatoryDocs.push({ category: cat, number: num, title: tit, link: lnk }); 
                 document.getElementById('newDocNumber').value = ''; 
                 document.getElementById('newDocTitle').value = ''; 
                 document.getElementById('newDocLink').value = ''; 
                 window.renderDocs(); 
                 window.saveDataToGAS(false); 
-            } 
+            } else {
+                Swal.fire('Lỗi', 'Vui lòng nhập số hiệu và tên văn bản', 'warning');
+            }
+        };
+
+        window.uploadDocDrive = async function(inputElem) {
+            if (currentUser.role !== 'admin') return; 
+            if (!inputElem.files || inputElem.files.length === 0) return;
+            let file = inputElem.files[0];
+            
+            if (file.size > 10 * 1024 * 1024) {
+                return Swal.fire('Lỗi', 'Dung lượng file vượt quá giới hạn 10MB', 'error');
+            }
+
+            const lText = document.getElementById('loaderText');
+            const loader = document.getElementById('loader');
+            if (lText) lText.innerText = "Đang tải văn bản lên Drive..."; 
+            if (loader) loader.style.display = 'flex';
+
+            let reader = new FileReader();
+            reader.onload = async function(e) {
+                let base64 = e.target.result;
+                let reqPayload = {
+                    filename: file.name,
+                    mimeType: file.type,
+                    base64: base64
+                };
+                try {
+                    let fetchUrl = GAS_URL + `?action=uploadFile&u=${encodeURIComponent(currentUser.username)}&p=${encodeURIComponent(currentUser.password)}`;
+                    let res = await fetch(fetchUrl, {
+                        method: "POST",
+                        body: JSON.stringify(reqPayload)
+                    });
+                    let result = await res.json();
+                    if (loader) loader.style.display = 'none';
+
+                    if (result.status === 'success') {
+                        // Tự động điền link vào ô input
+                        document.getElementById('newDocLink').value = result.link;
+                        Swal.fire('Thành công', 'Đã lưu trữ văn bản vào Drive! Vui lòng nhập số hiệu, tên văn bản và bấm Thêm.', 'success');
+                    } else {
+                        Swal.fire('Lỗi', result.message || 'Lỗi tải lên', 'error');
+                    }
+                } catch(err) {
+                    if (loader) loader.style.display = 'none';
+                    Swal.fire('Lỗi', 'Không thể kết nối máy chủ', 'error');
+                }
+            };
+            reader.readAsDataURL(file);
         };
 
         window.updateDoc = function(i, f, v) { 
