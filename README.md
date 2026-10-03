@@ -1,30 +1,53 @@
-📢 HƯỚNG DẪN SỬ DỤNG HỆ THỐNG ĐẤU THẦU (Dành cho Chuyên viên)
+# HỆ THỐNG QUẢN TRỊ ĐẤU THẦU - SCE ENTERPRISE
+> Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội (SCE)
 
-Chào mọi người, hệ thống theo dõi Tiến độ Đấu thầu (bản Enterprise) đã được cập nhật giao diện mới an toàn và trực quan hơn. Dưới đây là hướng dẫn thao tác:
+---
 
-🌐 1. Truy cập & Đăng nhập
+## 🎯 Giới thiệu
+Phần mềm Quản trị Đấu thầu SCE Enterprise là công cụ được thiết kế để số hóa toàn bộ luồng công việc, theo dõi tiến độ, và quản lý các gói thầu/nhiệm vụ của Trung tâm SCE. Hệ thống giúp chuyên viên và lãnh đạo nắm bắt tiến độ công việc theo thời gian thực.
 
-📊 2. Theo dõi công việc
+## 🌟 Các tính năng nổi bật
+1. **Bảng điều khiển (Dashboard):** Tổng hợp thống kê nhiệm vụ đang chạy, công việc trễ hạn, gói thầu đã hoàn thành. Hệ thống biểu đồ trực quan.
+2. **Quản lý Nhiệm vụ & Gói thầu:** Tạo nhiệm vụ tổng, tạo nhiều gói thầu con bên trong. Phân bổ công việc (step) và việc nhỏ (sub-tasks) theo các quy trình chuẩn.
+3. **Bảng Kanban:** Theo dõi luồng công việc trực quan bằng phương pháp kéo-thả (Kéo thả thay đổi thứ tự bước).
+4. **Lịch biểu (Calendar View):** Hiển thị toàn bộ hạn chót công việc lên lịch tháng/tuần. Giúp nhận biết ngay các công việc sắp tới hạn (màu cam) hoặc trễ hạn (màu đỏ).
+5. **Trao đổi & Bình luận (Comments):** Hỗ trợ chat, báo cáo tiến độ, thảo luận trực tiếp ngay tại từng công việc (Step).
+6. **Ứng dụng Offline (PWA):** Tích hợp công nghệ Progressive Web App. Có thể "Cài đặt" ứng dụng ra màn hình chính điện thoại hoặc máy tính. Tốc độ tải trang siêu tốc.
+7. **Bảo mật Backend:** Chống truy cập trái phép. Ẩn mật khẩu của người dùng khác. Kiểm tra quyền tại Server (Google Apps Script).
+8. **In ấn & Xuất Excel:** Xuất báo cáo tự động sang định dạng `.xlsx` chuẩn (sử dụng thư viện SheetJS) và In ấn báo cáo giao ban theo chuẩn thể thức hành chính Việt Nam.
+9. **Tích hợp Pháp lý:** Tra cứu Luật nhanh chóng với Thư viện Pháp luật và LuatVietnam ngay trên thanh Menu.
 
-Bảng Kanban: Xem toàn cảnh các gói thầu được phân loại tự động (Chưa bắt đầu, Đang làm, Trễ hạn, Đã xong). Chỉ cần di chuột (hoặc chạm trên điện thoại) vào thẻ nhiệm vụ, nội dung sẽ hiện ra đầy đủ.
+---
 
-Tổng quan: Nơi xem biểu đồ tiến độ và danh sách các việc đang bị trễ hạn cần xử lý gấp.
+## 🚀 Hướng dẫn sử dụng cho Chuyên viên / Lãnh đạo
 
-📝 3. Xử lý & Cập nhật Tiến độ
-Mọi người vào tab Danh sách Dự án, tìm gói thầu mình phụ trách và thao tác:
+### Đăng nhập & Bắt đầu
+- Truy cập vào đường dẫn trang web của phần mềm.
+- Đăng nhập bằng tên đăng nhập và mật khẩu được Admin cấp.
+- Nếu được phép ghi nhớ, bạn có thể tick chọn "Ghi nhớ đăng nhập" để không phải nhập lại lần sau.
 
-Báo cáo hoàn thành: Hoàn thành công việc nào, chỉ cần đánh dấu ☑️ vào ô trống đầu dòng.
+### Quản lý công việc hàng ngày
+- **Xem Lịch biểu:** Chuyển sang Tab "Lịch biểu" để xem tổng quan các việc trong tháng. Ưu tiên làm các việc có màu đỏ (trễ hạn) hoặc cam (sắp hạn).
+- **Thực hiện công việc:** Tại Tab "Danh sách Dự án", bấm dấu check `(V)` để đánh dấu hoàn thành công việc. Nếu có việc nhỏ (sub-task), hãy check từng việc nhỏ.
+- **Trao đổi / Báo cáo:** Bấm vào nút `Trao đổi` dưới tên mỗi công việc để báo cáo tiến độ, giải trình lý do trễ hạn với lãnh đạo hoặc đồng nghiệp.
+- **Đính kèm link:** Bấm nút `Gắn file` để chèn link Google Drive, OneDrive tài liệu, quyết định phê duyệt... cho bước đó.
 
-Cập nhật chi tiết: Bấm vào biểu tượng Sửa (icon 📝 màu xanh) ở mỗi việc để: Ghi chú báo cáo/giải trình tiến độ, dời hạn chót, hoặc thêm các Việc con (Sub-task).
+### Giao diện Sáng/Tối
+- Có thể bấm vào biểu tượng 🌙/☀️ ở góc trên cùng bên phải để thay đổi giao diện theo sở thích.
 
-Đính kèm tài liệu: Bấm nút Gắn file (icon 📎) để lưu link tài liệu, Google Drive liên quan đến công việc.
+---
 
-Kiểm tra lịch sử: Bấm nút Nhật ký ở trên cùng gói thầu để xem lại toàn bộ lịch sử thao tác của các thành viên.
+## 🛠 Hướng dẫn Triển khai & Cập nhật (Dành cho Quản trị viên)
 
-Hoàn tất toàn bộ gói thầu, bấm Chốt Gói.
+### 1. Cập nhật Backend (Google Apps Script)
+Mỗi khi có cập nhật code `Code.gs`:
+1. Mở Google Sheets đang lưu dữ liệu của bạn, vào **Tiện ích mở rộng > Apps Script**.
+2. Dán code mới vào file `Code.gs`. Bấm Lưu.
+3. Bấm **Triển khai (Deploy)** -> **Quản lý bản triển khai (Manage deployments)**.
+4. Bấm biểu tượng Cây bút (Chỉnh sửa) -> Ở mục Phiên bản, CHỌN **Phiên bản mới (New version)**. Bấm Triển khai.
 
-🖨 4. Thêm dự án & Xuất Báo cáo
+### 2. Cấu hình & Backup dữ liệu
+- Admin có quyền truy cập tab **Quy trình**, **Pháp lý**, **Tài khoản** và **Khôi phục**.
+- **Khôi phục (Backups):** Hệ thống sẽ tự động lưu 50 bản Snapshots mỗi khi có thao tác lưu. Admin có thể bấm Khôi phục bất cứ lúc nào nếu ai đó lỡ tay xóa nhầm dữ liệu.
 
-Thêm mới: Bấm nút Tạo Nhiệm vụ (xanh lá) ➡️ Bấm tiếp + Gói thầu, chọn quy trình chuẩn. Hệ thống sẽ tự động lên lịch trình, tự động trừ các ngày thứ 7, Chủ Nhật và ngày Lễ/Tết.
-
-In ấn: Cần xuất báo cáo giấy hoặc file mềm, chỉ cần bấm nút In Gói, In NV hoặc Xuất Excel ngay trên thẻ dự án.
+*(Được phát triển riêng biệt cho quy trình hoạt động của Trung tâm)*

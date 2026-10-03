@@ -771,8 +771,15 @@
                     backups.forEach(b => {
                         let displayTime = b.time;
                         try {
-                            let dt = new Date(b.time);
-                            if (!isNaN(dt.getTime())) {
+                            let timeStr = String(b.time);
+                            
+                            // Ngăn chặn trường hợp người dùng lỡ tay paste nhầm chuỗi JSON khổng lồ vào cột Thời gian (Cột B) trong sheet Backups
+                            if (timeStr.length > 100) {
+                                displayTime = `<span class="text-red-500 font-normal italic">Dữ liệu lỗi (Chuỗi quá dài do sai cột trong Google Sheets)</span>`;
+                            }
+                            // Nếu là ISO String (có chữ T và Z)
+                            else if (timeStr.includes("T") && timeStr.includes("Z")) {
+                                let dt = new Date(timeStr);
                                 let d = ("0" + dt.getDate()).slice(-2); 
                                 let m = ("0" + (dt.getMonth() + 1)).slice(-2); 
                                 let y = dt.getFullYear(); 
@@ -780,19 +787,25 @@
                                 let min = ("0" + dt.getMinutes()).slice(-2); 
                                 let sec = ("0" + dt.getSeconds()).slice(-2);
                                 displayTime = `Lúc <span class="font-bold text-red-600">${hr}:${min}:${sec}</span> ngày <span class="font-bold text-gray-700 dark:text-gray-300">${d}/${m}/${y}</span>`;
-                            } else {
-                                let tParts = String(b.time).split(" ");
+                            } 
+                            // Nếu là chuỗi ngày tháng dd/MM/yyyy HH:mm:ss của Việt Nam
+                            else {
+                                let tParts = timeStr.split(" ");
                                 if(tParts.length === 2 && tParts[0].includes("/")) { 
                                     displayTime = `Lúc <span class="font-bold text-red-600">${tParts[1]}</span> ngày <span class="font-bold text-gray-700 dark:text-gray-300">${tParts[0]}</span>`; 
                                 }
                             }
                         } catch(e) {}
+                        
+                        let safeId = String(b.id);
+                        if (safeId.length > 50) safeId = "Lỗi ID";
+
                         tbody.innerHTML += `
                             <tr class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                                <td class="p-3 text-center font-bold text-gray-500 dark:text-gray-400">#${b.id}</td>
-                                <td class="p-3 text-sm">${displayTime}</td>
+                                <td class="p-3 text-center font-bold text-gray-500 dark:text-gray-400 max-w-[100px] truncate">#${escapeHtml(safeId)}</td>
+                                <td class="p-3 text-sm max-w-xl break-words">${displayTime}</td>
                                 <td class="p-3 text-center">
-                                    <button onclick="window.restoreBackup('${b.id}', '${escapeHtml(b.time)}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition">
+                                    <button onclick="window.restoreBackup('${escapeHtml(safeId)}', '${escapeHtml(String(b.time).substring(0, 30))}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition">
                                         <i class="fas fa-undo-alt mr-1"></i> Khôi phục
                                     </button>
                                 </td>
