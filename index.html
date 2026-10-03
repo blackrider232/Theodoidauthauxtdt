@@ -747,6 +747,32 @@
                     if(response.ok) saveToIDB(textData); 
                 } catch(e) {}
                 let res = {};
+                try { res = JSON.parse(textData); } catch(e) {}
+                if (res.status === 'error' || res.error) throw new Error(res.message || res.error);
+                if (res.db && typeof res.db === 'object') {
+                    db = res.db;
+                } else {
+                    db = {};
+                }
+                applyDefaultsIfMissing();
+                isDataSynchronized = true;
+            } catch (err) {
+                console.error("Lỗi fetch API:", err);
+                const offlineData = await loadFromIDB();
+                if (offlineData) {
+                    let res = {};
+                    try { res = JSON.parse(offlineData); } catch(e) {}
+                    if (res.db) db = res.db;
+                    applyDefaultsIfMissing();
+                    isDataSynchronized = true;
+                    if (window.toast) window.toast.fire({ icon: 'info', title: 'Đang dùng dữ liệu ngoại tuyến (Offline)' });
+                } else {
+                    isDataSynchronized = false;
+                    throw err;
+                }
+            }
+        };
+
         window.saveDataToGAS = async function(alertSuccess = false) {
             if (!isDataSynchronized || !currentUser) return;
             isSaving = true;
@@ -3157,21 +3183,21 @@
         }
     
         window.exportToExcel = function() {
-            if (!db.missions || db.missions.length === 0) return Swal.fire('Th�ng b�o', 'Kh�ng c� d? li?u d? xu?t.', 'info');
+            if (!db.missions || db.missions.length === 0) return Swal.fire('Thông báo', 'Không có dữ liệu để xuất.', 'info');
             let data = [];
             db.missions.forEach(m => {
                 if(m.packages) m.packages.forEach(p => {
                     if(p.steps) p.steps.forEach((s, idx) => {
                         data.push({
-                            'D? �n': m.name,
-                            'G�i th?u': p.name,
-                            'Ch? tr�': p.owner || m.owner,
-                            'Bu?c': idx + 1,
-                            'T�n c�ng vi?c': s.name,
-                            'H?n ho�n th�nh': s.deadline || '',
-                            'Tr?ng th�i': s.completed ? 'Ho�n th�nh' : '�ang x? l�',
-                            'Ngu?i ho�n th�nh': s.completedBy || '',
-                            'Ghi ch�': s.note || ''
+                            'Dự án': m.name,
+                            'Gói thầu': p.name,
+                            'Chủ trì': p.owner || m.owner,
+                            'Bước': idx + 1,
+                            'Tên công việc': s.name,
+                            'Hạn hoàn thành': s.deadline || '',
+                            'Trạng thái': s.completed ? 'Hoàn thành' : 'Đang xử lý',
+                            'Người hoàn thành': s.completedBy || '',
+                            'Ghi chú': s.note || ''
                         });
                     });
                 });
