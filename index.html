@@ -747,55 +747,6 @@
                     if(response.ok) saveToIDB(textData); 
                 } catch(e) {}
                 let res = {};
-                try { res = JSON.parse(textData); } catch(e) {}
-                if (res.status === 'error' || res.error) throw new Error(res.message || res.error);
-                if (res.db && typeof res.db === 'object') {
-                    db = res.db;
-                } else {
-                    db = {};
-                }
-                applyDefaultsIfMissing();
-                isDataSynchronized = true;
-            } catch (err) {
-                console.error("Lỗi fetch API:", err);
-                
-                console.log("Mạng lỗi, thử tải từ Offline DB...");
-                const offlineData = await loadFromIDB();
-                if(offlineData) {
-                    let res = {};
-                    try { res = JSON.parse(offlineData); } catch(e) {}
-                    if (res.db) db = res.db;
-                    applyDefaultsIfMissing();
-                    isDataSynchronized = true;
-                    window.toast.fire({ icon: 'info', title: 'Đang dùng dữ liệu ngoại tuyến (Offline)' });
-                } else {
-                    isDataSynchronized = false;
-                    throw err;
-                }
-        
-            }
-        };
-                try { res = JSON.parse(textData); } catch(e) { console.warn("Lỗi đọc JSON từ GAS:", e); } 
-                
-                if (res.error) throw new Error(res.error);
-                
-                if (res.db && typeof res.db === 'object') { 
-                    db = res.db; 
-                } else if (res && !res.success && res.users) {
-                    // Fallback for old unauthenticated backend output
-                    db = res;
-                } else {
-                    db = {};
-                }
-                applyDefaultsIfMissing(); 
-                isDataSynchronized = true; 
-            } catch (err) { 
-                console.error("Lỗi fetch API:", err); 
-                isDataSynchronized = false; 
-                throw err;
-            }
-        };
-
         window.saveDataToGAS = async function(alertSuccess = false) {
             if (!isDataSynchronized || !currentUser) return;
             isSaving = true;
