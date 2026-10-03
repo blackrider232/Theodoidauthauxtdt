@@ -475,6 +475,34 @@
     <!-- MÃ JAVASCRIPT HỆ THỐNG -->
     <script>
         // Đường dẫn Google Apps Script Web App
+
+        // --- OFFLINE DB ---
+        const dbName = 'sce_bidding_db';
+        let idb = null;
+        const initIDB = () => {
+            return new Promise((resolve) => {
+                const req = indexedDB.open(dbName, 1);
+                req.onupgradeneeded = e => { e.target.result.createObjectStore('cache'); };
+                req.onsuccess = e => { idb = e.target.result; resolve(); };
+                req.onerror = () => resolve();
+            });
+        };
+        const saveToIDB = (data) => {
+            if(!idb) return;
+            const tx = idb.transaction('cache', 'readwrite');
+            tx.objectStore('cache').put(data, 'mainDb');
+        };
+        const loadFromIDB = () => {
+            return new Promise((resolve) => {
+                if(!idb) return resolve(null);
+                const tx = idb.transaction('cache', 'readonly');
+                const req = tx.objectStore('cache').get('mainDb');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(null);
+            });
+        };
+        initIDB();
+
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
 
         const defaultTemplates = {
@@ -689,7 +717,8 @@
                         showLoginError("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng hoặc đăng nhập lại."); 
                         return; 
                     }
-                    const found = db.users.find(u => u.username === pU.username && u.password === reqP);
+                    if (!db.users) db.users = [];
+                const found = db.users.find(u => u.username === pU.username && u.password === reqP);
                     if (found) { 
                         currentUser = found; 
                         window.openAppScreen(); 
@@ -697,9 +726,7 @@
                         localStorage.removeItem('bidAppUser'); 
                     }
                 }
-            } catch (error) { 
-                console.error("Lỗi khởi động:", error); 
-            }
+            } catch (error) { console.error('Loi:', error); const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none'; showLoginError('Loi: ' + error.message); }
         });
 
         // Kết nối Google Apps Script
@@ -1149,6 +1176,7 @@
                     showLoginError("Lỗi kết nối máy chủ Google Sheets. Vui lòng kiểm tra mạng."); 
                     return; 
                 }
+                if (!db.users) db.users = [];
                 const found = db.users.find(x => x.username === u && x.password === p);
                 if (found) { 
                     currentUser = found; 
@@ -1552,9 +1580,7 @@
                 document.getElementById('kb-doing-count').innerText = cDoing; 
                 document.getElementById('kb-late-count').innerText = cLate; 
                 document.getElementById('kb-done-count').innerText = cDone;
-            } catch (error) { 
-                console.error("Lỗi Render Kanban:", error); 
-            }
+            } catch (error) { console.error('Loi:', error); const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none'; showLoginError('Loi: ' + error.message); }
         };
 
         window.renderMissions = function() {
@@ -3207,6 +3233,11 @@
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
