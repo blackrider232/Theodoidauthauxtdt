@@ -147,6 +147,8 @@ function doPost(e) {
     const p = e.parameter ? e.parameter.p : null;
     const postData = e.postData ? e.postData.contents : "";
     
+    const action = e.parameter ? e.parameter.action : null;
+
     if (!postData) {
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Không có dữ liệu" })).setMimeType(ContentService.MimeType.JSON);
     }
@@ -156,12 +158,40 @@ function doPost(e) {
     let currentDb = {};
     try { currentDb = JSON.parse(dataStr); } catch(err){}
     
-    // Xác thực khi lưu
+    // Xác thực khi lưu hoặc upload
     if (currentDb.users && currentDb.users.length > 0) {
         const foundUser = currentDb.users.find(x => x.username === u && x.password === p);
         if (!foundUser) {
-            return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Xác thực thất bại, không thể lưu" })).setMimeType(ContentService.MimeType.JSON);
+            return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Xác thực thất bại, không thể thao tác" })).setMimeType(ContentService.MimeType.JSON);
         }
+    }
+
+    // XỬ LÝ UPLOAD FILE LÊN GOOGLE DRIVE
+    if (action === "uploadFile") {
+        let req = JSON.parse(postData);
+        let folderName = "Tai_Lieu_Dau_Thau_SCE";
+        let folders = DriveApp.getFoldersByName(folderName);
+        let folder;
+        if (folders.hasNext()) {
+            folder = folders.next();
+        } else {
+            folder = DriveApp.createFolder(folderName);
+            folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        }
+        
+        // Decode base64 
+        // Lọc bỏ phần tiền tố "data:MIME;base64," nếu có
+        let base64Data = req.base64;
+        if (base64Data.indexOf("base64,") !== -1) {
+            base64Data = base64Data.split("base64,")[1];
+        }
+        
+        let blob = Utilities.newBlob(Utilities.base64Decode(base64Data), req.mimeType, req.filename);
+        let file = folder.createFile(blob);
+        let link = file.getUrl();
+        
+        return ContentService.createTextOutput(JSON.stringify({ status: "success", link: link }))
+            .setMimeType(ContentService.MimeType.JSON);
     }
     
     // Lắp lại mật khẩu cũ và phân quyền chặt chẽ mảng users
