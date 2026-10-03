@@ -335,6 +335,12 @@
             <input type="date" id="editPackageStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
             <select id="editPackageOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-3">Giá dự toán</label>
+<input type="text" id="editPackageBudget" placeholder="Ví dụ: 1.500.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nhà thầu thực hiện</label>
+<input type="text" id="editPackageContractor" placeholder="Tên công ty trúng thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giá trúng thầu</label>
+<input type="text" id="editPackageWinningBid" placeholder="Ví dụ: 1.450.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 outline-none dark:text-white">
             <div class="flex justify-end gap-3">
                 <button onclick="window.closeEditPackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.saveEditPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md">Lưu thay đổi</button>
@@ -532,6 +538,16 @@
 
         // Ngày nghỉ lễ cố định Việt Nam (dd/mm)
         const VN_HOLIDAYS = ['01/01', '30/04', '01/05', '02/09'];
+// Các ngày nghỉ lễ Âm lịch (Tết Nguyên Đán, Giỗ Tổ Hùng Vương) 2024-2030 (Dự kiến)
+const LUNAR_HOLIDAYS = [
+    '08/02/2024','09/02/2024','10/02/2024','11/02/2024','12/02/2024','13/02/2024','14/02/2024','18/04/2024',
+    '25/01/2025','26/01/2025','27/01/2025','28/01/2025','29/01/2025','30/01/2025','31/01/2025','01/02/2025','02/02/2025','07/04/2025',
+    '14/02/2026','15/02/2026','16/02/2026','17/02/2026','18/02/2026','19/02/2026','20/02/2026','21/02/2026','22/02/2026','26/04/2026',
+    '04/02/2027','05/02/2027','06/02/2027','07/02/2027','08/02/2027','09/02/2027','10/02/2027','16/04/2027',
+    '24/01/2028','25/01/2028','26/01/2028','27/01/2028','28/01/2028','29/01/2028','30/01/2028','04/04/2028',
+    '11/02/2029','12/02/2029','13/02/2029','14/02/2029','15/02/2029','16/02/2029','17/02/2029','23/04/2029',
+    '31/01/2030','01/02/2030','02/02/2030','03/02/2030','04/02/2030','05/02/2030','06/02/2030','11/04/2030'
+];
 
         let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
         let currentUser = null; 
@@ -664,7 +680,8 @@
                     r.setDate(r.getDate() + 1); 
                     let isWeekend = r.getDay() === 0 || r.getDay() === 6; 
                     let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2); 
-                    let isHoliday = VN_HOLIDAYS.includes(dateStr);
+        let fullDateStr = dateStr + '/' + r.getFullYear();
+        let isHoliday = VN_HOLIDAYS.includes(dateStr) || LUNAR_HOLIDAYS.includes(fullDateStr);
                     if (!isWeekend && !isHoliday) a++; 
                 } 
             } else { 
@@ -1772,6 +1789,12 @@
                                                         <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
                                                         ${pkgNameSafe} ${btnEditPkg}
                                                     </h4>
+
+<div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] w-full">
+    ${pkg.budget ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-coins mr-1 text-yellow-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.budget)}</strong></span>` : ''}
+    ${pkg.contractor ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-building mr-1 text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
+    ${pkg.winningBid ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-hand-holding-usd mr-1 text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.winningBid)}</strong></span>` : ''}
+</div>
                                                     ${btnCompletePkg} ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''}
                                                 </div>
                                                 <div class="text-[11px] text-gray-600 dark:text-gray-400 mt-1.5">
@@ -1904,6 +1927,9 @@
             cEditP = pIndex; 
             let p = db.missions[mIndex].packages[pIndex];
             document.getElementById('editPackageName').value = p.name || "";
+    document.getElementById('editPackageBudget').value = p.budget || "";
+    document.getElementById('editPackageContractor').value = p.contractor || "";
+    document.getElementById('editPackageWinningBid').value = p.winningBid || "";
             let defaultStart = new Date();
             if(p.steps && p.steps.length > 0 && p.steps[0].originalDays) { 
                 defaultStart = new Date(p.steps[0].deadline); 
@@ -1929,6 +1955,9 @@
             let pkg = db.missions[cEditM].packages[cEditP]; 
             pkg.name = name; 
             pkg.owner = owner;
+    pkg.budget = document.getElementById('editPackageBudget').value.trim();
+    pkg.contractor = document.getElementById('editPackageContractor').value.trim();
+    pkg.winningBid = document.getElementById('editPackageWinningBid').value.trim();
             if (sDate && pkg.steps && pkg.steps.length > 0) {
                 let currentDt = new Date(sDate);
                 pkg.steps.forEach(st => { 
@@ -2585,7 +2614,46 @@
             }
         };
         
-        window.renderDocs = function() { 
+        window.addDocLink = function(docIndex) {
+    let url = prompt("Nhập đường dẫn (Link) của văn bản/phụ lục (Bắt đầu bằng http:// hoặc https://):");
+    if (!url) return;
+    if (!url.startsWith('http')) url = 'https://' + url;
+    let name = prompt("Nhập tên hiển thị (Ví dụ: 'Văn bản chính', 'Phụ lục 1'):", "Phụ lục");
+    if (!name) name = "Văn bản";
+    if (!db.regulatoryDocs[docIndex].links) db.regulatoryDocs[docIndex].links = [];
+    db.regulatoryDocs[docIndex].links.push({name: name, url: url});
+    window.renderDocs();
+    window.saveDataToGAS(false);
+};
+window.removeDocLink = function(docIndex, linkIndex) {
+    if (confirm("Xóa link này?")) {
+        db.regulatoryDocs[docIndex].links.splice(linkIndex, 1);
+        window.renderDocs();
+        window.saveDataToGAS(false);
+    }
+};
+
+window.addDocLink = function(docIndex) {
+    if (currentUser.role !== 'admin') return;
+    let url = prompt("Nhập đường dẫn (Link) của văn bản/phụ lục (Bắt đầu bằng http:// hoặc https://):");
+    if (!url) return;
+    if (!url.startsWith('http')) url = 'https://' + url;
+    let name = prompt("Nhập tên hiển thị (Ví dụ: 'Văn bản chính', 'Phụ lục 1'):", "Phụ lục");
+    if (!name) name = "Văn bản";
+    if (!db.regulatoryDocs[docIndex].links) db.regulatoryDocs[docIndex].links = [];
+    db.regulatoryDocs[docIndex].links.push({name: name, url: url});
+    window.renderDocs();
+    window.saveDataToGAS(false);
+};
+window.removeDocLink = function(docIndex, linkIndex) {
+    if (currentUser.role !== 'admin') return;
+    if (confirm("Xóa link này?")) {
+        db.regulatoryDocs[docIndex].links.splice(linkIndex, 1);
+        window.renderDocs();
+        window.saveDataToGAS(false);
+    }
+};
+window.renderDocs = function() { 
             const tbodyChung = document.getElementById('docsTableBodyChung'); 
             const tbodyThamKhao = document.getElementById('docsTableBodyThamKhao'); 
             tbodyChung.innerHTML = ''; 
@@ -2596,31 +2664,37 @@
                 const isAdmin = currentUser && currentUser.role === 'admin';
                 let numberCell, titleCell, linkCell;
                 
-                if (isAdmin) {
-                    numberCell = `<input value="${escapeHtml(d.number)}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
-                    titleCell = `<input value="${escapeHtml(d.title)}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
-                    linkCell = `<div class="flex flex-col gap-1">
-                                    <textarea rows="2" placeholder="Mỗi link một dòng" onchange="window.updateDoc(${i}, 'link', this.value)" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 p-1 rounded text-sm outline-none resize-y">${escapeHtml(d.link||'')}</textarea>
-                                </div>`;
-                } else {
-                    numberCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal font-medium">${escapeHtml(d.number)}</div>`;
-                    titleCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal leading-relaxed">${escapeHtml(d.title)}</div>`;
-                    
-                    let linksHtml = '';
-                    if (d.link) {
-                        let urls = d.link.split(/[\n\s,]+/).filter(u => u.trim().length > 0);
-                        if (urls.length > 0) {
-                            linksHtml = `<div class="flex flex-wrap gap-2">` + urls.map((u, idx) => {
-                                let label = urls.length > 1 ? `Đọc văn bản ${idx + 1}` : `Đọc văn bản`;
-                                return `<a href="${escapeHtml(u)}" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded text-xs font-semibold transition border border-blue-200 dark:border-blue-800"><i class="fas fa-book-open"></i> ${label}</a>`;
-                            }).join('') + `</div>`;
-                        }
-                    }
-                    if (!linksHtml) linksHtml = `<span class="text-xs text-gray-400 italic">Không có link</span>`;
-                    
-                    linkCell = linksHtml;
-                }
+// Backward compatibility
+        if (d.link && !d.links) {
+            let urls = d.link.split(/[\n\s,]+/).filter(u => u.trim().length > 0);
+            d.links = urls.map((u, idx) => ({ name: urls.length > 1 ? `Link ${idx + 1}` : 'Văn bản chính', url: u }));
+            delete d.link;
+        }
+        if (!d.links) d.links = [];
 
+        let linksHtml = '<div class="flex flex-wrap gap-2">';
+        d.links.forEach((l, lIndex) => {
+            linksHtml += `<div class="inline-flex items-center bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded">
+                <a href="${escapeHtml(l.url)}" target="_blank" class="px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"><i class="fas fa-book-open"></i> ${escapeHtml(l.name)}</a>
+                ${isAdmin ? `<button onclick="window.removeDocLink(${i}, ${lIndex})" class="px-2 py-1 text-red-400 hover:text-red-600 border-l border-blue-200 dark:border-blue-800 transition" title="Xóa link"><i class="fas fa-times"></i></button>` : ''}
+            </div>`;
+        });
+        if (isAdmin) {
+            linksHtml += `<button onclick="window.addDocLink(${i})" class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 rounded transition border border-gray-300 dark:border-gray-600"><i class="fas fa-plus"></i> Thêm link</button>`;
+        } else if (d.links.length === 0) {
+            linksHtml += `<span class="text-xs text-gray-400 italic">Chưa có link</span>`;
+        }
+        linksHtml += '</div>';
+
+        if (isAdmin) {
+            numberCell = `<input value="${escapeHtml(d.number)}" onchange="window.updateDoc(${i}, 'number', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
+            titleCell = `<input value="${escapeHtml(d.title)}" onchange="window.updateDoc(${i}, 'title', this.value)" class="w-full border-b dark:border-gray-600 bg-transparent text-sm outline-none">`;
+            linkCell = linksHtml;
+        } else {
+            numberCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal font-medium">${escapeHtml(d.number)}</div>`;
+            titleCell = `<div class="text-sm text-gray-800 dark:text-gray-200 break-words whitespace-normal leading-relaxed">${escapeHtml(d.title)}</div>`;
+            linkCell = linksHtml;
+        }
                 let rowHtml = `
                     <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                         <td class="p-3 align-top">${numberCell}</td>
@@ -2645,7 +2719,13 @@
             const lnk = document.getElementById('newDocLink').value.trim(); 
             if(num && tit){ 
                 if(!db.regulatoryDocs) db.regulatoryDocs = [];
-                db.regulatoryDocs.push({ category: cat, number: num, title: tit, link: lnk }); 
+
+        let initialLinks = [];
+        if (lnk) {
+            let urls = lnk.split(/[\n\s,]+/).filter(u => u.trim().length > 0);
+            initialLinks = urls.map((u, idx) => ({ name: urls.length > 1 ? `Link ${idx + 1}` : 'Văn bản chính', url: u }));
+        }
+        db.regulatoryDocs.push({ category: cat, number: num, title: tit, links: initialLinks });
                 document.getElementById('newDocNumber').value = ''; 
                 document.getElementById('newDocTitle').value = ''; 
                 document.getElementById('newDocLink').value = ''; 
@@ -2667,13 +2747,13 @@
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const latestDocs = [
-                        { category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', link: 'https://www.google.com/search?q=Luật+Đấu+thầu+22%2F2023%2FQH15' },
-                        { category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu (Mới nhất)', link: 'https://www.google.com/search?q=Nghị+định+349%2F2026%2FNĐ-CP+lựa+chọn+nhà+thầu' },
-                        { category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu (Sửa đổi bởi NĐ 349/2026)', link: 'https://www.google.com/search?q=Nghị+định+214%2F2025%2FNĐ-CP' },
-                        { category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', link: 'https://www.google.com/search?q=Văn+bản+hợp+nhất+36%2F2026%2FVBHN-BTC+Bộ+Tài+chính' },
-                        { category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', link: 'https://www.google.com/search?q=Nghị+quyết+HĐND+Hà+Nội+phân+cấp+đấu+thầu+2026' }
-                    ];
+const latestDocs = [
+{ category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=208119'}] },
+{ category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
+{ category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
+{ category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', links: [{name: 'Văn bản chính', url: 'https://mof.gov.vn/webcenter/portal/vbdh/r/m/cvd'}] },
+{ category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', links: [{name: 'Văn bản chính', url: 'https://dbndhanoi.gov.vn/'}] }
+];
                     
                     if(!db.regulatoryDocs) db.regulatoryDocs = [];
                     
@@ -2698,13 +2778,13 @@
         };
 
         window.silentUpdateBiddingLaws = function() {
-            const latestDocs = [
-                { category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', link: 'https://www.google.com/search?q=Luật+Đấu+thầu+22%2F2023%2FQH15' },
-                { category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu (Mới nhất)', link: 'https://www.google.com/search?q=Nghị+định+349%2F2026%2FNĐ-CP+lựa+chọn+nhà+thầu' },
-                { category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu (Sửa đổi bởi NĐ 349/2026)', link: 'https://www.google.com/search?q=Nghị+định+214%2F2025%2FNĐ-CP' },
-                { category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', link: 'https://www.google.com/search?q=Văn+bản+hợp+nhất+36%2F2026%2FVBHN-BTC+Bộ+Tài+chính' },
-                { category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', link: 'https://www.google.com/search?q=Nghị+quyết+HĐND+Hà+Nội+phân+cấp+đấu+thầu+2026' }
-            ];
+const latestDocs = [
+{ category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=208119'}] },
+{ category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
+{ category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
+{ category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', links: [{name: 'Văn bản chính', url: 'https://mof.gov.vn/webcenter/portal/vbdh/r/m/cvd'}] },
+{ category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', links: [{name: 'Văn bản chính', url: 'https://dbndhanoi.gov.vn/'}] }
+];
             
             if(!db.regulatoryDocs) db.regulatoryDocs = [];
             
