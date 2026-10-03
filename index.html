@@ -833,11 +833,12 @@
                 let backups = null; 
                 try { backups = JSON.parse(textResponse); } catch(e) {}
                 
-                if (backups && backups.error) {
-                    Swal.fire('Lỗi', backups.error, 'error');
+                if (backups && (backups.error || backups.status === 'error')) {
+                    Swal.fire('Lỗi', backups.error || backups.message, 'error');
                     if (loader) loader.style.display = 'none';
                     return;
                 }
+                if (backups && Array.isArray(backups.backups)) backups = backups.backups;
                 if (!Array.isArray(backups)) { 
                     Swal.fire({ 
                         title: 'Cần cập nhật Google Apps Script', 
@@ -1725,7 +1726,7 @@
                                         let dragHandle = "";
                                         if (canEditPkg) {
                                             dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mr-2 step-drag-handle inline-block"><i class="fas fa-grip-vertical"></i></div>`;
-                                            actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(s.name)}&dates=${s.deadline ? s.deadline.replace(/-/g,'') : ''}T000000Z/${s.deadline ? s.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent(m.name + ' - ' + p.name)}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
+                                            actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
