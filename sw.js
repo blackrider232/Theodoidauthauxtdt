@@ -1,17 +1,35 @@
-// Cơ bản Service Worker để thỏa mãn điều kiện PWA Installable
-const CACHE_NAME = 'sce-dauthau-v1';
+const CACHE_NAME = 'sce-dauthau-v2';
 
 self.addEventListener('install', (event) => {
-    // Bỏ qua cache các file để luôn lấy dữ liệu mới, chỉ cài đặt SW
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
+    event.waitUntil(
+        caches.keys().then(keys => Promise.all(
+            keys.map(key => {
+                if (key !== CACHE_NAME) return caches.delete(key);
+            })
+        )).then(() => clients.claim())
+    );
 });
 
 self.addEventListener('fetch', (event) => {
-    // Không làm gì đặc biệt, chỉ fetch bình thường qua mạng
-    // Điều này đủ để trình duyệt nhận diện là PWA hợp lệ
-    event.respondWith(fetch(event.request));
+    if (event.request.method !== 'GET') return;
+    
+    // Chiến lược Network-First: Luôn ưu tiên lấy bản mới nhất từ mạng
+    event.respondWith(
+        fetch(event.request)
+            .then((response) => {
+                const resClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, resClone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // Nếu mất mạng, lấy từ Cache
+                return caches.match(event.request);
+            })
+    );
 });

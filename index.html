@@ -3599,5 +3599,45 @@ window.openAuditLogModal = function(mIndex, pIndex) {
     });
   }
 </script>
+
+<script>
+// Tự động kiểm tra bản cập nhật mới bỏ qua Cache của trình duyệt và GitHub
+async function checkForUpdates() {
+    try {
+        const checkUrl = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+        const response = await fetch(checkUrl, { method: 'HEAD', cache: 'no-store' });
+        const lastModified = response.headers.get('Last-Modified') || response.headers.get('ETag');
+        
+        if (lastModified) {
+            const currentModified = localStorage.getItem('appLastModified');
+            if (currentModified && currentModified !== lastModified) {
+                // Xóa cache cũ của Service Worker để ép tải lại hoàn toàn
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                
+                Swal.fire({
+                    title: 'Đã có bản cập nhật mới!',
+                    text: 'Hệ thống đang tải lại phiên bản mới nhất...',
+                    icon: 'info',
+                    timer: 2500,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                }).then(() => {
+                    localStorage.setItem('appLastModified', lastModified);
+                    window.location.href = window.location.href.split('?')[0] + '?v=' + new Date().getTime();
+                });
+            } else {
+                localStorage.setItem('appLastModified', lastModified);
+            }
+        }
+    } catch (e) {
+        // Bỏ qua nếu lỗi mạng (offline)
+    }
+}
+// Chạy kiểm tra sau khi tải trang xong 5 giây
+setTimeout(checkForUpdates, 5000);
+</script>
 </body>
 </html>
