@@ -632,7 +632,7 @@ const LUNAR_HOLIDAYS = [
 
         // Hàm khử mã độc HTML (XSS prevention)
         function escapeHtml(str) {
-            if (str === null || str === undefined) return ';
+            if (str === null || str === undefined) return '';
             return String(str)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -704,22 +704,22 @@ const LUNAR_HOLIDAYS = [
         }
 
         window.formatDate = function(dIn) { 
-            if (!dIn) return '; 
+            if (!dIn) return ''; 
             try { 
                 let dt = (typeof dIn === 'string' && dIn.includes('T')) ? new Date(dIn) : new Date(dIn); 
-                if (isNaN(dt.getTime())) return '; 
+                if (isNaN(dt.getTime())) return ''; 
                 return `${("0" + dt.getDate()).slice(-2)}/${("0" + (dt.getMonth() + 1)).slice(-2)}/${dt.getFullYear()}`; 
-            } catch(e) { return '; }
+            } catch(e) { return ''; }
         };
 
         window.formatForDateInput = function(dIn) { 
-            if (!dIn) return '; 
+            if (!dIn) return ''; 
             try { 
                 if (typeof dIn === 'string' && !dIn.includes('T')) return dIn; 
                 let dt = new Date(dIn); 
-                if (isNaN(dt.getTime())) return '; 
+                if (isNaN(dt.getTime())) return ''; 
                 return `${dt.getFullYear()}-${("0" + (dt.getMonth() + 1)).slice(-2)}-${("0" + dt.getDate()).slice(-2)}`; 
-            } catch(e) { return '; }
+            } catch(e) { return ''; }
         };
 
         // Tính ngày hạn chót theo ngày làm việc hoặc ngày lịch
@@ -918,7 +918,7 @@ const LUNAR_HOLIDAYS = [
                     return; 
                 }
                 const tbody = document.getElementById('backupsTableBody'); 
-                tbody.innerHTML = ';
+                tbody.innerHTML = '';
                 if (backups.length === 0) { 
                     tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào.</td></tr>`; 
                 } else {
@@ -1016,7 +1016,7 @@ const LUNAR_HOLIDAYS = [
                             Swal.fire('Thành công', 'Đã khôi phục dữ liệu thành công!', 'success');
                             const activeTabObj = document.querySelector('.border-blue-700') || document.querySelector('.border-red-600');
                             if (activeTabObj) { 
-                                window.switchTab(activeTabObj.id.replace('tab-', ')); 
+                                window.switchTab(activeTabObj.id.replace('tab-', '')); 
                             } else { 
                                 window.switchTab('dashboard'); 
                             }
@@ -1250,8 +1250,8 @@ const LUNAR_HOLIDAYS = [
             if (autoSyncInterval) clearInterval(autoSyncInterval);
             document.getElementById('appScreen').classList.add('hidden'); 
             document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('loginUser').value = '; 
-            document.getElementById('loginPass').value = ';
+            document.getElementById('loginUser').value = ''; 
+            document.getElementById('loginPass').value = '';
         };
 
         window.openAppScreen = function() {
@@ -1318,7 +1318,7 @@ const LUNAR_HOLIDAYS = [
                 if (viewEl) viewEl.classList.add('hidden');
                 const tabEl = document.getElementById(`tab-${t}`);
                 if (tabEl) { 
-                    tabEl.className = tabEl.className.replace(/text-blue-700|text-blue-400|text-red-600|text-red-400|bg-white|dark:bg-gray-700|shadow-sm/g, ').trim();
+                    tabEl.className = tabEl.className.replace(/text-blue-700|text-blue-400|text-red-600|text-red-400|bg-white|dark:bg-gray-700|shadow-sm/g, '').trim();
                     if (!tabEl.className.includes('text-gray-500')) tabEl.classList.add('text-gray-500', 'dark:text-gray-400');
                 }
             });
@@ -1357,7 +1357,7 @@ const LUNAR_HOLIDAYS = [
                         m.packages.forEach(p => {
                             if (p.archived || p.completed) return;
                             let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                            if ((currentUser.role || ').toLowerCase() === 'user' && !isOwner) return;
+                            if ((currentUser.role || '').toLowerCase() === 'user' && !isOwner) return;
                             
                             if (p.steps && Array.isArray(p.steps)) {
                                 p.steps.forEach(s => {
@@ -1417,7 +1417,7 @@ const LUNAR_HOLIDAYS = [
                         m.packages.forEach(p => {
                             if (p.archived) return; 
                             let isPkgOwner = isViewer || p.owner === currentUser.fullname; 
-                            if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgOwner) return;
+                            if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
                             if (p.completed || m.completed) { 
                                 sDone++; 
                             } else {
@@ -1474,7 +1474,7 @@ const LUNAR_HOLIDAYS = [
                 let missionsHTML = ""; 
                 let overdueHTML = "";
                 
-                if ((currentUser.role || ').toLowerCase() === 'user') { 
+                if ((currentUser.role || '').toLowerCase() === 'user') { 
                     document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; 
                 } else { 
                     document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể`; 
@@ -1497,7 +1497,7 @@ const LUNAR_HOLIDAYS = [
                                 } 
                             });
                         }
-                        if ((currentUser.role || ').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
                         if (!m.completed) activeMs++; 
                         let mTotalSteps = 0; 
                         let mCompletedSteps = 0;
@@ -1539,7 +1539,7 @@ const LUNAR_HOLIDAYS = [
                         let progress = mTotalSteps > 0 ? Math.round((mCompletedSteps / mTotalSteps) * 100) : 0; 
                         if (m.completed) progress = 100; 
                         let colorClass = progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'; 
-                        let statusBadge = m.completed ? `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Hoàn thành</span>` : '; 
+                        let statusBadge = m.completed ? `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Hoàn thành</span>` : ''; 
                         let mNameFinal = m.name || "Nhiệm vụ"; 
                         let mOwnerFinal = m.owner || "Không rõ";
                         
@@ -1587,7 +1587,7 @@ const LUNAR_HOLIDAYS = [
                             m.packages.forEach((p) => {
                                 if (p.archived) return; 
                                 let isPkgOwner = isMissionViewer || p.owner === currentUser.fullname; 
-                                if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgOwner) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
                                 
                                 let safePkgName = p.name || 'Gói thầu'; 
                                 let ownerName = p.owner || m.owner; 
@@ -1637,12 +1637,12 @@ const LUNAR_HOLIDAYS = [
             try {
                 const container = document.getElementById('projectList'); 
                 if (!container) return; 
-                container.innerHTML = ';
+                container.innerHTML = '';
                 
-                const searchKw = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : ';
+                const searchKw = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
                 const filterStat = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : 'active';
                 const filterOwner = document.getElementById('filterOwner') ? document.getElementById('filterOwner').value : 'all';
-            const sq = document.getElementById('globalSearchInput') ? document.getElementById('globalSearchInput').value.toLowerCase().trim() : ';
+            const sq = document.getElementById('globalSearchInput') ? document.getElementById('globalSearchInput').value.toLowerCase().trim() : '';
                 const filterFrom = document.getElementById('filterFromDate') && document.getElementById('filterFromDate').value ? new Date(document.getElementById('filterFromDate').value).setHours(0,0,0,0) : null;
                 const filterTo = document.getElementById('filterToDate') && document.getElementById('filterToDate').value ? new Date(document.getElementById('filterToDate').value).setHours(23,59,59,999) : null;
                 const now = new Date(new Date().setHours(0,0,0,0));
@@ -1658,7 +1658,7 @@ const LUNAR_HOLIDAYS = [
                     db.missions.forEach((mission, mIndex) => {
                         let mNameSafe = mission.name || "Chưa có tên"; 
                         let mOwnerSafe = mission.owner || "Chưa xác định"; 
-                        let matchSearch = searchKw === ' || mNameSafe.toLowerCase().includes(searchKw); 
+                        let matchSearch = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw); 
                         let visiblePackages = [];
                         
                         if (mission.packages && Array.isArray(mission.packages)) {
@@ -1673,11 +1673,11 @@ const LUNAR_HOLIDAYS = [
                                 if (filterTo && finalD && finalD > filterTo) return false;
                                 
                                 let pNameSafe = pkg.name || ""; 
-                                let matchSearchPkg = searchKw === ' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.toLowerCase().includes(searchKw); 
+                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.toLowerCase().includes(searchKw); 
                                 if (!matchSearchPkg) return false;
                                 
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
-                                if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgViewer) return false; 
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return false; 
                                 return true;
                             });
                         }
@@ -1707,7 +1707,7 @@ const LUNAR_HOLIDAYS = [
                             btnCompleteMission = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`; 
                         }
                         
-                        let btnEditMission = canEditMission ? `<button onclick="window.openEditMissionModal(${mIndex})" class="text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 px-2 py-1 rounded shadow-sm text-xs transition ml-2"><i class="fas fa-edit"></i> Sửa</button>` : ';
+                        let btnEditMission = canEditMission ? `<button onclick="window.openEditMissionModal(${mIndex})" class="text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 px-2 py-1 rounded shadow-sm text-xs transition ml-2"><i class="fas fa-edit"></i> Sửa</button>` : '';
                         let btnPrintMission = `<button onclick="window.printMission(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-print"></i> In NV</button>`;
                         
                         let packagesHtml = "";
@@ -1737,7 +1737,7 @@ const LUNAR_HOLIDAYS = [
                                             } 
                                         }
                                         let dateColor = 'text-gray-700 dark:text-gray-300'; 
-                                        let bgRow = ';
+                                        let bgRow = '';
                                         if(step.completed) { 
                                             dateColor = 'text-green-600 dark:text-green-400'; 
                                         } else if(isOverdue) { 
@@ -1748,19 +1748,19 @@ const LUNAR_HOLIDAYS = [
                                             bgRow = 'bg-orange-50 dark:bg-orange-900/20'; 
                                         }
                                         
-                                        let safeStepName = escapeHtml(step.name || '); 
-                                        let safeNote = escapeHtml(step.note || ');
+                                        let safeStepName = escapeHtml(step.name || ''); 
+                                        let safeNote = escapeHtml(step.note || '');
                                         let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800 dark:text-gray-200'} text-[13px] leading-tight">${safeStepName}</div>`;
                                         
                                         let subTasksHtml = "";
                                         if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
                                             subTasksHtml = `<div class="mt-1.5 ml-1 border-l-2 border-gray-200 dark:border-gray-600 pl-2 space-y-1">`;
                                             step.subTasks.forEach((sub, subIdx) => {
-                                                let safeSubName = escapeHtml(sub.name || '); 
+                                                let safeSubName = escapeHtml(sub.name || ''); 
                                                 let subClass = sub.completed ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400"; 
-                                                let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 dark:text-gray-500 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : ';
+                                                let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 dark:text-gray-500 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : '';
                                                 let lockSub = !canEditPkg || anyPrevIncomplete;
-                                                subTasksHtml += `<div class="flex items-start gap-1.5 text-[12px]"><input type="checkbox" class="mt-0.5 ${!lockSub?'cursor-pointer':'cursor-not-allowed'}" ${sub.completed ? 'checked' : '} ${lockSub?'disabled':'} onchange="window.toggleSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx}, this.checked)"><span class="${subClass} leading-tight flex-1">${safeSubName}</span>${delSubBtn}</div>`;
+                                                subTasksHtml += `<div class="flex items-start gap-1.5 text-[12px]"><input type="checkbox" class="mt-0.5 ${!lockSub?'cursor-pointer':'cursor-not-allowed'}" ${sub.completed ? 'checked' : ''} ${lockSub?'disabled':''} onchange="window.toggleSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx}, this.checked)"><span class="${subClass} leading-tight flex-1">${safeSubName}</span>${delSubBtn}</div>`;
                                             });
                                             subTasksHtml += `</div>`;
                                         }
@@ -1768,7 +1768,7 @@ const LUNAR_HOLIDAYS = [
                                         let fullTaskHtml = nameHtml + subTasksHtml; 
                                         let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-"; 
-                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded mb-1">${safeNote}</div>` : ';
+                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded mb-1">${safeNote}</div>` : '';
                                         let cCount = (step.comments && step.comments.length > 0) ? step.comments.length : 0;
                                         let cClass = cCount > 0 ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 font-bold" : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
                                         noteHtml += `<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] ${cClass} px-2 py-1 rounded border shadow-sm transition hover:opacity-80"><i class="fas fa-comments mr-1"></i>Trao đổi (${cCount})</button>`;
@@ -1776,9 +1776,9 @@ const LUNAR_HOLIDAYS = [
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links)) {
                                             linksDisplayHtml = step.links.map((l, lIndex) => {
-                                                let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : ';
+                                                let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : '';
                                                 return `<div class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-gray-600 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm"><a href="${escapeHtml(l.url)}" target="_blank" class="hover:underline font-medium truncate max-w-[100px]" title="${escapeHtml(l.url)}"><i class="fas fa-link mr-1"></i>${escapeHtml(l.name)}</a>${actDelLink}</div>`;
-                                            }).join(');
+                                            }).join('');
                                         }
                                         
                                         const linkInputHtml = canEditPkg ? `
@@ -1792,18 +1792,18 @@ const LUNAR_HOLIDAYS = [
                                                     <input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1 p-1 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
                                                     <button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs w-full">Lưu</button>
                                                 </div>
-                                            </div>` : ';
+                                            </div>` : '';
                                             
                                         let actCell = ""; 
                                         let dragHandle = "";
                                         if (canEditPkg) {
                                             dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mr-2 step-drag-handle inline-block"><i class="fas fa-grip-vertical"></i></div>`;
-                                            actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || ')}&dates=${step.deadline ? step.deadline.replace(/-/g,') : '}T000000Z/${step.deadline ? step.deadline.replace(/-/g,') : '}T235959Z&details=${encodeURIComponent((mission.name || ') + ' - ' + (pkg.name || '))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
+                                            actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        return `<tr class="border-b dark:border-gray-700 transition hover:bg-gray-50 dark:hover:bg-gray-800 ${bgRow}"><td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':'} ${lockMain?'disabled':'} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : '}"></td><td class="p-2 align-top flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:'}</div></td><td class="p-2 text-center align-top">${timeBudget}</td><td class="p-2 align-top">${dateHtml}</td><td class="p-2 align-top min-w-[150px]">${noteHtml}</td><td class="p-2 align-top min-w-[120px]"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
-                                    }).join(');
+                                        return `<tr class="border-b dark:border-gray-700 transition hover:bg-gray-50 dark:hover:bg-gray-800 ${bgRow}"><td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="p-2 align-top flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></td><td class="p-2 text-center align-top">${timeBudget}</td><td class="p-2 align-top">${dateHtml}</td><td class="p-2 align-top min-w-[150px]">${noteHtml}</td><td class="p-2 align-top min-w-[120px]"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
+                                    }).join('');
                                 }
 
                                 let archiveBtn = "";
@@ -1826,8 +1826,8 @@ const LUNAR_HOLIDAYS = [
                                     btnCompletePkg = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã xong</span>`; 
                                 }
 
-                                let btnLogPkg = (['admin', 'leader', 'team_lead'].includes((currentUser.role || ').toLowerCase())) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
-let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : ';
+                                let btnLogPkg = (['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
+let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
 
                                 let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (pkg.completed ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'bg-blue-50/50 dark:bg-blue-900/10');
                                 let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
@@ -1845,11 +1845,11 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                                     </h4>
 
 <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] w-full">
-    ${pkg.budget ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-coins mr-1 text-yellow-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.budget)}</strong></span>` : '}
-    ${pkg.contractor ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-building mr-1 text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : '}
-    ${pkg.winningBid ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-hand-holding-usd mr-1 text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.winningBid)}</strong></span>` : '}
+    ${pkg.budget ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-coins mr-1 text-yellow-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.budget)}</strong></span>` : ''}
+    ${pkg.contractor ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-building mr-1 text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
+    ${pkg.winningBid ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-hand-holding-usd mr-1 text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.winningBid)}</strong></span>` : ''}
 </div>
-                                                    ${btnCompletePkg} ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : '}
+                                                    ${btnCompletePkg} ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''}
                                                 </div>
                                                 <div class="text-[11px] text-gray-600 dark:text-gray-400 mt-1.5">
                                                     <span class="inline-block bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${pkgProcessTitle}</span>
@@ -1860,15 +1860,15 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                                 ${archiveBtn}
                                                 <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm" title="Xuất Excel gói thầu"><i class="fas fa-file-excel"></i> Xuất</button>
                                                 <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm"><i class="fas fa-print"></i> In Gói</button>
-                                                ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm"><i class="fas fa-trash-alt"></i></button>` : '}
+                                                ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm"><i class="fas fa-trash-alt"></i></button>` : ''}
                                             </div>
                                         </div>
-                                        <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : '}">
+                                        <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
                                             <table class="w-full text-left border-collapse text-sm">
                                                 <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-16 text-center">Mức</th><th class="p-2 w-24">Hạn chót</th><th class="p-2 w-48">Ghi chú</th><th class="p-2 min-w-[120px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-24 text-right"><i class="fas fa-cogs"></i></th>' : '}</tr>
+                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-16 text-center">Mức</th><th class="p-2 w-24">Hạn chót</th><th class="p-2 w-48">Ghi chú</th><th class="p-2 min-w-[120px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-24 text-right"><i class="fas fa-cogs"></i></th>' : ''}</tr>
                                                 </thead>
-                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-1.5 text-center bg-gray-50 dark:bg-gray-900"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : '}</tbody>
+                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-1.5 text-center bg-gray-50 dark:bg-gray-900"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
                                         </div>
                                     </div>`;
@@ -1880,8 +1880,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                             const chungDocs = db.regulatoryDocs.filter(d => d.category === 'chung');
                             if (chungDocs.length > 0) {
                                 let docLinks = chungDocs.map(d => { 
-                                    let linkPart = d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : '; 
-                                    let linkClose = d.link ? `</a>` : '; 
+                                    let linkPart = d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">` : ''; 
+                                    let linkClose = d.link ? `</a>` : ''; 
                                     return `${linkPart}<b>${escapeHtml(d.number)}</b>${linkClose}`; 
                                 }).join(', ');
                                 docsHtml = `<div class="mt-3 bg-white dark:bg-gray-800 p-2 rounded border border-indigo-100 dark:border-indigo-900 text-xs shadow-sm"><span class="font-semibold text-indigo-800 dark:text-indigo-400">Căn cứ chung:</span><span class="text-gray-600 dark:text-gray-400 ml-1">${docLinks}</span></div>`;
@@ -1916,7 +1916,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                         ${btnCompleteMission} ${btnPrintMission} ${addPkgBtn} ${delMissionBtn}
                                     </div>
                                 </div>
-                                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50 ${mission.completed ? 'hidden' : '}">${packagesHtml}</div>
+                                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50 ${mission.completed ? 'hidden' : ''}">${packagesHtml}</div>
                             </div>`;
                     });
                 }
@@ -1990,9 +1990,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             }
             document.getElementById('editPackageStartDate').value = window.formatForDateInput(defaultStart);
             const sel = document.getElementById('editPackageOwner'); 
-            sel.innerHTML = '; 
+            sel.innerHTML = ''; 
             db.users.forEach(u => { 
-                let isSelected = (u.fullname === p.owner) ? 'selected' : '; 
+                let isSelected = (u.fullname === p.owner) ? 'selected' : ''; 
                 sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${isSelected}>${escapeHtml(u.fullname)}</option>`; 
             }); 
             document.getElementById('editPackageModal').classList.remove('hidden');
@@ -2419,7 +2419,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             if (loader) loader.style.display = 'flex';
 
             try {
-                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, ');
+                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
                 let res = await fetch(SUPABASE_URL + '/storage/v1/object/attachments/' + uniqueName, {
                     method: 'POST',
                     headers: {
@@ -2473,7 +2473,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         window.openActivityLogModal = function(mIndex, pIndex) { 
             const pkg = db.missions[mIndex].packages[pIndex]; 
             const logBox = document.getElementById('activityLogs'); 
-            logBox.innerHTML = '; 
+            logBox.innerHTML = ''; 
             if (pkg.logs && pkg.logs.length > 0) { 
                 pkg.logs.forEach(l => logBox.innerHTML += `<div>${escapeHtml(l)}</div>`); 
             } else { 
@@ -2487,7 +2487,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
 
         window.openProfileModal = function() { 
             document.getElementById('profileFullname').value = currentUser.fullname; 
-            document.getElementById('profilePassword').value = '; 
+            document.getElementById('profilePassword').value = ''; 
             document.getElementById('profileModal').classList.remove('hidden'); 
         };
         window.closeProfileModal = function() { 
@@ -2528,7 +2528,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                 packages: [], 
                 completed: false 
             }); 
-            document.getElementById('missionName').value = '; 
+            document.getElementById('missionName').value = ''; 
             window.closeCreateMissionModal(); 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
@@ -2538,9 +2538,9 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
             if (currentUser.role === 'leader') return; 
             currentMissionIndexForNewPackage = mIndex; 
             const sel = document.getElementById('pkgOwner'); 
-            sel.innerHTML = '; 
+            sel.innerHTML = ''; 
             db.users.forEach(u => { 
-                sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${u.fullname === currentUser.fullname ? 'selected' : '}>${escapeHtml(u.fullname)}</option>`; 
+                sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${escapeHtml(u.fullname)}</option>`; 
             }); 
             document.getElementById('createPackageModal').classList.remove('hidden'); 
         };
@@ -2584,14 +2584,14 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                 steps: steps 
             }); 
             window.closeCreatePackageModal(); 
-            document.getElementById('projName').value = '; 
+            document.getElementById('projName').value = ''; 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
         };
 
         window.populateProcessDropdowns = function() { 
-            document.getElementById('projType').innerHTML = '; 
-            document.getElementById('configProcessSelector').innerHTML = '; 
+            document.getElementById('projType').innerHTML = ''; 
+            document.getElementById('configProcessSelector').innerHTML = ''; 
             for (const key in db.processTemplates) { 
                 document.getElementById('projType').innerHTML += `<option value="${key}">${escapeHtml(db.processTemplates[key].title)}</option>`; 
                 document.getElementById('configProcessSelector').innerHTML += `<option value="${key}">${escapeHtml(db.processTemplates[key].title)}</option>`; 
@@ -2601,7 +2601,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         window.renderConfig = function() { 
             const type = document.getElementById('configProcessSelector').value; 
             const c = document.getElementById('configSteps'); 
-            c.innerHTML = '; 
+            c.innerHTML = ''; 
             if (!type || !db.processTemplates[type]) return; 
             if(db.processTemplates[type].steps) { 
                 db.processTemplates[type].steps.forEach((s, i) => { 
@@ -2612,8 +2612,8 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                             <input type="text" value="${escapeHtml(s.name)}" onchange="window.updateConfigStep('${type}', ${i}, 'name', this.value)" class="flex-1 border-b dark:border-gray-600 bg-transparent focus:border-blue-500 outline-none text-sm dark:text-white">
                             <input type="number" value="${s.days}" onchange="window.updateConfigStep('${type}', ${i}, 'days', this.value)" class="w-16 border dark:border-gray-600 bg-transparent rounded text-center outline-none text-sm dark:text-white">
                             <select onchange="window.updateConfigStep('${type}', ${i}, 'dayType', this.value)" class="border-b dark:border-gray-600 bg-transparent outline-none text-sm p-1 dark:text-white">
-                                <option value="calendar" ${s.dayType !== 'workday' ? 'selected' : '} class="dark:bg-gray-800">Ngày lịch</option>
-                                <option value="workday" ${s.dayType === 'workday' ? 'selected' : '} class="dark:bg-gray-800">Ngày LV</option>
+                                <option value="calendar" ${s.dayType !== 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày lịch</option>
+                                <option value="workday" ${s.dayType === 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày LV</option>
                             </select>
                             <button onclick="window.removeConfigStep('${type}', ${i})" class="text-gray-400 hover:text-red-500 px-2"><i class="fas fa-times"></i></button>
                         </div>`; 
@@ -2639,7 +2639,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
             if(t){ 
                 const id = 'proc_' + Date.now(); 
                 db.processTemplates[id] = { title: t, steps: [] }; 
-                document.getElementById('newProcessTitle').value = '; 
+                document.getElementById('newProcessTitle').value = ''; 
                 window.populateProcessDropdowns(); 
                 document.getElementById('configProcessSelector').value = id; 
                 window.renderConfig(); 
@@ -2660,8 +2660,8 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
             const d = parseInt(document.getElementById('newStepDays').value); 
             if(n && !isNaN(d)){ 
                 db.processTemplates[type].steps.push({ name: n, days: d, dayType: document.getElementById('newStepDayType').value }); 
-                document.getElementById('newStepName').value = '; 
-                document.getElementById('newStepDays').value = '; 
+                document.getElementById('newStepName').value = ''; 
+                document.getElementById('newStepDays').value = ''; 
                 window.renderConfig(); 
                 window.saveDataToGAS(false); 
             } else {
@@ -2711,8 +2711,8 @@ window.removeDocLink = function(docIndex, linkIndex) {
 window.renderDocs = function() { 
             const tbodyChung = document.getElementById('docsTableBodyChung'); 
             const tbodyThamKhao = document.getElementById('docsTableBodyThamKhao'); 
-            tbodyChung.innerHTML = '; 
-            tbodyThamKhao.innerHTML = '; 
+            tbodyChung.innerHTML = ''; 
+            tbodyThamKhao.innerHTML = ''; 
             
             if(!db.regulatoryDocs) db.regulatoryDocs = []; 
             db.regulatoryDocs.forEach((d, i) => { 
@@ -2731,7 +2731,7 @@ window.renderDocs = function() {
         d.links.forEach((l, lIndex) => {
             linksHtml += `<div class="inline-flex items-center bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded">
                 <a href="${escapeHtml(l.url)}" target="_blank" class="px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"><i class="fas fa-book-open"></i> ${escapeHtml(l.name)}</a>
-                ${isAdmin ? `<button onclick="window.removeDocLink(${i}, ${lIndex})" class="px-2 py-1 text-red-400 hover:text-red-600 border-l border-blue-200 dark:border-blue-800 transition" title="Xóa link"><i class="fas fa-times"></i></button>` : '}
+                ${isAdmin ? `<button onclick="window.removeDocLink(${i}, ${lIndex})" class="px-2 py-1 text-red-400 hover:text-red-600 border-l border-blue-200 dark:border-blue-800 transition" title="Xóa link"><i class="fas fa-times"></i></button>` : ''}
             </div>`;
         });
         if (isAdmin) {
@@ -2781,9 +2781,9 @@ window.renderDocs = function() {
             initialLinks = urls.map((u, idx) => ({ name: urls.length > 1 ? `Link ${idx + 1}` : 'Văn bản chính', url: u }));
         }
         db.regulatoryDocs.push({ category: cat, number: num, title: tit, links: initialLinks });
-                document.getElementById('newDocNumber').value = '; 
-                document.getElementById('newDocTitle').value = '; 
-                document.getElementById('newDocLink').value = '; 
+                document.getElementById('newDocNumber').value = ''; 
+                document.getElementById('newDocTitle').value = ''; 
+                document.getElementById('newDocLink').value = ''; 
                 window.renderDocs(); 
                 window.saveDataToGAS(false); 
             } else {
@@ -2806,7 +2806,7 @@ window.renderDocs = function() {
             if (loader) loader.style.display = 'flex';
 
             try {
-                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, ');
+                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
                 let res = await fetch(SUPABASE_URL + '/storage/v1/object/attachments/' + uniqueName, {
                     method: 'POST',
                     headers: {
@@ -2840,7 +2840,7 @@ window.updateDoc = function(i, f, v) {
 
         window.renderUsers = function() { 
             const b = document.getElementById('userTableBody'); 
-            b.innerHTML = '; 
+            b.innerHTML = ''; 
             db.users.forEach((u, i) => { 
                 b.innerHTML += `
                     <tr class="border-b dark:border-gray-700">
@@ -2849,7 +2849,7 @@ window.updateDoc = function(i, f, v) {
                         <td class="p-3">${escapeHtml(u.role)}</td>
                         <td class="p-3 text-right">
                             <button onclick="window.openEditUserModal(${i})" class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i></button>
-                            ${u.username !== 'admin' ? `<button onclick="window.deleteUser(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>` : '}
+                            ${u.username !== 'admin' ? `<button onclick="window.deleteUser(${i})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>` : ''}
                         </td>
                     </tr>`; 
             }); 
@@ -2864,9 +2864,9 @@ window.updateDoc = function(i, f, v) {
             if(u && p && f){ 
                 if(db.users.some(usr => usr.username === u)) return Swal.fire('Lỗi','Tên đăng nhập đã tồn tại!','error'); 
                 db.users.push({ username: u, password: p, fullname: f, role: r }); 
-                document.getElementById('newUserUsername').value = '; 
-                document.getElementById('newUserPassword').value = '; 
-                document.getElementById('newUserFullname').value = '; 
+                document.getElementById('newUserUsername').value = ''; 
+                document.getElementById('newUserPassword').value = ''; 
+                document.getElementById('newUserFullname').value = ''; 
                 window.renderUsers(); 
                 window.saveDataToGAS(false); 
             } else {
@@ -2881,7 +2881,7 @@ window.updateDoc = function(i, f, v) {
             document.getElementById('editUserUsername').value = u.username; 
             document.getElementById('editUserFullname').value = u.fullname; 
             document.getElementById('editUserRole').value = u.role; 
-            document.getElementById('editUserPassword').value = '; 
+            document.getElementById('editUserPassword').value = ''; 
             document.getElementById('editUserRole').disabled = (u.username === 'admin'); 
             document.getElementById('editUserModal').classList.remove('hidden'); 
         };
@@ -2951,14 +2951,14 @@ window.updateDoc = function(i, f, v) {
                         let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         let hasOwnedPackage = false;
                         if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if ((currentUser.role || ').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
                         
                         let mStatusStr = m.completed ? "Hoàn thành" : "Đang thực hiện";
                         if(m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return; 
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === p.owner || currentUser.fullname === m.owner;
-                                if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgViewer) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                                 
                                 let total = 0, done = 0;
                                 if(p.steps) { 
@@ -3012,8 +3012,8 @@ window.updateDoc = function(i, f, v) {
                 const processLabel = pkg.processTitle || "Quy trình đấu thầu";
 
                 const aoa = [
-                    [`NHIỆM VỤ: ${(mission.name || ').toUpperCase()}`],
-                    [`GÓI THẦU: ${pkg.name || '}`],
+                    [`NHIỆM VỤ: ${(mission.name || '').toUpperCase()}`],
+                    [`GÓI THẦU: ${pkg.name || ''}`],
                     [`Quy trình áp dụng: ${processLabel} | Phụ trách: ${pkg.owner || mission.owner}`],
                     [`Ngày xuất dữ liệu: ${window.formatDate(new Date().toISOString())}`],
                     []
@@ -3202,13 +3202,13 @@ window.updateDoc = function(i, f, v) {
                         let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         let hasOwnedPackage = false;
                         if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if ((currentUser.role || ').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
                         let mTotalSteps = 0, mCompletedSteps = 0, hasActive = false;
                         if (m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return;
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                                if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgViewer) return;
+                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                                 hasActive = true; 
                                 if (p.steps) p.steps.forEach(s => { mTotalSteps++; if(s.completed) mCompletedSteps++; });
                             });
@@ -3234,16 +3234,9 @@ window.updateDoc = function(i, f, v) {
                 html += `<div class="footer"><div class="signature"><p style="font-weight:bold; margin-bottom: 80px;">NGƯỜI LẬP BÁO CÁO</p><p style="font-weight:bold">${escapeHtml(currentUser.fullname)}</p></div></div>
 
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered')).catch(err => console.error('SW Error', err));
-    });
-  }
-</script>
 </body></html>`;
                 
-                const printWindow = window.open(', '_blank');
+                const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
                 printWindow.document.write(html); 
                 printWindow.document.close(); 
@@ -3269,7 +3262,7 @@ window.updateDoc = function(i, f, v) {
                     mission.packages.forEach((pkg, pIdx) => {
                         if (pkg.archived) return; 
                         let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
-                        if ((currentUser.role || ').toLowerCase() === 'user' && !isPkgViewer) return;
+                        if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
                         hasVisiblePkg = true;
                         html += `<h2>Gói thầu ${pIdx + 1}: ${escapeHtml(pkg.name)}</h2><p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${escapeHtml(pkg.processTitle)} | Phụ trách: ${escapeHtml(pkg.owner)}</i></p>`;
                         html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 180px">Ghi chú</th></tr></thead><tbody>`;
@@ -3277,13 +3270,13 @@ window.updateDoc = function(i, f, v) {
                             pkg.steps.forEach((step, sIdx) => {
                                 let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
                                 const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${escapeHtml(step.completedBy)})</span>` : 'Chưa xong';
-                                let nameTxt = escapeHtml(step.name || ');
+                                let nameTxt = escapeHtml(step.name || '');
                                 if(step.subTasks && step.subTasks.length > 0) { 
                                     step.subTasks.forEach(sub => { 
                                         nameTxt += `<br><span style="color:#666; font-size:12px;">- ${escapeHtml(sub.name)} (${sub.completed ? 'Xong' : 'Chưa'})</span>`; 
                                     }); 
                                 }
-                                html += `<tr><td class="text-center">${sIdx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${escapeHtml(step.note || ')}</td></tr>`;
+                                html += `<tr><td class="text-center">${sIdx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${escapeHtml(step.note || '')}</td></tr>`;
                             });
                         } else { 
                             html += `<tr><td colspan="6" class="text-center" style="font-style: italic;">Chưa có công việc</td></tr>`; 
@@ -3299,7 +3292,7 @@ window.updateDoc = function(i, f, v) {
 
 </body></html>`;
                 
-                const printWindow = window.open(', '_blank');
+                const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
                 printWindow.document.write(html); 
                 printWindow.document.close(); 
@@ -3331,7 +3324,7 @@ window.updateDoc = function(i, f, v) {
                         let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
                         const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${escapeHtml(step.completedBy)})</span>` : 'Chưa xong';
                         let linkText = (step.links && step.links.length > 0) ? step.links.map(l => `- ${escapeHtml(l.name)}`).join("<br>") : "";
-                        let nameTxt = escapeHtml(step.name || ');
+                        let nameTxt = escapeHtml(step.name || '');
                         if(step.subTasks && step.subTasks.length > 0) { 
                             step.subTasks.forEach(sub => { 
                                 nameTxt += `<br><span style="color:#666; font-size:12px;">- ${escapeHtml(sub.name)} (${sub.completed ? 'Xong' : 'Chưa'})</span>`; 
@@ -3345,7 +3338,7 @@ window.updateDoc = function(i, f, v) {
 
 </body></html>`;
                 
-                const printWindow = window.open(', '_blank');
+                const printWindow = window.open('', '_blank');
                 if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
                 printWindow.document.write(html); 
                 printWindow.document.close(); 
@@ -3390,10 +3383,10 @@ window.updateDoc = function(i, f, v) {
                             'Chủ trì': p.owner || m.owner,
                             'Bước': idx + 1,
                             'Tên công việc': s.name,
-                            'Hạn hoàn thành': s.deadline || ',
+                            'Hạn hoàn thành': s.deadline || '',
                             'Trạng thái': s.completed ? 'Hoàn thành' : 'Đang xử lý',
-                            'Người hoàn thành': s.completedBy || ',
-                            'Ghi chú': s.note || '
+                            'Người hoàn thành': s.completedBy || '',
+                            'Ghi chú': s.note || ''
                         });
                     });
                 });
@@ -3508,7 +3501,7 @@ window.printDashboard = function() {
 
 window.printReportDirectly = function() {
     let content = document.getElementById('reportContentArea').innerHTML;
-    let printWin = window.open(', ', 'width=900,height=650');
+    let printWin = window.open('', '', 'width=900,height=650');
     printWin.document.write(`<html><head><title>In Báo cáo</title><style>body { font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; }</style></head><body>${content}
 
 
@@ -3565,7 +3558,7 @@ window.exportReportToWord = function() {
 
 <script>
 window.openAuditLogModal = function(mIndex, pIndex) {
-    if (!['admin', 'leader', 'team_lead'].includes((currentUser.role || ').toLowerCase())) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký', 'error');
+    if (!['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký', 'error');
     let pkg = db.missions[mIndex].packages[pIndex];
     document.getElementById('auditLogPkgName').innerText = "Gói thầu: " + (pkg.name || "");
     
@@ -3599,5 +3592,12 @@ window.openAuditLogModal = function(mIndex, pIndex) {
 };
 </script>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered')).catch(err => console.error('SW Error', err));
+    });
+  }
+</script>
 </body>
 </html>
