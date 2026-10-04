@@ -269,7 +269,7 @@
                 <div class="admin-only hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-gray-800 dark:text-white">Thêm Văn bản Pháp lý</h2>
-                        <button onclick="window.loadLatestBiddingLaws()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition"><i class="fas fa-magic mr-1"></i> Bộ CSDL Luật Đấu Thầu (Mới nhất)</button>
+                        
                     </div>
                     <div class="flex flex-col md:flex-row gap-3 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded items-center">
                         <select id="newDocCategory" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-48 dark:text-white">
@@ -280,7 +280,7 @@
                         <input type="text" id="newDocTitle" placeholder="Tên văn bản..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-[2] dark:text-white">
                         <textarea id="newDocLink" rows="1" placeholder="Link web (nếu có nhiều link, mỗi link 1 dòng)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none flex-1 dark:text-white resize-y"></textarea>
                         <div class="flex gap-2 w-full md:w-auto">
-                            <button onclick="document.getElementById('uploadDocFile').click()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded text-sm font-medium whitespace-nowrap" title="Tải file lên Drive"><i class="fas fa-cloud-upload-alt"></i> Tải file</button>
+                            <button onclick="document.getElementById('uploadDocFile').click()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded text-sm font-medium whitespace-nowrap" title="Tải file đính kèm"><i class="fas fa-cloud-upload-alt"></i> Tải file</button>
                             <input type="file" id="uploadDocFile" class="hidden" onchange="window.uploadDocDrive(this)">
                             <button onclick="window.addNewDoc()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap w-full md:w-auto"><i class="fas fa-plus"></i> Thêm</button>
                         </div>
@@ -558,8 +558,9 @@
             });
         };
         initIDB();
-
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwIO64QYdcIc9LJPNVQY379bFYim2SPkNmiZe1gAKiUGJFCwoOq4bYNjLbrU8WNmvwJ/exec"; 
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycby/exec';
+        const SUPABASE_URL = 'https://xqmeeticiwclsvckpqrd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxbWVldGljaXdjbHN2Y2twcXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMzQ4NDEsImV4cCI6MjEwNjYxMDg0MX0.izCPDQ8wIMqr8GEm47Oz2PTJB7srj5Fj7DpeKIR_HAk'; 
 
         const defaultTemplates = {
             duoi100: { 
@@ -796,31 +797,33 @@ const LUNAR_HOLIDAYS = [
             } catch (error) { console.error('Loi:', error); const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none'; showLoginError('Loi: ' + error.message); }
         });
 
-        // Kết nối Google Apps Script
+        // Kết nối Supabase
         window.loadDataFromGAS = async function(u = null, p = null) {
             try {
-                let reqU = u || (currentUser ? currentUser.username : null);
-                let reqP = p || (currentUser ? currentUser.password : null);
-                const payload = { action: 'read', u: reqU, p: reqP };
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                const response = await fetch(SUPABASE_URL + '/rest/v1/app_data?id=eq.1&select=data', {
+                    method: 'GET',
+                    headers: { 
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    }
                 });
                 if (!response.ok) throw new Error("HTTP error " + response.status);
-                const textData = await response.text();
+                const result = await response.json();
+                
+                let textData = "";
+                if (result.length > 0 && result[0].data) {
+                    db = result[0].data;
+                    textData = JSON.stringify({db: db});
+                } else {
+                    db = {};
+                }
+                
                 // Cache success response
                 try { 
                     if(response.ok) saveToIDB(textData); 
                 } catch(e) {}
-                let res = {};
-                try { res = JSON.parse(textData); } catch(e) {}
-                if (res.status === 'error' || res.error) throw new Error(res.message || res.error);
-                if (res.db && typeof res.db === 'object') {
-                    db = res.db;
-                } else {
-                    db = {};
-                }
+                
                 applyDefaultsIfMissing();
                 isDataSynchronized = true;
             } catch (err) {
@@ -848,15 +851,16 @@ const LUNAR_HOLIDAYS = [
             if (syncIcon) syncIcon.className = 'fas fa-sync fa-spin text-yellow-400';
             if (syncText) syncText.innerText = 'Đang lưu...';
             try {
-                const payload = { action: 'save', u: currentUser.username, p: currentUser.password, data: db };
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                const response = await fetch(SUPABASE_URL + '/rest/v1/app_data?id=eq.1', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ data: db }),
+                    headers: { 
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    }
                 });
                 if (!response.ok) throw new Error("HTTP error " + response.status);
-                const res = await response.json();
-                if (res.status === 'error') throw new Error(res.message);
                 lastSaveTime = Date.now();
                 if (syncIcon) syncIcon.className = 'fas fa-check-circle text-green-400';
                 if (syncText) syncText.innerText = 'Đã lưu';
@@ -885,28 +889,24 @@ const LUNAR_HOLIDAYS = [
 
         // Quản lý sao lưu & khôi phục
         window.fetchBackups = async function() {
-            if (currentUser.role !== 'admin') return Swal.fire('Cảnh báo', 'Chỉ Admin được truy cập tính năng này!', 'warning');
-            const lText = document.getElementById('loaderText');
-            const loader = document.getElementById('loader');
-            if (lText) lText.innerText = "Đang tải danh sách bản sao lưu..."; 
-            if (loader) loader.style.display = 'flex';
-            
-            try {
-                const payload = { action: 'getBackups', u: currentUser.username, p: currentUser.password };
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const textResponse = await response.text();
-                let backups = null; 
-                try { backups = JSON.parse(textResponse); } catch(e) {}
-                
-                if (backups && (backups.error || backups.status === 'error')) {
-                    Swal.fire('Lỗi', backups.error || backups.message, 'error');
-                    if (loader) loader.style.display = 'none';
-                    return;
-                }
+              if (currentUser.role !== "admin") return Swal.fire("Cảnh báo", "Chỉ Admin được truy cập!", "warning");
+              const lText = document.getElementById("loaderText");
+              const loader = document.getElementById("loader");
+              if (lText) lText.innerText = "Đang tải danh sách bản sao lưu..."; 
+              if (loader) loader.style.display = "flex";
+              
+              try {
+                  const response = await fetch(SUPABASE_URL + "/rest/v1/app_backups?select=id,created_at&order=id.desc&limit=20", {
+                      method: "GET",
+                      headers: {
+                          "apikey": SUPABASE_ANON_KEY,
+                          "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+                          "Content-Type": "application/json"
+                      }
+                  });
+                  const backupsData = await response.json();
+                  let backups = { backups: backupsData.map(b => ({ id: b.id, time: new Date(b.created_at).toLocaleString('vi-VN') })) };
+
                 if (backups && Array.isArray(backups.backups)) backups = backups.backups;
                 if (!Array.isArray(backups)) { 
                     Swal.fire({ 
@@ -990,15 +990,18 @@ const LUNAR_HOLIDAYS = [
                     if (lText) lText.innerText = "Đang tải và khôi phục..."; 
                     if (loader) loader.style.display = 'flex';
                     try {
-                        const payload = { action: 'loadBackup', u: currentUser.username, p: currentUser.password, id: id };
-                        const response = await fetch(GAS_URL, {
-                            method: 'POST',
-                            body: JSON.stringify(payload),
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                        });
-                        const textData = await response.text(); 
-                        let data = null; 
-                        if(textData && textData.trim() !== "") data = JSON.parse(textData);
+                        
+                          const response = await fetch(SUPABASE_URL + "/rest/v1/app_backups?id=eq." + id + "&select=data", {
+                              method: "GET",
+                              headers: {
+                                  "apikey": SUPABASE_ANON_KEY,
+                                  "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+                                  "Content-Type": "application/json"
+                              }
+                          });
+                          const result = await response.json();
+                          let data = result && result.length > 0 ? result[0].data : null;
+
                         if (data && data.error) {
                             Swal.fire('Lỗi', data.error, 'error');
                             if (loader) loader.style.display = 'none';
@@ -1781,7 +1784,7 @@ const LUNAR_HOLIDAYS = [
                                         const linkInputHtml = canEditPkg ? `
                                             <div class="mt-1 relative">
                                                 <button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800 mr-1"><i class="fas fa-link"></i> Link web</button>
-                                                <button onclick="document.getElementById('uploadFile_${mIndex}_${pkgIndex}_${sIndex}').click()" class="text-[10px] text-teal-600 dark:text-teal-400 font-medium bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded border border-teal-100 dark:border-teal-800" title="Tải file lên Drive"><i class="fas fa-cloud-upload-alt"></i> Tải file lên</button>
+                                                <button onclick="document.getElementById('uploadFile_${mIndex}_${pkgIndex}_${sIndex}').click()" class="text-[10px] text-teal-600 dark:text-teal-400 font-medium bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded border border-teal-100 dark:border-teal-800" title="Tải file đính kèm"><i class="fas fa-cloud-upload-alt"></i> Tải file lên</button>
                                                 <input type="file" id="uploadFile_${mIndex}_${pkgIndex}_${sIndex}" class="hidden" onchange="window.uploadFileDrive(this, ${mIndex}, ${pkgIndex}, ${sIndex})">
                                                 
                                                 <div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white dark:bg-gray-800 rounded shadow-lg absolute z-20 w-48 border dark:border-gray-700">
@@ -2222,18 +2225,22 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.deleteFileFromDrive = async function(url) {
-            if (!url || !url.includes("drive.google.com/file/d/")) return;
-            try {
-                const payload = { action: 'deleteFile', u: currentUser.username, p: currentUser.password, data: { url: url } };
-                await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-            } catch(e) {
-                console.error("Lỗi xóa file trên Drive", e);
-            }
-        };
+              if (!url) return;
+              if (url.includes("drive.google.com")) return; // Old Drive links cannot be deleted without GAS
+              if (!url.includes("/storage/v1/object/public/attachments/")) return;
+              try {
+                  let filename = url.split("/storage/v1/object/public/attachments/")[1];
+                  await fetch(SUPABASE_URL + '/storage/v1/object/attachments/' + filename, {
+                      method: 'DELETE',
+                      headers: {
+                          'apikey': SUPABASE_ANON_KEY,
+                          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                      }
+                  });
+              } catch(e) {
+                  console.error("Lỗi xóa file trên Supabase", e);
+              }
+          };
 
         window.deleteDoc = function(index) { 
             if (currentUser.role !== 'admin') return; 
@@ -2402,53 +2409,51 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             if (!inputElem.files || inputElem.files.length === 0) return;
             let file = inputElem.files[0];
             
-            // Check size max 10MB
             if (file.size > 10 * 1024 * 1024) {
                 return Swal.fire('Lỗi', 'Dung lượng file vượt quá giới hạn 10MB', 'error');
             }
 
             const lText = document.getElementById('loaderText');
             const loader = document.getElementById('loader');
-            if (lText) lText.innerText = "Đang tải lên Google Drive..."; 
+            if (lText) lText.innerText = "Đang tải lên Supabase..."; 
             if (loader) loader.style.display = 'flex';
 
-            let reader = new FileReader();
-            reader.onload = async function(e) {
-                let base64 = e.target.result;
-                let reqPayload = {
-                    filename: file.name,
-                    mimeType: file.type,
-                    base64: base64
-                };
-                try {
-                    const payload = { action: 'uploadFile', u: currentUser.username, p: currentUser.password, data: reqPayload };
-                    let res = await fetch(GAS_URL, {
-                        method: 'POST',
-                        body: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                    });
-                    let result = await res.json();
-                    if (loader) loader.style.display = 'none';
-
-                    if (result.status === 'success') {
-                        if (!pkg.steps[sIndex].links) pkg.steps[sIndex].links = []; 
-                        pkg.steps[sIndex].links.push({ name: file.name, url: result.link }); 
-                        window.logActivity(mIndex, pkgIndex, `Tải file lên Drive: ${file.name}`); 
-                        window.renderMissions(); 
-                        window.saveDataToGAS(false);
-                        Swal.fire('Thành công', 'Đã lưu trữ file vào thư mục Tai_Lieu_Dau_Thau_SCE', 'success');
-                    } else {
-                        Swal.fire('Lỗi', result.message || 'Lỗi tải lên', 'error');
-                    }
-                } catch(err) {
-                    if (loader) loader.style.display = 'none';
-                    Swal.fire('Lỗi', 'Không thể kết nối máy chủ', 'error');
+            try {
+                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+                let res = await fetch(SUPABASE_URL + '/storage/v1/object/attachments/' + uniqueName, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': file.type || 'application/octet-stream'
+                    },
+                    body: file
+                });
+                
+                if (!res.ok) throw new Error("Lỗi tải lên");
+                
+                let fileUrl = SUPABASE_URL + '/storage/v1/object/public/attachments/' + uniqueName;
+                
+                if (!db.missions[mIndex].packages[pkgIndex].steps[sIndex].links) {
+                    db.missions[mIndex].packages[pkgIndex].steps[sIndex].links = [];
                 }
-            };
-            reader.readAsDataURL(file);
+                db.missions[mIndex].packages[pkgIndex].steps[sIndex].links.push({
+                    name: file.name,
+                    url: fileUrl
+                });
+                window.logActivity(mIndex, pkgIndex, `Tải file lên Supabase: ${file.name}`); 
+                window.renderMissions(); 
+                window.saveDataToGAS(false); 
+                
+                inputElem.value = "";
+            } catch(err) {
+                console.error(err);
+                Swal.fire('Lỗi', 'Không thể tải file lên', 'error');
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
         };
-
-        window.addLink = function(mIndex, pkgIndex, sIndex) { 
+window.addLink = function(mIndex, pkgIndex, sIndex) { 
             if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let pkg = m.packages[pkgIndex]; 
@@ -2786,92 +2791,6 @@ window.renderDocs = function() {
             }
         };
 
-        window.loadLatestBiddingLaws = function() {
-            if(currentUser.role !== 'admin') return; 
-            Swal.fire({
-                title: 'Nạp CSDL Luật Đấu thầu 2026?',
-                text: "Hệ thống sẽ tự động thêm các văn bản cốt lõi mới nhất (bao gồm Nghị định 349/2026/NĐ-CP, Nghị định 214/2025/NĐ-CP...) vào Các văn bản tham khảo.",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Đồng ý nạp',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-const latestDocs = [
-{ category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=208119'}] },
-{ category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
-{ category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
-{ category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', links: [{name: 'Văn bản chính', url: 'https://mof.gov.vn/webcenter/portal/vbdh/r/m/cvd'}] },
-{ category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', links: [{name: 'Văn bản chính', url: 'https://dbndhanoi.gov.vn/'}] }
-];
-                    
-                    if(!db.regulatoryDocs) db.regulatoryDocs = [];
-                    
-                    let addedCount = 0;
-                    latestDocs.forEach(newDoc => {
-                        // Tránh thêm trùng lặp
-                        if (!db.regulatoryDocs.find(d => d.number === newDoc.number)) {
-                            db.regulatoryDocs.push(newDoc);
-                            addedCount++;
-                        }
-                    });
-                    
-                    if (addedCount > 0) {
-                        window.renderDocs();
-                        window.saveDataToGAS(false);
-                        Swal.fire('Thành công', `Đã nạp ${addedCount} văn bản Luật đấu thầu mới nhất!`, 'success');
-                    } else {
-                        Swal.fire('Thông báo', 'Hệ thống của bạn đã có sẵn các văn bản này, không cần nạp thêm.', 'info');
-                    }
-                }
-            });
-        };
-
-        window.silentUpdateBiddingLaws = function() {
-const latestDocs = [
-{ category: 'thamkhao', number: '22/2023/QH15', title: 'Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=208119'}] },
-{ category: 'thamkhao', number: '349/2026/NĐ-CP', title: 'Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
-{ category: 'thamkhao', number: '214/2025/NĐ-CP', title: 'Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu', links: [{name: 'Văn bản chính', url: 'https://vanban.chinhphu.vn/'}] },
-{ category: 'thamkhao', number: '36/2026/VBHN-BTC', title: 'Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)', links: [{name: 'Văn bản chính', url: 'https://mof.gov.vn/webcenter/portal/vbdh/r/m/cvd'}] },
-{ category: 'thamkhao', number: 'NQ-HĐND-HN-2026', title: 'Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu', links: [{name: 'Văn bản chính', url: 'https://dbndhanoi.gov.vn/'}] }
-];
-            
-            if(!db.regulatoryDocs) db.regulatoryDocs = [];
-            
-            let addedCount = 0;
-            latestDocs.forEach(newDoc => {
-                if (!db.regulatoryDocs.find(d => d.number === newDoc.number)) {
-                    db.regulatoryDocs.push(newDoc);
-                    addedCount++;
-                }
-            });
-            
-            if (addedCount > 0) {
-                if (document.getElementById('view-docs') && !document.getElementById('view-docs').classList.contains('hidden')) {
-                    window.renderDocs();
-                }
-                window.saveDataToGAS(true); // background silent save
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: `Đã tự động cập nhật ${addedCount} văn bản Luật đấu thầu mới nhất (2026)!`,
-                    showConfirmButton: false,
-                    timer: 5000,
-                    timerProgressBar: true
-                });
-            } else {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'info',
-                    title: `CSDL Luật Đấu thầu của bạn đã là bản mới nhất!`,
-                    showConfirmButton: false,
-                    timer: 4000
-                });
-            }
-        };
-
         window.uploadDocDrive = async function(inputElem) {
             if (currentUser.role !== 'admin') return; 
             if (!inputElem.files || inputElem.files.length === 0) return;
@@ -2883,44 +2802,37 @@ const latestDocs = [
 
             const lText = document.getElementById('loaderText');
             const loader = document.getElementById('loader');
-            if (lText) lText.innerText = "Đang tải văn bản lên Drive..."; 
+            if (lText) lText.innerText = "Đang tải văn bản lên Supabase..."; 
             if (loader) loader.style.display = 'flex';
 
-            let reader = new FileReader();
-            reader.onload = async function(e) {
-                let base64 = e.target.result;
-                let reqPayload = {
-                    filename: file.name,
-                    mimeType: file.type,
-                    base64: base64
-                };
-                try {
-                    const payload = { action: 'uploadFile', u: currentUser.username, p: currentUser.password, data: reqPayload };
-                    let res = await fetch(GAS_URL, {
-                        method: 'POST',
-                        body: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                    });
-                    let result = await res.json();
-                    if (loader) loader.style.display = 'none';
-
-                    if (result.status === 'success') {
-                        // Tự động điền link vào ô input
-                        let currentLink = document.getElementById('newDocLink').value.trim();
-                        document.getElementById('newDocLink').value = currentLink ? (currentLink + "\n" + result.link) : result.link;
-                        Swal.fire('Thành công', 'Đã lưu trữ văn bản vào Drive! Vui lòng nhập số hiệu, tên văn bản và bấm Thêm.', 'success');
-                    } else {
-                        Swal.fire('Lỗi', result.message || 'Lỗi tải lên', 'error');
-                    }
-                } catch(err) {
-                    if (loader) loader.style.display = 'none';
-                    Swal.fire('Lỗi', 'Không thể kết nối máy chủ', 'error');
-                }
-            };
-            reader.readAsDataURL(file);
+            try {
+                let uniqueName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+                let res = await fetch(SUPABASE_URL + '/storage/v1/object/attachments/' + uniqueName, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': file.type || 'application/octet-stream'
+                    },
+                    body: file
+                });
+                
+                if (!res.ok) throw new Error("Lỗi tải lên");
+                
+                let fileUrl = SUPABASE_URL + '/storage/v1/object/public/attachments/' + uniqueName;
+                
+                document.getElementById('docLink').value = fileUrl;
+                Swal.fire('Thành công', 'Đã lưu trữ văn bản! Vui lòng nhập số hiệu, tên văn bản và bấm Thêm.', 'success');
+                
+                inputElem.value = "";
+            } catch(err) {
+                console.error(err);
+                Swal.fire('Lỗi', 'Không thể tải file lên', 'error');
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
         };
-
-        window.updateDoc = function(i, f, v) { 
+window.updateDoc = function(i, f, v) { 
             if(currentUser.role !== 'admin') return; 
             db.regulatoryDocs[i][f] = v; 
             window.saveDataToGAS(false); 
