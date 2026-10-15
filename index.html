@@ -56,6 +56,10 @@
             min-height: auto !important;
         }
     }
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
     </style>
 <style id="mobile-ux">
 @media (max-width: 768px) {
@@ -174,13 +178,13 @@
     }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 overflow-x-hidden w-full">
 
     <!-- Màn hình Đăng nhập -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-200 dark:bg-gray-800 px-4 transition-colors">
         <div class="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600">
             <div class="text-center mb-6">
-                <img src="Logo (tách nền sát cạnh).png" alt="Logo SCE" class="h-20 w-auto mx-auto mb-4 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png'; this.classList.add('opacity-75', 'h-16');">
+                <img src="logo-192.png" alt="Logo SCE" class="h-20 w-auto mx-auto mb-4 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png'; this.classList.add('opacity-75', 'h-16');">
                 <h2 class="text-2xl font-bold text-blue-900 dark:text-blue-400 tracking-tight">HỆ THỐNG ĐẤU THẦU</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Quản trị Tiến độ & Dữ liệu Enterprise</p>
             </div>
@@ -208,18 +212,18 @@
     <!-- Màn hình Ứng dụng chính -->
     <div id="appScreen" class="hidden">
         <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 dark:from-gray-900 dark:to-gray-950 text-white shadow-xl sticky top-0 z-40 transition-colors border-b border-blue-800 dark:border-gray-800">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
                 <!-- GÓC TRÁI: LOGO SCE NỀN TRẮNG LÀM NÚT HOME -->
-                <div class="flex items-center gap-2.5 sm:gap-3.5 max-w-full">
+                <div class="flex items-center gap-2.5 sm:gap-3.5 w-full md:w-auto">
                     <a href="javascript:void(0)" onclick="window.switchTab('projects')" class="shrink-0 group flex items-center justify-center p-1.5 bg-white rounded-xl shadow-lg border border-white hover:scale-105 transition-all cursor-pointer" title="Trang chủ / Về danh sách Dự án (Home)">
-                        <img src="Logo (tách nền sát cạnh).png" alt="SCE" class="h-8 sm:h-9 w-auto object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
+                        <img src="logo-192.png" alt="SCE" class="h-8 sm:h-9 w-auto object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
                     </a>
-                    <div class="min-w-0">
+                    <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <h1 class="text-sm sm:text-base md:text-lg font-black tracking-wide text-white uppercase drop-shadow-sm">QUẢN TRỊ ĐẤU THẦU</h1>
                             <span class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded font-black tracking-wider shadow-sm uppercase border border-blue-400/40">Enterprise</span>
                         </div>
-                        <p class="text-[10px] sm:text-[11px] text-blue-200/90 font-medium tracking-tight truncate">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
+                        <p class="text-[10px] sm:text-[11px] text-blue-200/90 font-medium tracking-tight leading-tight break-words">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
                     </div>
                 </div>
 
@@ -280,14 +284,14 @@
                         <!-- Nút Tạo Nhiệm vụ -->
                         <button onclick="window.openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow-md hover:shadow-lg transition">
                             <i class="fas fa-folder-plus text-xs"></i>
-                            <span>Tạo Nhiệm vụ</span>
+                            <span><span class="sm:hidden">+ Tạo NV</span><span class="hidden sm:inline">+ Tạo Nhiệm vụ</span></span>
                         </button>
 
                         <!-- Tên chuyên viên & Vai trò -->
                         <button onclick="window.openProfileModal()" id="userBadge" class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-xs font-medium text-white transition backdrop-blur-md" title="Thông tin cá nhân & Đổi mật khẩu"></button>
 
                         <!-- Nút Đăng xuất màu đỏ -->
-                        <button onclick="window.handleLogout()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition shadow-sm" title="Đăng xuất khỏi hệ thống">
+                        <button onclick="window.handleLogout()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition shadow-sm shrink-0" title="Đăng xuất khỏi hệ thống">
                             <i class="fas fa-sign-out-alt text-xs"></i>
                         </button>
                     </div>
@@ -295,7 +299,7 @@
             </div>
         </header>
 
-        <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="max-w-7xl mx-auto px-2.5 sm:px-4 py-4 sm:py-6">
             <!-- Menu Tabs -->
             <div class="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl mb-6 gap-2 overflow-x-auto hide-scrollbar shadow-inner">
                 <button onclick="window.switchTab('projects')" id="tab-projects" class="py-2 px-4 font-semibold text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-700 shadow-sm rounded-lg whitespace-nowrap transition-all"><i class="fas fa-tasks mr-1.5"></i>Danh sách Dự án</button>
@@ -309,7 +313,7 @@
             <div class="flex-1 min-w-0 w-full">
             <!-- 3. PROJECTS / MISSIONS (GIAO DIỆN CHÍNH CỐT LÕI) -->
             <div id="view-projects">
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col xl:flex-row gap-4 justify-between items-center">
+                <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col xl:flex-row gap-3 sm:gap-4 justify-between items-center">
                     <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto items-center flex-1 flex-wrap">
                         <div class="relative w-full md:flex-1 md:min-w-[200px]"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border dark:border-gray-600 rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                         <div class="flex flex-wrap gap-2 w-full md:w-auto">
@@ -317,7 +321,7 @@
                             <input type="text" id="globalSearchInput" placeholder="🔍 Tìm dự án, gói thầu..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white p-2 rounded-lg text-sm w-full sm:w-48 md:w-64 focus:ring-2 focus:ring-blue-500 outline-none" onkeyup="window.renderMissions()">
                     <select id="filterOwner" onchange="window.renderMissions()" class="flex-[2] md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
                         </div>
-                        <div class="flex items-center justify-between w-full md:w-auto gap-1 text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md"><span class="text-gray-500 dark:text-gray-300">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"><span class="text-gray-500 dark:text-gray-300 text-center">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"></div>
+                        <div class="flex items-center justify-between w-full md:w-auto gap-1 text-xs sm:text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md min-w-0 max-w-full overflow-hidden"><span class="text-gray-500 dark:text-gray-300 shrink-0">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0 text-xs sm:text-sm"><span class="text-gray-500 dark:text-gray-300 text-center shrink-0">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0 text-xs sm:text-sm"></div>
                         <button onclick="window.toggleAllPackages()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md text-xs font-semibold border dark:border-gray-600 flex items-center gap-1.5 shadow-sm transition whitespace-nowrap" title="Mở rộng hoặc thu gọn toàn bộ các gói thầu"><i class="fas fa-layer-group text-blue-500"></i><span id="btnToggleAllText">Mở rộng tất cả</span></button>
                     </div>
                     <div id="archiveWarning" class="hidden text-[11px] md:text-xs text-red-600 font-medium bg-red-50 dark:bg-red-900/30 px-3 py-2 rounded-md border border-red-200 dark:border-red-800 flex items-center gap-1.5 whitespace-nowrap shadow-sm"><i class="fas fa-trash-alt"></i> Tự động xóa sau 30 ngày</div>
@@ -1525,7 +1529,7 @@ const LUNAR_HOLIDAYS = [
             let roleBadge = 'Chuyên viên'; 
             if (currentUser.role === 'admin') roleBadge = 'Admin'; 
             else if (currentUser.role === 'leader') roleBadge = 'Lãnh đạo';
-            document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> ${escapeHtml(currentUser.fullname)} <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${roleBadge}</span>`;
+            document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> <span class="truncate max-w-[90px] sm:max-w-none">${escapeHtml(currentUser.fullname)}</span> <span class="hidden sm:inline text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${roleBadge}</span>`;
         };
 
         window.switchTab = function(tab) {
@@ -1918,16 +1922,16 @@ const LUNAR_HOLIDAYS = [
                         
                         if (canEditMission) {
                             if (mission.completed) { 
-                                btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-emerald-600 border-2 border-emerald-600 text-white hover:bg-emerald-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-md transition flex items-center gap-2"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</button>`; 
+                                btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-emerald-600 border-2 border-emerald-600 text-white hover:bg-emerald-700 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5 sm:gap-2"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</button>`; 
                             } else { 
-                                btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="far fa-circle"></i> Chốt Nhiệm vụ</button>`; 
+                                btnCompleteMission = `<button onclick="window.toggleMissionComplete(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-1.5 sm:gap-2"><i class="far fa-circle"></i> Chốt Nhiệm vụ</button>`; 
                             }
                         } else if (mission.completed) { 
-                            btnCompleteMission = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`; 
+                            btnCompleteMission = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã hoàn thành Nhiệm vụ</span>`; 
                         }
                         
                         let btnEditMission = canEditMission ? `<button onclick="window.openEditMissionModal(${mIndex})" class="text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 px-2 py-1 rounded shadow-sm text-xs transition ml-2"><i class="fas fa-edit"></i> Sửa</button>` : '';
-                        let btnPrintMission = `<button onclick="window.printMission(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-print"></i> In NV</button>`;
+                        let btnPrintMission = `<button onclick="window.printMission(${mIndex})" class="bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-sm transition flex items-center gap-1.5 sm:gap-2"><i class="fas fa-print"></i> In NV</button>`;
                         
                         let packagesHtml = "";
                         if (visiblePackages.length === 0) { 
@@ -2003,16 +2007,19 @@ const LUNAR_HOLIDAYS = [
                                     }
 
                                     currentStepHtml = `
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold border ${stepBadgeBg}">
-                                                <i class="fas fa-play-circle text-[11px]"></i> Đang triển khai: <strong>Bước ${currentStepIndex + 1}/${totalStepsCount}</strong>
-                                            </span>
-                                            <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100">${escapeHtml(currentStep.name)}</span>
-                                            ${subTaskInfo}
-                                            <span class="text-xs ${stepTimeBadge} ml-auto sm:ml-2 flex items-center gap-1">
-                                                <i class="far fa-calendar-alt text-gray-400"></i> Hạn: <strong>${window.formatDate(currentStep.deadline)}</strong>
-                                                ${statusLabel}
-                                            </span>
+                                        <div class="w-full flex flex-col gap-1.5">
+                                            <div class="flex items-center justify-between gap-2 flex-wrap w-full">
+                                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold border ${stepBadgeBg} shrink-0">
+                                                    <i class="fas fa-play-circle text-[11px]"></i> Đang triển khai: <strong>Bước ${currentStepIndex + 1}/${totalStepsCount}</strong>
+                                                </span>
+                                                <span class="text-xs ${stepTimeBadge} flex items-center gap-1 shrink-0">
+                                                    <i class="far fa-calendar-alt text-gray-400"></i> Hạn: <strong>${window.formatDate(currentStep.deadline)}</strong>
+                                                    ${statusLabel}
+                                                </span>
+                                            </div>
+                                            <div class="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 break-words leading-snug">
+                                                ${escapeHtml(currentStep.name)} ${subTaskInfo}
+                                            </div>
                                         </div>`;
                                 } else if (totalStepsCount > 0) {
                                     currentStepHtml = `
@@ -2144,38 +2151,45 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                 packagesHtml += `
                                     <div class="bg-white dark:bg-gray-800 rounded-xl border ${borderColor} overflow-hidden mb-4 shadow-sm hover:shadow transition-shadow">
                                         <!-- PHẦN 1: HEADER THÔNG TIN CƠ BẢN VỀ GÓI THẦU -->
-                                        <div class="${headerBg} px-4 py-3 border-b ${pkg.archived ? 'border-gray-200 dark:border-gray-700' : 'border-blue-100 dark:border-blue-900/30'}">
-                                            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center gap-2 flex-wrap">
-                                                        <h4 class="font-bold text-[14.5px] flex items-center ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (pkg.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-blue-900 dark:text-blue-300')}">
-                                                            <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-2 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
-                                                            <span class="truncate">${pkgNameSafe}</span> ${btnEditPkg} ${btnLogPkg}
+                                        <div class="${headerBg} px-3 py-2.5 sm:px-4 sm:py-3 border-b ${pkg.archived ? 'border-gray-200 dark:border-gray-700' : 'border-blue-100 dark:border-blue-900/30'}">
+                                            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2.5 sm:gap-3">
+                                                <div class="flex-1 min-w-0 w-full">
+                                                    <!-- HÀNG 1: TÊN GÓI THẦU -->
+                                                    <div class="w-full">
+                                                        <h4 class="font-bold text-[14px] sm:text-[14.5px] leading-snug break-words ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (pkg.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-blue-900 dark:text-blue-300')}">
+                                                            <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
+                                                            <span>${pkgNameSafe}</span> ${btnEditPkg} ${btnLogPkg}
                                                         </h4>
+                                                    </div>
+
+                                                    <!-- HÀNG 2: BADGE QUY TRÌNH & NÚT CHỐT GÓI -->
+                                                    <div class="flex items-center gap-2 flex-wrap mt-1.5">
                                                         <span class="inline-block bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[11px] font-medium shadow-sm">${pkgProcessTitle}</span>
                                                         ${btnCompletePkg}
-                                                        ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''}
+                                                        ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-1">(Đã lưu trữ)</span>' : ''}
                                                     </div>
 
                                                     <!-- DÒNG THÔNG TIN CƠ BẢN: Dự toán, Nhà thầu, Giá trúng, Ký HĐ dự kiến, Chuyên viên -->
-                                                    <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                                        ${pkg.budget ? `<span class="flex items-center gap-1"><i class="fas fa-coins text-amber-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.budget))}</strong></span>` : ''}
-                                                        ${pkg.contractor ? `<span class="flex items-center gap-1"><i class="fas fa-building text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
-                                                        ${pkg.winningBid ? `<span class="flex items-center gap-1"><i class="fas fa-hand-holding-usd text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.winningBid))}</strong></span>` : ''}
-                                                        <span class="flex items-center gap-1"><i class="far fa-calendar-check text-indigo-500"></i>Ký HĐ dự kiến: <strong class="text-gray-800 dark:text-gray-200">${finalDate}</strong></span>
-                                                        <span class="flex items-center gap-1"><i class="far fa-user text-purple-500"></i>Chuyên viên: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.owner)}</strong></span>
+                                                    <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                        ${pkg.budget ? `<span class="inline-flex items-center gap-1 shrink-0"><i class="fas fa-coins text-amber-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.budget))}</strong></span>` : ''}
+                                                        ${pkg.contractor ? `<span class="inline-flex items-center gap-1 flex-wrap break-words w-full sm:w-auto"><i class="fas fa-building text-blue-500 shrink-0"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200 break-words">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
+                                                        ${pkg.winningBid ? `<span class="inline-flex items-center gap-1 shrink-0"><i class="fas fa-hand-holding-usd text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.winningBid))}</strong></span>` : ''}
+                                                        <span class="inline-flex items-center gap-1 shrink-0"><i class="far fa-calendar-check text-indigo-500"></i>Ký HĐ dự kiến: <strong class="text-gray-800 dark:text-gray-200">${finalDate}</strong></span>
+                                                        <span class="inline-flex items-center gap-1 shrink-0"><i class="far fa-user text-purple-500"></i>Chuyên viên: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.owner)}</strong></span>
                                                     </div>
                                                 </div>
 
                                                 <!-- CÁC NÚT THAO TÁC CƠ BẢN & NÚT CHI TIẾT -->
-                                                <div class="flex items-center gap-1.5 flex-wrap self-end lg:self-center">
-                                                    ${archiveBtn}
-                                                    <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition" title="Xuất Excel gói thầu"><i class="fas fa-file-excel mr-1"></i>Xuất</button>
-                                                    <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition"><i class="fas fa-print mr-1"></i>In</button>
-                                                    ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm transition" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                                <div class="flex items-center justify-between sm:justify-end gap-1.5 flex-wrap w-full lg:w-auto mt-2 lg:mt-0 pt-2 lg:pt-0 border-t border-blue-100/60 dark:border-gray-700/60 lg:border-t-0">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        ${archiveBtn}
+                                                        <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition" title="Xuất Excel gói thầu"><i class="fas fa-file-excel mr-1"></i>Xuất</button>
+                                                        <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition"><i class="fas fa-print mr-1"></i>In</button>
+                                                        ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm transition" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                                    </div>
                                                     
                                                     <!-- NÚT CHI TIẾT / THU GỌN CHÍNH -->
-                                                    <button onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" class="ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${isExpanded ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'}">
+                                                    <button onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${isExpanded ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'}">
                                                         <span id="btn_expand_text_${pkgKey}" data-count="${totalStepsCount}">${isExpanded ? 'Thu gọn' : `Chi tiết (${totalStepsCount} bước)`}</span>
                                                         <i id="btn_expand_icon_${pkgKey}" class="fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[11px]"></i>
                                                     </button>
@@ -2184,21 +2198,21 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                         </div>
 
                                         <!-- PHẦN 2: BANNER BƯỚC ĐANG TRIỂN KHAI VÀ TIẾN ĐỘ -->
-                                        <div class="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-900/80 transition" onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" title="Bấm vào để mở/thu gọn chi tiết các bước thực hiện">
-                                            <div class="flex-1 min-w-0">
+                                        <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 bg-slate-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-900/80 transition" onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" title="Bấm vào để mở/thu gọn chi tiết các bước thực hiện">
+                                            <div class="flex-1 min-w-0 w-full">
                                                 ${currentStepHtml}
                                             </div>
                                             
                                             <!-- Mini Progress Bar & Trạng thái mở rộng -->
-                                            <div class="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-between md:justify-end">
+                                            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end pt-1.5 md:pt-0 border-t border-gray-200/50 dark:border-gray-800 md:border-t-0">
                                                 <div class="flex items-center gap-2">
                                                     <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">${completedStepsCount}/${totalStepsCount}</span>
-                                                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden shadow-inner">
+                                                    <div class="w-20 sm:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden shadow-inner">
                                                         <div class="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                                                     </div>
                                                     <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 w-8 text-right">${progressPercent}%</span>
                                                 </div>
-                                                <span class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium select-none ml-2">
+                                                <span class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium select-none ml-2 shrink-0">
                                                     <span id="banner_expand_text_${pkgKey}">${isExpanded ? 'Đóng chi tiết' : 'Mở chi tiết'}</span>
                                                     <i id="banner_expand_icon_${pkgKey}" class="fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]"></i>
                                                 </span>
@@ -2237,16 +2251,16 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                         let addPkgBtn = ""; 
                         let delMissionBtn = "";
                         if (canEditMission) {
-                            addPkgBtn = `<button onclick="window.openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-sm transition"><i class="fas fa-plus"></i> Gói thầu</button>`;
-                            delMissionBtn = `<button onclick="window.deleteMission(${mIndex})" class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1.5 rounded-full text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>`;
+                            addPkgBtn = `<button onclick="window.openCreatePackageModal(${mIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium shadow-sm transition"><i class="fas fa-plus"></i> Gói thầu</button>`;
+                            delMissionBtn = `<button onclick="window.deleteMission(${mIndex})" class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>`;
                         }
 
                         container.innerHTML += `
                             <div class="mission-block border ${mBorderColor} rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm mb-6">
-                                <div class="${mBgColor} p-4 border-b border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="${mBgColor} p-3 sm:p-4 border-b border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <h2 class="text-lg font-bold flex items-center ${mission.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-indigo-900 dark:text-indigo-400'}">
+                                            <h2 class="text-base sm:text-lg font-bold leading-snug break-words flex-1 min-w-0 ${mission.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-indigo-900 dark:text-indigo-400'}">
                                                 <i class="fas fa-folder text-indigo-500 dark:text-indigo-400 mr-2"></i> Nhiệm vụ: ${escapeHtml(mNameSafe)} ${btnEditMission}
                                             </h2>
                                         </div>
@@ -2255,11 +2269,11 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                         </p>
                                         ${docsHtml}
                                     </div>
-                                    <div class="flex flex-wrap gap-2 items-center w-full md:w-auto mt-2 md:mt-0">
+                                    <div class="flex flex-wrap gap-1.5 sm:gap-2 items-center w-full md:w-auto mt-2 md:mt-0">
                                         ${btnCompleteMission} ${btnPrintMission} ${addPkgBtn} ${delMissionBtn}
                                     </div>
                                 </div>
-                                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50 ${mission.completed ? 'hidden' : ''}">${packagesHtml}</div>
+                                <div class="p-2 sm:p-4 bg-gray-50/50 dark:bg-gray-900/50 ${mission.completed ? 'hidden' : ''}">${packagesHtml}</div>
                             </div>`;
                     });
                 }
