@@ -883,6 +883,20 @@ const LUNAR_HOLIDAYS = [
                 });
                 if (!response.ok) throw new Error("HTTP error " + response.status);
                 lastSaveTime = Date.now();
+
+                // Tự động tạo bản sao lưu trong app_backups (giới hạn tối đa 1 bản mỗi 60 giây để tránh đầy dung lượng)
+                if (!window.lastBackupTime || (Date.now() - window.lastBackupTime > 60000)) {
+                    window.lastBackupTime = Date.now();
+                    fetch(SUPABASE_URL + '/rest/v1/app_backups', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ data: db })
+                    }).catch(bErr => console.warn("Lỗi tạo bản sao lưu:", bErr));
+                }
                 if (syncIcon) syncIcon.className = 'fas fa-check-circle text-green-400';
                 if (syncText) syncText.innerText = 'Đã lưu';
                 clearTimeout(syncTimeout);
@@ -900,8 +914,9 @@ const LUNAR_HOLIDAYS = [
                 if (syncIcon) syncIcon.className = 'fas fa-exclamation-triangle text-red-500';
                 if (syncText) syncText.innerText = 'Lỗi lưu';
                 return false;
+            } finally {
+                isSaving = false;
             }
-            isSaving = false;
         };
 
         window.forceSync = function() { 
@@ -931,8 +946,8 @@ const LUNAR_HOLIDAYS = [
                 if (backups && Array.isArray(backups.backups)) backups = backups.backups;
                 if (!Array.isArray(backups)) { 
                     Swal.fire({ 
-                        title: 'Cần cập nhật Google Apps Script', 
-                        html: "Vui lòng <b>Deploy</b> -> <b>New version</b> trong Google Sheets để sử dụng tính năng sao lưu này.", 
+                        title: 'Lỗi kết nối Supabase', 
+                        html: "Không thể tải danh sách bản sao lưu từ máy chủ Supabase.", 
                         icon: 'warning' 
                     }); 
                     if (loader) loader.style.display = 'none'; 
@@ -1053,7 +1068,7 @@ const LUNAR_HOLIDAYS = [
             });
         };
 
-        // Đồng bộ ngầm định kỳ
+        // Đồng bộ ngầm định kỳ qua Supabase
         async function backgroundSync() {
             if (!isDataSynchronized || !currentUser || isSaving || (Date.now() - lastSaveTime < 5000)) return;
             const syncIcon = document.querySelector('#syncStatus i'); 
@@ -1061,37 +1076,29 @@ const LUNAR_HOLIDAYS = [
             if (syncIcon) syncIcon.className = "fas fa-sync fa-spin text-blue-300"; 
             if (syncText) syncText.innerText = "Làm mới...";
             try {
-                const payload = { action: 'read', u: currentUser.username, p: currentUser.password };
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                const response = await fetch(SUPABASE_URL + '/rest/v1/app_data?id=eq.1&select=data', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    }
                 });
-                const textData = await response.text(); 
-                let res = null; 
-                if (textData && textData.trim() !== "") res = JSON.parse(textData);
-                if (res && res.error) throw new Error(res.error);
-                let data = res && res.db ? res.db : (res && !res.success && res.users ? res : null);
-                if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-                    if (JSON.stringify(db) !== JSON.stringify(data)) {
-                        db = data; 
-                        applyDefaultsIfMissing(); 
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                const result = await response.json();
+                if (result.length > 0 && result[0].data) {
+                    const serverDb = result[0].data;
+                    if (JSON.stringify(db) !== JSON.stringify(serverDb)) {
+                        db = serverDb;
+                        applyDefaultsIfMissing();
                         autoCleanArchivedData();
-                        const activeTabObj = document.querySelector('.border-blue-700');
-                        if (activeTabObj) {
-                            if (activeTabObj.id === 'tab-projects') window.renderMissions();
-                            else if (activeTabObj.id === 'tab-kanban') window.renderKanban();
-                            else if (activeTabObj.id === 'tab-dashboard') window.renderDashboard();
-                            else if (activeTabObj.id === 'tab-settings') window.renderConfig();
-                            else if (activeTabObj.id === 'tab-docs') window.renderDocs();
-                            else if (activeTabObj.id === 'tab-users') window.renderUsers();
-                        }
+                        const vProj = document.getElementById('view-projects');
+                        if (vProj && !vProj.classList.contains('hidden')) window.renderMissions();
                         window.populateProcessDropdowns();
                     }
                 }
                 if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300"; 
                 if (syncText) syncText.innerText = "Đã đồng bộ";
             } catch (err) { 
+                console.warn("Lỗi đồng bộ ngầm Supabase:", err);
                 if (syncIcon) syncIcon.className = "fas fa-exclamation-triangle text-red-400"; 
                 if (syncText) syncText.innerText = "Mất kết nối"; 
             }
@@ -1182,34 +1189,7 @@ const LUNAR_HOLIDAYS = [
             window.bgSyncTimer = setInterval(window.silentBackgroundSync, 3 * 60 * 1000); // 3 minutes
         };
 
-        window.silentBackgroundSync = async function() {
-            if (!currentUser || isSaving) return;
-            try {
-                const payload = { action: 'read', u: currentUser.username, p: currentUser.password };
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                if (!response.ok) return;
-                const textData = await response.text();
-                let res = JSON.parse(textData);
-                if (res.db) {
-                    let oldStr = JSON.stringify(db);
-                    let newStr = JSON.stringify(res.db);
-                    if (oldStr !== newStr) {
-                        db = res.db;
-                        applyDefaultsIfMissing();
-                        const noModalOpen = document.querySelectorAll('#editMissionModal:not(.hidden), #editPackageModal:not(.hidden), #editStepModal:not(.hidden), #subTaskModal:not(.hidden), #commentsModal:not(.hidden)').length === 0;
-                        if (noModalOpen) {
-                            const vProj = document.getElementById('view-projects'); if (vProj && !vProj.classList.contains('hidden')) window.renderMissions();
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn("Lỗi đồng bộ ngầm:", e);
-            }
-        };
+        
 
         function showLoginError(msg) { 
             const el = document.getElementById('loginError'); 
