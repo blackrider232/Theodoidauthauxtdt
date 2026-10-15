@@ -251,6 +251,7 @@
                     <select id="filterOwner" onchange="window.renderMissions()" class="flex-[2] md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
                         </div>
                         <div class="flex items-center justify-between w-full md:w-auto gap-1 text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md"><span class="text-gray-500 dark:text-gray-300">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"><span class="text-gray-500 dark:text-gray-300 text-center">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0"></div>
+                        <button onclick="window.toggleAllPackages()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md text-xs font-semibold border dark:border-gray-600 flex items-center gap-1.5 shadow-sm transition whitespace-nowrap" title="Mở rộng hoặc thu gọn toàn bộ các gói thầu"><i class="fas fa-layer-group text-blue-500"></i><span id="btnToggleAllText">Mở rộng tất cả</span></button>
                     </div>
                     <div id="archiveWarning" class="hidden text-[11px] md:text-xs text-red-600 font-medium bg-red-50 dark:bg-red-900/30 px-3 py-2 rounded-md border border-red-200 dark:border-red-800 flex items-center gap-1.5 whitespace-nowrap shadow-sm"><i class="fas fa-trash-alt"></i> Tự động xóa sau 30 ngày</div>
                 </div>
@@ -639,6 +640,57 @@ const LUNAR_HOLIDAYS = [
         const MAX_HISTORY = 30;
         let isPerformingHistoryAction = false;
         let lastCommittedState = null;
+
+        // --- QUẢN LÝ MỞ RỘNG / THU GỌN GÓI THẦU (COLLAPSIBLE PACKAGES) ---
+        let expandedPackages = new Set();
+        window.expandedPackages = expandedPackages;
+
+        window.togglePackageExpand = function(mIndex, pkgIndex) {
+            const key = `${mIndex}_${pkgIndex}`;
+            const container = document.getElementById(`steps_container_${key}`);
+            const btnText = document.getElementById(`btn_expand_text_${key}`);
+            const btnIcon = document.getElementById(`btn_expand_icon_${key}`);
+            const bannerIcon = document.getElementById(`banner_expand_icon_${key}`);
+            const bannerText = document.getElementById(`banner_expand_text_${key}`);
+            
+            if (window.expandedPackages.has(key)) {
+                window.expandedPackages.delete(key);
+                if (container) container.classList.add('hidden');
+                const count = btnText ? (btnText.getAttribute('data-count') || '') : '';
+                if (btnText) btnText.innerText = count ? `Chi tiết (${count})` : 'Chi tiết';
+                if (btnIcon) btnIcon.className = 'fas fa-chevron-down text-[11px]';
+                if (bannerIcon) bannerIcon.className = 'fas fa-chevron-down text-[10px]';
+                if (bannerText) bannerText.innerText = 'Mở chi tiết';
+            } else {
+                window.expandedPackages.add(key);
+                if (container) container.classList.remove('hidden');
+                if (btnText) btnText.innerText = 'Thu gọn';
+                if (btnIcon) btnIcon.className = 'fas fa-chevron-up text-[11px]';
+                if (bannerIcon) bannerIcon.className = 'fas fa-chevron-up text-[10px]';
+                if (bannerText) bannerText.innerText = 'Đóng chi tiết';
+            }
+        };
+
+        window.toggleAllPackages = function() {
+            let allKeys = [];
+            if (db.missions) {
+                db.missions.forEach((m, mIdx) => {
+                    if (m.packages) {
+                        m.packages.forEach((p, pIdx) => {
+                            allKeys.push(`${mIdx}_${pIdx}`);
+                        });
+                    }
+                });
+            }
+            
+            const shouldOpen = window.expandedPackages.size < allKeys.length;
+            if (shouldOpen) {
+                allKeys.forEach(k => window.expandedPackages.add(k));
+            } else {
+                window.expandedPackages.clear();
+            }
+            window.renderMissions();
+        };
 
         window.updateUndoRedoUI = function() {
             const btnUndo = document.getElementById('btnUndo');
@@ -1819,6 +1871,92 @@ const LUNAR_HOLIDAYS = [
                                 let isPkgOwner = currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
                                 let canEditPkg = (isAdmin || isPkgOwner) && !isLeader;
                                 const finalDate = pkg.steps && pkg.steps.length > 0 ? window.formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
+
+                                // Xác định bước đang triển khai và tiến độ gói thầu
+                                let currentStep = null;
+                                let currentStepIndex = -1;
+                                let completedStepsCount = 0;
+                                let totalStepsCount = pkg.steps ? pkg.steps.length : 0;
+
+                                if (pkg.steps && Array.isArray(pkg.steps) && pkg.steps.length > 0) {
+                                    for (let sIdx = 0; sIdx < pkg.steps.length; sIdx++) {
+                                        if (pkg.steps[sIdx].completed) {
+                                            completedStepsCount++;
+                                        } else if (!currentStep) {
+                                            currentStep = pkg.steps[sIdx];
+                                            currentStepIndex = sIdx;
+                                        }
+                                    }
+                                }
+                                const progressPercent = totalStepsCount > 0 ? Math.round((completedStepsCount / totalStepsCount) * 100) : 0;
+
+                                // Xác định trạng thái mở rộng (isExpanded)
+                                const pkgKey = `${mIndex}_${pkgIndex}`;
+                                let isAutoExpandedBySearch = false;
+                                if (searchKw || sq) {
+                                    const q = searchKw || sq;
+                                    if (pkg.steps && pkg.steps.some(st => (st.name || '').toLowerCase().includes(q) || (st.note || '').toLowerCase().includes(q))) {
+                                        isAutoExpandedBySearch = true;
+                                    }
+                                }
+                                const isExpanded = isAutoExpandedBySearch || (window.expandedPackages && window.expandedPackages.has(pkgKey));
+
+                                // Xây dựng giao diện Bước đang triển khai
+                                let currentStepHtml = "";
+                                if (pkg.completed) {
+                                    currentStepHtml = `
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                                                <i class="fas fa-check-double text-emerald-600"></i> Đã hoàn thành toàn bộ gói thầu
+                                            </span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">(${totalStepsCount}/${totalStepsCount} bước)</span>
+                                        </div>`;
+                                } else if (currentStep) {
+                                    const isStepOverdue = new Date(currentStep.deadline) < now;
+                                    const isStepWarning = !isStepOverdue && ((new Date(currentStep.deadline) - now) / (1000 * 3600 * 24) <= 2);
+                                    
+                                    let stepBadgeBg = "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800";
+                                    let stepTimeBadge = "text-gray-600 dark:text-gray-300";
+                                    let statusLabel = "";
+
+                                    if (isStepOverdue) {
+                                        stepBadgeBg = "bg-red-50 text-red-700 border-red-300 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800";
+                                        stepTimeBadge = "text-red-600 dark:text-red-400 font-bold";
+                                        statusLabel = `<span class="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ml-1 animate-pulse">Quá hạn</span>`;
+                                    } else if (isStepWarning) {
+                                        stepBadgeBg = "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800";
+                                        stepTimeBadge = "text-amber-600 dark:text-amber-400 font-bold";
+                                        statusLabel = `<span class="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ml-1">Sắp đến hạn</span>`;
+                                    }
+
+                                    let subTaskInfo = "";
+                                    if (currentStep.subTasks && currentStep.subTasks.length > 0) {
+                                        const doneSub = currentStep.subTasks.filter(s => s.completed).length;
+                                        subTaskInfo = `<span class="text-[11px] text-gray-500 dark:text-gray-400 ml-1">(${doneSub}/${currentStep.subTasks.length} việc nhỏ)</span>`;
+                                    }
+
+                                    currentStepHtml = `
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold border ${stepBadgeBg}">
+                                                <i class="fas fa-play-circle text-[11px]"></i> Đang triển khai: <strong>Bước ${currentStepIndex + 1}/${totalStepsCount}</strong>
+                                            </span>
+                                            <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100">${escapeHtml(currentStep.name)}</span>
+                                            ${subTaskInfo}
+                                            <span class="text-xs ${stepTimeBadge} ml-auto sm:ml-2 flex items-center gap-1">
+                                                <i class="far fa-calendar-alt text-gray-400"></i> Hạn: <strong>${window.formatDate(currentStep.deadline)}</strong>
+                                                ${statusLabel}
+                                            </span>
+                                        </div>`;
+                                } else if (totalStepsCount > 0) {
+                                    currentStepHtml = `
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                <i class="fas fa-check-circle"></i> Đã hoàn tất tất cả các bước (${totalStepsCount}/${totalStepsCount}) - Chờ chốt gói
+                                            </span>
+                                        </div>`;
+                                } else {
+                                    currentStepHtml = `<span class="text-xs text-gray-400 italic">Chưa có các bước triển khai</span>`;
+                                }
                                 
                                 let stepsHtml = "";
                                 if (pkg.steps && Array.isArray(pkg.steps)) {
@@ -1935,40 +2073,76 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
 
                                 packagesHtml += `
-                                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-visible mb-5 shadow-sm relative">
-                                        <div class="${headerBg} px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b ${pkg.archived ? 'border-gray-200 dark:border-gray-700' : 'border-blue-100 dark:border-blue-900/30'} gap-3">
-                                            <div class="flex-1">
-                                                <div class="flex items-center gap-2 flex-wrap">
-                                                    <h4 class="font-bold text-[14px] flex items-center ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (pkg.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-blue-900 dark:text-blue-300')}">
-                                                        <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-1.5 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
-                                                        ${pkgNameSafe} ${btnEditPkg} ${btnLogPkg}
-                                                    </h4>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl border ${borderColor} overflow-hidden mb-4 shadow-sm hover:shadow transition-shadow">
+                                        <!-- PHẦN 1: HEADER THÔNG TIN CƠ BẢN VỀ GÓI THẦU -->
+                                        <div class="${headerBg} px-4 py-3 border-b ${pkg.archived ? 'border-gray-200 dark:border-gray-700' : 'border-blue-100 dark:border-blue-900/30'}">
+                                            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <h4 class="font-bold text-[14.5px] flex items-center ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (pkg.completed ? 'text-emerald-800 dark:text-emerald-400' : 'text-blue-900 dark:text-blue-300')}">
+                                                            <i class="fas ${pkg.archived ? 'fa-box' : 'fa-box-open'} mr-2 ${pkg.archived ? 'text-gray-500' : (pkg.completed ? 'text-emerald-500' : 'text-blue-600')}"></i>
+                                                            <span class="truncate">${pkgNameSafe}</span> ${btnEditPkg} ${btnLogPkg}
+                                                        </h4>
+                                                        <span class="inline-block bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[11px] font-medium shadow-sm">${pkgProcessTitle}</span>
+                                                        ${btnCompletePkg}
+                                                        ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''}
+                                                    </div>
 
-<div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] w-full">
-    ${pkg.budget ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-coins mr-1 text-yellow-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.budget))}</strong></span>` : ''}
-    ${pkg.contractor ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-building mr-1 text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
-    ${pkg.winningBid ? `<span class="text-gray-600 dark:text-gray-400"><i class="fas fa-hand-holding-usd mr-1 text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.winningBid))}</strong></span>` : ''}
-</div>
-                                                    ${btnCompletePkg} ${pkg.archived ? '<span class="text-xs text-red-500 font-normal no-underline ml-2">(Đã lưu trữ)</span>' : ''}
+                                                    <!-- DÒNG THÔNG TIN CƠ BẢN: Dự toán, Nhà thầu, Giá trúng, Ký HĐ dự kiến, Chuyên viên -->
+                                                    <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                                        ${pkg.budget ? `<span class="flex items-center gap-1"><i class="fas fa-coins text-amber-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.budget))}</strong></span>` : ''}
+                                                        ${pkg.contractor ? `<span class="flex items-center gap-1"><i class="fas fa-building text-blue-500"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
+                                                        ${pkg.winningBid ? `<span class="flex items-center gap-1"><i class="fas fa-hand-holding-usd text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.winningBid))}</strong></span>` : ''}
+                                                        <span class="flex items-center gap-1"><i class="far fa-calendar-check text-indigo-500"></i>Ký HĐ dự kiến: <strong class="text-gray-800 dark:text-gray-200">${finalDate}</strong></span>
+                                                        <span class="flex items-center gap-1"><i class="far fa-user text-purple-500"></i>Chuyên viên: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.owner)}</strong></span>
+                                                    </div>
                                                 </div>
-                                                <div class="text-[11px] text-gray-600 dark:text-gray-400 mt-1.5">
-                                                    <span class="inline-block bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded mr-2 font-medium shadow-sm">${pkgProcessTitle}</span>
-                                                    Ký HĐ dự kiến: <span class="font-semibold text-gray-800 dark:text-gray-200">${finalDate}</span> | Chuyên viên: <b>${escapeHtml(pkg.owner)}</b>
+
+                                                <!-- CÁC NÚT THAO TÁC CƠ BẢN & NÚT CHI TIẾT -->
+                                                <div class="flex items-center gap-1.5 flex-wrap self-end lg:self-center">
+                                                    ${archiveBtn}
+                                                    <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition" title="Xuất Excel gói thầu"><i class="fas fa-file-excel mr-1"></i>Xuất</button>
+                                                    <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition"><i class="fas fa-print mr-1"></i>In</button>
+                                                    ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm transition" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                                    
+                                                    <!-- NÚT CHI TIẾT / THU GỌN CHÍNH -->
+                                                    <button onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" class="ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${isExpanded ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'}">
+                                                        <span id="btn_expand_text_${pkgKey}" data-count="${totalStepsCount}">${isExpanded ? 'Thu gọn' : `Chi tiết (${totalStepsCount} bước)`}</span>
+                                                        <i id="btn_expand_icon_${pkgKey}" class="fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[11px]"></i>
+                                                    </button>
                                                 </div>
-                                            </div>
-                                            <div class="flex items-center gap-1 mt-2 md:mt-0 flex-wrap">
-                                                ${archiveBtn}
-                                                <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm" title="Xuất Excel gói thầu"><i class="fas fa-file-excel"></i> Xuất</button>
-                                                <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm"><i class="fas fa-print"></i> In Gói</button>
-                                                ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm"><i class="fas fa-trash-alt"></i></button>` : ''}
                                             </div>
                                         </div>
-                                        <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
-                                            <table class="w-full text-left border-separate border-spacing-y-2 text-sm">
+
+                                        <!-- PHẦN 2: BANNER BƯỚC ĐANG TRIỂN KHAI VÀ TIẾN ĐỘ -->
+                                        <div class="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-900/50 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-900/80 transition" onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" title="Bấm vào để mở/thu gọn chi tiết các bước thực hiện">
+                                            <div class="flex-1 min-w-0">
+                                                ${currentStepHtml}
+                                            </div>
+                                            
+                                            <!-- Mini Progress Bar & Trạng thái mở rộng -->
+                                            <div class="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-between md:justify-end">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">${completedStepsCount}/${totalStepsCount}</span>
+                                                    <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden shadow-inner">
+                                                        <div class="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                                                    </div>
+                                                    <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 w-8 text-right">${progressPercent}%</span>
+                                                </div>
+                                                <span class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium select-none ml-2">
+                                                    <span id="banner_expand_text_${pkgKey}">${isExpanded ? 'Đóng chi tiết' : 'Mở chi tiết'}</span>
+                                                    <i id="banner_expand_icon_${pkgKey}" class="fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px]"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- PHẦN 3: BẢNG CHI TIẾT CÁC BƯỚC THỰC HIỆN (BỔ RA KHI BẤM CHI TIẾT) -->
+                                        <div id="steps_container_${pkgKey}" class="overflow-x-auto overflow-y-visible border-t border-gray-100 dark:border-gray-800 ${isExpanded ? '' : 'hidden'}">
+                                            <table class="w-full text-left border-separate border-spacing-y-2 text-sm px-3">
                                                 <thead class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
                                                     <tr><th class="py-2.5 px-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="py-2.5 px-2 text-[13px]">Chi tiết việc</th><th class="py-2.5 px-2 w-14 text-center">Mức</th><th class="py-2.5 px-2 w-24">Hạn chót</th><th class="py-2.5 px-2 w-40">Ghi chú</th><th class="py-2.5 px-2 w-24">Đính kèm</th>${canEditPkg ? '<th class="py-2.5 px-2 w-28 text-center"><i class="fas fa-cogs"></i></th>' : ''}</tr>
                                                 </thead>
-                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-2 text-center bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 transition"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
+                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-2 text-center bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 transition"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus mr-1"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
                                         </div>
                                     </div>`;
@@ -2030,7 +2204,16 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                 sortableInstancesList = [];
 
                 setTimeout(() => {
-                    document.querySelectorAll('.step-list-tbody').forEach(tbody => {
+                    const btnToggleAllText = document.getElementById('btnToggleAllText');
+                if (btnToggleAllText) {
+                    let totalPkgs = 0;
+                    if (db.missions) {
+                        db.missions.forEach(m => { if (m.packages) totalPkgs += m.packages.length; });
+                    }
+                    btnToggleAllText.innerText = (window.expandedPackages && window.expandedPackages.size >= totalPkgs && totalPkgs > 0) ? 'Thu gọn tất cả' : 'Mở rộng tất cả';
+                }
+
+                document.querySelectorAll('.step-list-tbody').forEach(tbody => {
                         let inst = Sortable.create(tbody, {
                             handle: '.step-drag-handle', 
                             animation: 150,
