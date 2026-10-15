@@ -199,6 +199,14 @@
                     <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-white/10 border border-white/20 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer text-white backdrop-blur-sm" title="Tra cứu LuatVietnam">
                         <i class="fas fa-gavel text-yellow-300"></i> <span class="hidden xl:inline">Luật VN</span>
                     </a>
+                    <div class="flex items-center bg-white/10 border border-white/20 rounded-lg p-0.5 backdrop-blur-sm">
+                        <button onclick="window.undoAction()" id="btnUndo" class="text-white hover:bg-white/20 px-2.5 py-1.5 rounded-md text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1" title="Hoàn tác thao tác trước (Ctrl+Z)" disabled>
+                            <i class="fas fa-undo"></i> <span class="hidden xl:inline">Hoàn tác</span>
+                        </button>
+                        <button onclick="window.redoAction()" id="btnRedo" class="text-white hover:bg-white/20 px-2.5 py-1.5 rounded-md text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1" title="Làm lại thao tác vừa hủy (Ctrl+Y)" disabled>
+                            <i class="fas fa-redo"></i> <span class="hidden xl:inline">Làm lại</span>
+                        </button>
+                    </div>
                     <button onclick="window.printDashboard()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-md transition" title="Tạo báo cáo, chỉnh sửa và xuất Word">
                         <i class="fas fa-file-word"></i> <span class="hidden lg:inline">Báo cáo (Word / In)</span>
                     </button>
@@ -624,6 +632,76 @@ const LUNAR_HOLIDAYS = [
 ];
 
         let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
+        
+        // --- QUẢN LÝ HOÀN TÁC (UNDO / REDO) ---
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_HISTORY = 30;
+        let isPerformingHistoryAction = false;
+        let lastCommittedState = null;
+
+        window.updateUndoRedoUI = function() {
+            const btnUndo = document.getElementById('btnUndo');
+            const btnRedo = document.getElementById('btnRedo');
+            if (btnUndo) {
+                btnUndo.disabled = undoStack.length === 0;
+                btnUndo.title = undoStack.length > 0 ? `Hoàn tác (${undoStack.length} thao tác - Ctrl+Z)` : 'Hoàn tác (Ctrl+Z)';
+            }
+            if (btnRedo) {
+                btnRedo.disabled = redoStack.length === 0;
+                btnRedo.title = redoStack.length > 0 ? `Làm lại (${redoStack.length} thao tác - Ctrl+Y)` : 'Làm lại (Ctrl+Y)';
+            }
+        };
+
+        window.undoAction = async function() {
+            if (undoStack.length === 0 || isPerformingHistoryAction) return;
+            isPerformingHistoryAction = true;
+            try {
+                // Đẩy trạng thái hiện tại sang redoStack
+                redoStack.push(JSON.stringify(db));
+                if (redoStack.length > MAX_HISTORY) redoStack.shift();
+
+                // Lấy trạng thái trước đó
+                const prevStateStr = undoStack.pop();
+                db = JSON.parse(prevStateStr);
+                lastCommittedState = prevStateStr;
+                applyDefaultsIfMissing();
+                window.renderMissions();
+                window.populateProcessDropdowns();
+                window.updateUndoRedoUI();
+                await window.saveDataToGAS(false);
+                window.toast.fire({ icon: 'info', title: 'Đã hoàn tác (Ctrl+Z)' });
+            } catch (e) {
+                console.error("Lỗi hoàn tác:", e);
+            } finally {
+                isPerformingHistoryAction = false;
+            }
+        };
+
+        window.redoAction = async function() {
+            if (redoStack.length === 0 || isPerformingHistoryAction) return;
+            isPerformingHistoryAction = true;
+            try {
+                // Đẩy trạng thái hiện tại sang undoStack
+                undoStack.push(JSON.stringify(db));
+                if (undoStack.length > MAX_HISTORY) undoStack.shift();
+
+                // Lấy trạng thái kế tiếp
+                const nextStateStr = redoStack.pop();
+                db = JSON.parse(nextStateStr);
+                lastCommittedState = nextStateStr;
+                applyDefaultsIfMissing();
+                window.renderMissions();
+                window.populateProcessDropdowns();
+                window.updateUndoRedoUI();
+                await window.saveDataToGAS(false);
+                window.toast.fire({ icon: 'info', title: 'Đã làm lại (Ctrl+Y)' });
+            } catch (e) {
+                console.error("Lỗi làm lại:", e);
+            } finally {
+                isPerformingHistoryAction = false;
+            }
+        };
         let currentUser = null; 
         let syncTimeout = null; 
         let autoSyncInterval = null; 
@@ -847,6 +925,10 @@ const LUNAR_HOLIDAYS = [
                 
                 applyDefaultsIfMissing();
                 isDataSynchronized = true;
+                lastCommittedState = JSON.stringify(db);
+                undoStack = [];
+                redoStack = [];
+                window.updateUndoRedoUI();
             } catch (err) {
                 console.error("Lỗi fetch API:", err);
                 const offlineData = await loadFromIDB();
@@ -856,6 +938,10 @@ const LUNAR_HOLIDAYS = [
                     if (res.db) db = res.db;
                     applyDefaultsIfMissing();
                     isDataSynchronized = true;
+                    lastCommittedState = JSON.stringify(db);
+                    undoStack = [];
+                    redoStack = [];
+                    window.updateUndoRedoUI();
                     if (window.toast) window.toast.fire({ icon: 'info', title: 'Đang dùng dữ liệu ngoại tuyến (Offline)' });
                 } else {
                     isDataSynchronized = false;
@@ -866,6 +952,21 @@ const LUNAR_HOLIDAYS = [
 
         window.saveDataToGAS = async function(alertSuccess = false) {
             if (!isDataSynchronized || !currentUser) return;
+
+            // Ghi lại lịch sử hoàn tác nếu đây là hành động sửa mới
+            if (!isPerformingHistoryAction) {
+                const curStateStr = JSON.stringify(db);
+                if (!lastCommittedState) {
+                    lastCommittedState = curStateStr;
+                } else if (lastCommittedState !== curStateStr) {
+                    undoStack.push(lastCommittedState);
+                    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+                    redoStack = [];
+                    window.updateUndoRedoUI();
+                    lastCommittedState = curStateStr;
+                }
+            }
+
             isSaving = true;
             const syncIcon = document.querySelector('#syncStatus i');
             const syncText = document.getElementById('syncText');
@@ -1293,6 +1394,7 @@ const LUNAR_HOLIDAYS = [
             
             window.populateProcessDropdowns(); 
             window.switchTab('projects');
+            window.updateUndoRedoUI();
             
             if (autoSyncInterval) clearInterval(autoSyncInterval); 
             autoSyncInterval = setInterval(backgroundSync, 60000);
@@ -3705,6 +3807,28 @@ async function checkForUpdates() {
 }
 // Chạy kiểm tra sau khi tải trang xong 5 giây
 setTimeout(checkForUpdates, 5000);
+
+// Phím tắt toàn cục: Ctrl+Z (Hoàn tác) và Ctrl+Y / Ctrl+Shift+Z (Làm lại)
+window.addEventListener('keydown', function(e) {
+    // Không can thiệp nếu người dùng đang nhập văn bản trong ô text input, textarea hoặc contenteditable
+    const activeEl = document.activeElement;
+    const activeTag = activeEl ? activeEl.tagName.toLowerCase() : '';
+    const isTextInput = activeTag === 'textarea' || 
+        (activeTag === 'input' && !['checkbox', 'radio', 'button', 'submit', 'reset', 'file', 'image', 'range', 'color'].includes(activeEl.type));
+    const isEditingText = isTextInput || Boolean(activeEl && activeEl.isContentEditable);
+    if (isEditingText) return;
+
+    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+        const key = e.key.toLowerCase();
+        if (key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            window.undoAction();
+        } else if (key === 'y' || (key === 'z' && e.shiftKey)) {
+            e.preventDefault();
+            window.redoAction();
+        }
+    }
+});
 </script>
 </body>
 </html>
