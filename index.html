@@ -30,6 +30,32 @@
         .kanban-col { min-height: 500px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media (min-width: 769px) {
+        .uniform-step-row {
+            height: 105px !important;
+        }
+        .uniform-step-row td {
+            height: 105px !important;
+        }
+        .uniform-note-box {
+            height: 52px;
+            min-height: 52px;
+        }
+    }
+    @media (max-width: 768px) {
+        .uniform-step-row {
+            height: auto !important;
+            min-height: auto !important;
+        }
+        .uniform-step-row td {
+            height: auto !important;
+            min-height: auto !important;
+        }
+        .uniform-note-box {
+            height: auto !important;
+            min-height: auto !important;
+        }
+    }
     </style>
 <style id="mobile-ux">
 @media (max-width: 768px) {
@@ -181,49 +207,90 @@
 
     <!-- Màn hình Ứng dụng chính -->
     <div id="appScreen" class="hidden">
-        <header class="bg-gradient-to-r from-blue-900 to-indigo-800 dark:from-gray-900 dark:to-gray-950 text-white shadow-lg sticky top-0 z-40 transition-colors border-b border-blue-800 dark:border-gray-800">
+        <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 dark:from-gray-900 dark:to-gray-950 text-white shadow-xl sticky top-0 z-40 transition-colors border-b border-blue-800 dark:border-gray-800">
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10">
-                        <i class="fas fa-gavel text-xl text-blue-200"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg font-bold leading-tight tracking-wide flex items-center">QUẢN TRỊ ĐẤU THẦU <span class="bg-gradient-to-r from-blue-600 to-indigo-500 px-2 py-0.5 rounded text-[10px] ml-2 shadow-inner border border-blue-500 font-bold uppercase tracking-widest">Enterprise</span></h1>
-                        <p class="text-xs text-blue-200 mt-0.5 opacity-80">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
+                <!-- GÓC TRÁI: LOGO SCE NỀN TRẮNG LÀM NÚT HOME -->
+                <div class="flex items-center gap-2.5 sm:gap-3.5 max-w-full">
+                    <a href="javascript:void(0)" onclick="window.switchTab('projects')" class="shrink-0 group flex items-center justify-center p-1.5 bg-white rounded-xl shadow-lg border border-white hover:scale-105 transition-all cursor-pointer" title="Trang chủ / Về danh sách Dự án (Home)">
+                        <img src="Logo (tách nền sát cạnh).png" alt="SCE" class="h-8 sm:h-9 w-auto object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
+                    </a>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <h1 class="text-sm sm:text-base md:text-lg font-black tracking-wide text-white uppercase drop-shadow-sm">QUẢN TRỊ ĐẤU THẦU</h1>
+                            <span class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded font-black tracking-wider shadow-sm uppercase border border-blue-400/40">Enterprise</span>
+                        </div>
+                        <p class="text-[10px] sm:text-[11px] text-blue-200/90 font-medium tracking-tight truncate">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
-                    <a href="https://thuvienphapluat.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-white/10 border border-white/20 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer text-white backdrop-blur-sm" title="Tra cứu Thư viện pháp luật">
-                        <i class="fas fa-scale-balanced text-yellow-300"></i> <span class="hidden xl:inline">Thư viện PL</span>
-                    </a>
-                    <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-white/10 border border-white/20 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer text-white backdrop-blur-sm" title="Tra cứu LuatVietnam">
-                        <i class="fas fa-gavel text-yellow-300"></i> <span class="hidden xl:inline">Luật VN</span>
-                    </a>
-                    <div class="flex items-center bg-white/10 border border-white/20 rounded-lg p-0.5 backdrop-blur-sm">
-                        <button onclick="window.undoAction()" id="btnUndo" class="text-white hover:bg-white/20 px-2.5 py-1.5 rounded-md text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1" title="Hoàn tác thao tác trước (Ctrl+Z)" disabled>
-                            <i class="fas fa-undo"></i> <span class="hidden xl:inline">Hoàn tác</span>
+
+                <!-- GÓC PHẢI: CHIA THÀNH 2 HÀNG RÕ RÀNG -->
+                <div class="flex flex-col items-center sm:items-end gap-2 w-full md:w-auto">
+                    <!-- HÀNG 1: CÁC ICON CHỨC NĂNG (TOOLTIP HOVER) + NÚT SÁNG/TỐI Ở GÓC TRÊN BÊN PHẢI -->
+                    <div class="flex items-center gap-1 sm:gap-1.5 bg-white/10 dark:bg-gray-800/80 p-1 rounded-xl backdrop-blur-md border border-white/15 dark:border-gray-700/60 shadow-inner max-w-full overflow-x-auto hide-scrollbar">
+                        <!-- 1. Hoàn tác -->
+                        <button onclick="window.undoAction()" id="btnUndo" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white/90 hover:text-white hover:bg-white/20 transition group relative disabled:opacity-40 disabled:cursor-not-allowed shrink-0" title="Hoàn tác (Ctrl+Z)" disabled>
+                            <i class="fas fa-undo text-xs"></i>
                         </button>
-                        <button onclick="window.redoAction()" id="btnRedo" class="text-white hover:bg-white/20 px-2.5 py-1.5 rounded-md text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1" title="Làm lại thao tác vừa hủy (Ctrl+Y)" disabled>
-                            <i class="fas fa-redo"></i> <span class="hidden xl:inline">Làm lại</span>
+
+                        <!-- 2. Làm lại -->
+                        <button onclick="window.redoAction()" id="btnRedo" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white/90 hover:text-white hover:bg-white/20 transition group relative disabled:opacity-40 disabled:cursor-not-allowed shrink-0" title="Làm lại (Ctrl+Y)" disabled>
+                            <i class="fas fa-redo text-xs"></i>
+                        </button>
+
+                        <div class="w-px h-3.5 sm:h-4 bg-white/20 dark:bg-gray-700 mx-0.5 shrink-0"></div>
+
+                        <!-- 3. Báo cáo Word / In -->
+                        <button onclick="window.printDashboard()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-indigo-200 hover:text-white hover:bg-indigo-600/60 transition group relative shrink-0" title="Báo cáo tiến độ (Word / In)">
+                            <i class="fas fa-file-word text-xs sm:text-sm"></i>
+                        </button>
+
+                        <!-- 4. Xuất Excel -->
+                        <button onclick="window.exportGlobalExcel()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-emerald-300 hover:text-white hover:bg-emerald-600/60 transition group relative shrink-0" title="Xuất toàn bộ dữ liệu ra Excel">
+                            <i class="fas fa-file-excel text-xs sm:text-sm"></i>
+                        </button>
+
+                        <!-- 5. Đồng bộ đám mây -->
+                        <button onclick="window.forceSync()" id="syncStatus" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-sky-300 hover:text-white hover:bg-sky-600/60 transition group relative shrink-0" title="Đồng bộ đám mây ngay lập tức (Cloud Sync)">
+                            <i class="fas fa-cloud text-xs"></i>
+                            <span id="syncText" class="hidden">Đã đồng bộ</span>
+                        </button>
+
+                        <div class="w-px h-3.5 sm:h-4 bg-white/20 dark:bg-gray-700 mx-0.5 shrink-0"></div>
+
+                        <!-- 6. Thư viện Pháp luật -->
+                        <a href="https://thuvienphapluat.vn/" target="_blank" rel="noopener noreferrer" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-amber-300 hover:text-white hover:bg-amber-600/60 transition group relative shrink-0" title="Tra cứu Thư viện pháp luật">
+                            <i class="fas fa-scale-balanced text-xs"></i>
+                        </a>
+
+                        <!-- 7. Luật Việt Nam -->
+                        <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-yellow-300 hover:text-white hover:bg-yellow-600/60 transition group relative shrink-0" title="Tra cứu Luật Việt Nam">
+                            <i class="fas fa-gavel text-xs"></i>
+                        </a>
+
+                        <div class="w-px h-3.5 sm:h-4 bg-white/20 dark:bg-gray-700 mx-0.5 shrink-0"></div>
+
+                        <!-- 8. NÚT CHUYỂN SÁNG / TỐI (LIGHT / DARK MODE) -->
+                        <button onclick="window.toggleDarkMode()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-400/30 transition shadow-sm shrink-0" title="Chuyển chế độ Giao diện Sáng / Tối">
+                            <i id="darkModeIcon" class="fas fa-moon text-xs text-indigo-200"></i>
                         </button>
                     </div>
-                    <button onclick="window.printDashboard()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-md transition" title="Tạo báo cáo, chỉnh sửa và xuất Word">
-                        <i class="fas fa-file-word"></i> <span class="hidden lg:inline">Báo cáo (Word / In)</span>
-                    </button>
-                    <button onclick="window.exportGlobalExcel()" class="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-md transition" title="Xuất toàn bộ dữ liệu ra Excel">
-                        <i class="fas fa-file-excel"></i> <span class="hidden lg:inline">Xuất Excel</span>
-                    </button>
-                    <button onclick="window.openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-3 md:px-4 py-1.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition">
-                        <i class="fas fa-folder-plus"></i> <span class="hidden md:inline">Tạo Nhiệm vụ</span>
-                    </button>
-                    <button onclick="window.forceSync()" id="syncStatus" class="flex items-center gap-1 bg-white/10 border border-white/20 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer backdrop-blur-sm" title="Bấm để đồng bộ ngay lập tức">
-                        <i class="fas fa-cloud text-blue-300"></i> <span id="syncText" class="hidden md:inline">Đã đồng bộ</span>
-                    </button>
-                    <button onclick="window.toggleDarkMode()" class="bg-indigo-800/50 dark:bg-yellow-600/20 border border-indigo-700/50 dark:border-yellow-500/30 hover:bg-indigo-700/50 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center justify-center w-9 h-9 backdrop-blur-sm" title="Giao diện Sáng/Tối">
-                        <i id="darkModeIcon" class="fas fa-moon text-indigo-200 dark:text-yellow-400"></i>
-                    </button>
-                    <button onclick="window.openProfileModal()" id="userBadge" class="bg-blue-800 dark:bg-gray-800 border border-blue-700 dark:border-gray-700 hover:bg-blue-700 px-3 py-1.5 rounded text-sm font-medium transition flex items-center gap-1.5" title="Đổi thông tin cá nhân"></button>
-                    <button onclick="window.handleLogout()" class="text-white text-sm bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition shadow w-9 h-9 flex justify-center items-center" title="Đăng xuất"><i class="fas fa-sign-out-alt"></i></button>
+
+                    <!-- HÀNG 2: TẠO NHIỆM VỤ, TÊN CHUYÊN VIÊN, ĐĂNG XUẤT -->
+                    <div class="flex items-center justify-center sm:justify-end gap-1.5 sm:gap-2 flex-wrap w-full">
+                        <!-- Nút Tạo Nhiệm vụ -->
+                        <button onclick="window.openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow-md hover:shadow-lg transition">
+                            <i class="fas fa-folder-plus text-xs"></i>
+                            <span>Tạo Nhiệm vụ</span>
+                        </button>
+
+                        <!-- Tên chuyên viên & Vai trò -->
+                        <button onclick="window.openProfileModal()" id="userBadge" class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg text-xs font-medium text-white transition backdrop-blur-md" title="Thông tin cá nhân & Đổi mật khẩu"></button>
+
+                        <!-- Nút Đăng xuất màu đỏ -->
+                        <button onclick="window.handleLogout()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition shadow-sm" title="Đăng xuất khỏi hệ thống">
+                            <i class="fas fa-sign-out-alt text-xs"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -1339,7 +1406,7 @@ const LUNAR_HOLIDAYS = [
 
             // Start auto-refresh
             if (window.bgSyncTimer) clearInterval(window.bgSyncTimer);
-            window.bgSyncTimer = setInterval(window.silentBackgroundSync, 3 * 60 * 1000); // 3 minutes
+            window.bgSyncTimer = setInterval(backgroundSync, 3 * 60 * 1000); // 3 minutes
         };
 
         
@@ -2006,10 +2073,12 @@ const LUNAR_HOLIDAYS = [
                                         let fullTaskHtml = nameHtml + subTasksHtml; 
                                         let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-"; 
-                                        let noteHtml = safeNote ? `<div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded mb-1">${safeNote}</div>` : '';
                                         let cCount = (step.comments && step.comments.length > 0) ? step.comments.length : 0;
                                         let cClass = cCount > 0 ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 font-bold" : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
-                                        noteHtml += `<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] ${cClass} px-2 py-1 rounded border shadow-sm transition hover:opacity-80"><i class="fas fa-comments mr-1"></i>Trao đổi (${cCount})</button>`;
+                                        let noteBoxHtml = safeNote 
+                                            ? `<div class="text-[11px] text-gray-700 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded h-8 flex items-center overflow-hidden text-ellipsis whitespace-nowrap" title="${safeNote}">${safeNote}</div>`
+                                            : `<div class="text-[11px] text-gray-400 dark:text-gray-500 italic bg-gray-50/50 dark:bg-gray-900/50 border border-dashed border-gray-200 dark:border-gray-800 p-1.5 rounded h-8 flex items-center">Không có ghi chú</div>`;
+                                        let noteHtml = `<div class="flex flex-col justify-between uniform-note-box">${noteBoxHtml}<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="self-start text-[10px] ${cClass} px-2 py-0.5 rounded border shadow-sm transition hover:opacity-80 flex items-center gap-1"><i class="fas fa-comments text-gray-400"></i> Trao đổi (${cCount})</button></div>`;
                                         
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links)) {
@@ -2040,7 +2109,7 @@ const LUNAR_HOLIDAYS = [
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        return `<tr class="step-row cursor-pointer ${bgRow}"><td class="py-2.5 px-2 w-8 text-center align-middle"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="py-2.5 px-2 align-middle flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></td><td class="py-2.5 px-2 text-center align-middle w-14">${timeBudget}</td><td class="py-2.5 px-2 align-middle w-24">${dateHtml}</td><td class="py-2.5 px-2 align-top w-40 text-xs">${noteHtml}</td><td class="py-2.5 px-2 align-top w-28 text-xs"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
+                                        return `<tr class="step-row uniform-step-row cursor-pointer ${bgRow}"><td class="py-2.5 px-3 w-8 text-center align-middle"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="py-2.5 px-3 align-middle"><div class="flex items-center gap-2">${dragHandle}<div class="flex-1 min-w-0">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1 flex items-center gap-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></div></td><td class="py-2.5 px-2 text-center align-middle w-14">${timeBudget}</td><td class="py-2.5 px-3 text-center align-middle w-24">${dateHtml}</td><td class="py-2.5 px-3 align-middle w-48 text-xs">${noteHtml}</td><td class="py-2.5 px-3 align-middle w-32 text-xs"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
                                     }).join('');
                                 }
 
@@ -2140,7 +2209,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                         <div id="steps_container_${pkgKey}" class="overflow-x-auto overflow-y-visible border-t border-gray-100 dark:border-gray-800 ${isExpanded ? '' : 'hidden'}">
                                             <table class="w-full text-left border-separate border-spacing-y-2 text-sm px-3">
                                                 <thead class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                                    <tr><th class="py-2.5 px-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="py-2.5 px-2 text-[13px]">Chi tiết việc</th><th class="py-2.5 px-2 w-14 text-center">Mức</th><th class="py-2.5 px-2 w-24">Hạn chót</th><th class="py-2.5 px-2 w-40">Ghi chú</th><th class="py-2.5 px-2 w-24">Đính kèm</th>${canEditPkg ? '<th class="py-2.5 px-2 w-28 text-center"><i class="fas fa-cogs"></i></th>' : ''}</tr>
+                                                    <tr><th class="py-2 px-3 w-8 text-center"><i class="fas fa-check"></i></th><th class="py-2 px-3 text-[13px]">Chi tiết việc</th><th class="py-2 px-2 w-14 text-center">Mức</th><th class="py-2 px-3 w-24 text-center">Hạn chót</th><th class="py-2 px-3 w-48">Ghi chú & Trao đổi</th><th class="py-2 px-3 w-32">Đính kèm</th>${canEditPkg ? '<th class="py-2.5 px-2 w-28 text-center"><i class="fas fa-cogs"></i></th>' : ''}</tr>
                                                 </thead>
                                                 <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-2 text-center bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 transition"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus mr-1"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
@@ -2186,7 +2255,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                         </p>
                                         ${docsHtml}
                                     </div>
-                                    <div class="flex flex-wrap gap-2 shrink-0 items-center">
+                                    <div class="flex flex-wrap gap-2 items-center w-full md:w-auto mt-2 md:mt-0">
                                         ${btnCompleteMission} ${btnPrintMission} ${addPkgBtn} ${delMissionBtn}
                                     </div>
                                 </div>
@@ -3104,7 +3173,8 @@ window.renderDocs = function() {
                 
                 let fileUrl = SUPABASE_URL + '/storage/v1/object/public/attachments/' + uniqueName;
                 
-                document.getElementById('docLink').value = fileUrl;
+                const docLinkEl = document.getElementById('newDocLink') || document.getElementById('docLink');
+                if (docLinkEl) docLinkEl.value = fileUrl;
                 Swal.fire('Thành công', 'Đã lưu trữ văn bản! Vui lòng nhập số hiệu, tên văn bản và bấm Thêm.', 'success');
                 
                 inputElem.value = "";
