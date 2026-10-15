@@ -11,16 +11,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <!-- SortableJS -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- html2pdf for PDF Export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <!-- SheetJS (XLSX) for Native Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FullCalendar -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="Logo (tách nền sát cạnh).png">
@@ -94,6 +90,63 @@
         return val;
     };
 </script>
+
+    
+    
+    <style>
+    .step-table {
+        border-collapse: separate !important;
+        border-spacing: 0 10px !important;
+    }
+    .step-row {
+        background-color: #ffffff !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dark .step-row {
+        background-color: #1e293b !important;
+    }
+    .step-row td {
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .dark .step-row td {
+        border-top-color: #334155;
+        border-bottom-color: #334155;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .step-row td:first-child {
+        border-left: 1px solid #e2e8f0;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        padding-left: 14px !important;
+    }
+    .dark .step-row td:first-child { border-left-color: #334155; }
+    .step-row td:last-child {
+        border-right: 1px solid #e2e8f0;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        padding-right: 14px !important;
+    }
+    .dark .step-row td:last-child { border-right-color: #334155; }
+    
+    /* Hover - pops up like a Kanban card */
+    .step-row:hover {
+        transform: translateY(-2px);
+    }
+    .step-row:hover td {
+        background-color: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 6px 16px -2px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+    }
+    .dark .step-row:hover td {
+        background-color: #1e293b;
+        border-color: #475569;
+        box-shadow: 0 6px 16px -2px rgba(0,0,0,0.4);
+    }
+    </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
 
@@ -146,6 +199,12 @@
                     <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 bg-white/10 border border-white/20 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer text-white backdrop-blur-sm" title="Tra cứu LuatVietnam">
                         <i class="fas fa-gavel text-yellow-300"></i> <span class="hidden xl:inline">Luật VN</span>
                     </a>
+                    <button onclick="window.printDashboard()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-md transition" title="Tạo báo cáo, chỉnh sửa và xuất Word">
+                        <i class="fas fa-file-word"></i> <span class="hidden lg:inline">Báo cáo (Word / In)</span>
+                    </button>
+                    <button onclick="window.exportGlobalExcel()" class="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-md transition" title="Xuất toàn bộ dữ liệu ra Excel">
+                        <i class="fas fa-file-excel"></i> <span class="hidden lg:inline">Xuất Excel</span>
+                    </button>
                     <button onclick="window.openCreateMissionModal()" id="btnCreateProject" class="hidden items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white px-3 md:px-4 py-1.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition">
                         <i class="fas fa-folder-plus"></i> <span class="hidden md:inline">Tạo Nhiệm vụ</span>
                     </button>
@@ -164,10 +223,7 @@
         <div class="max-w-7xl mx-auto px-4 py-6">
             <!-- Menu Tabs -->
             <div class="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl mb-6 gap-2 overflow-x-auto hide-scrollbar shadow-inner">
-                <button onclick="window.switchTab('dashboard')" id="tab-dashboard" class="py-2 px-4 font-semibold text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-700 shadow-sm rounded-lg whitespace-nowrap transition-all"><i class="fas fa-chart-pie mr-1.5"></i>Tổng quan</button>
-                <button onclick="window.switchTab('projects')" id="tab-projects" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-tasks mr-1.5"></i>Danh sách Dự án</button>
-                <button onclick="window.switchTab('kanban')" id="tab-kanban" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-columns mr-1.5"></i>Bảng Kanban</button>
-                <button onclick="window.switchTab('calendar')" id="tab-calendar" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-calendar-alt mr-1.5"></i>Lịch biểu</button>
+                <button onclick="window.switchTab('projects')" id="tab-projects" class="py-2 px-4 font-semibold text-blue-700 dark:text-blue-400 bg-white dark:bg-gray-700 shadow-sm rounded-lg whitespace-nowrap transition-all"><i class="fas fa-tasks mr-1.5"></i>Danh sách Dự án</button>
                 <button onclick="window.switchTab('docs')" id="tab-docs" class="py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-book mr-1.5"></i>Pháp lý</button>
                 <button onclick="window.switchTab('settings')" id="tab-settings" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-sliders mr-1.5"></i>Quy trình</button>
                 <button onclick="window.switchTab('users')" id="tab-users" class="admin-only hidden py-2 px-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg whitespace-nowrap transition-all"><i class="fas fa-users-gear mr-1.5"></i>Tài khoản</button>
@@ -175,63 +231,9 @@
             </div>
 
             <!-- TABS CONTENT CONTAINER -->
-            <!-- 1. DASHBOARD -->
-            <div id="view-dashboard">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white" id="dashTitle">Bảng điều khiển</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" id="dashCurrentDate"></p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="window.printDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2 transition" title="Tạo báo cáo, chỉnh sửa và xuất Word"><i class="fas fa-file-word"></i> Báo cáo (Word / In)</button>
-                        <button onclick="window.exportGlobalExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium shadow flex items-center gap-2 transition"><i class="fas fa-file-excel"></i> Xuất Excel (.xlsx)</button>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm border-l-4 border-blue-500"><p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Nhiệm vụ đang chạy</p><h3 class="text-3xl font-bold text-blue-900 dark:text-blue-400" id="dashActiveMissions">0</h3></div>
-                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm border-l-4 border-red-500"><p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Công việc trễ hạn</p><h3 class="text-3xl font-bold text-red-600 dark:text-red-400" id="dashOverdue">0</h3></div>
-                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm border-l-4 border-emerald-500"><p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Gói thầu đã xong</p><h3 class="text-3xl font-bold text-emerald-700 dark:text-emerald-400" id="dashCompletedPkgs">0</h3></div>
-                </div>
-
-                <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-4 text-center">Tỷ lệ Trạng thái Gói thầu</h3>
-                    <div class="relative h-64 w-full md:w-1/2 mx-auto flex justify-center"><canvas id="chartStatus"></canvas></div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-96">
-                        <div class="bg-blue-50 dark:bg-gray-700 border-b border-blue-100 dark:border-gray-600 p-3 flex justify-between items-center"><h3 class="font-bold text-blue-800 dark:text-blue-300"><i class="fas fa-tasks mr-2"></i>Tiến độ Nhiệm vụ</h3></div>
-                        <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-sm text-left border-collapse"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-[11px] uppercase sticky top-0 shadow-sm z-10"><tr><th class="p-3">Tên Nhiệm vụ</th><th class="p-3 w-32">Phụ trách</th><th class="p-3 w-32">Tiến độ</th></tr></thead><tbody id="dashMissionsTable"></tbody></table></div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-96">
-                        <div class="bg-red-50 dark:bg-red-900/30 border-b border-red-100 dark:border-red-900/50 p-3 flex justify-between items-center"><h3 class="font-bold text-red-800 dark:text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Cần đôn đốc (Trễ hạn)</h3></div>
-                        <div class="p-0 overflow-y-auto flex-1"><table class="w-full text-sm text-left border-collapse"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-[11px] uppercase sticky top-0 shadow-sm z-10"><tr><th class="p-3">Công việc</th><th class="p-3 w-28">Chuyên viên</th><th class="p-3 w-20 text-center">Trễ</th></tr></thead><tbody id="dashOverdueTable"></tbody></table></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. KANBAN -->
-            <div id="view-kanban" class="hidden">
-                <div class="flex justify-between items-end mb-4"><div><h2 class="text-2xl font-bold text-gray-800 dark:text-white">Bảng Kanban Gói thầu</h2><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Theo dõi luồng trạng thái của tất cả các gói thầu</p></div></div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto pb-4">
-                    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg flex flex-col kanban-col border border-gray-200 dark:border-gray-700 p-2"><div class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-inbox mr-1"></i> Chưa bắt đầu</span><span class="bg-white dark:bg-gray-800 text-xs px-2 py-0.5 rounded-full" id="kb-todo-count">0</span></div><div id="kb-todo" class="flex-1 space-y-3"></div></div>
-                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg flex flex-col kanban-col border border-blue-100 dark:border-blue-900/40 p-2"><div class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-spinner fa-spin mr-1"></i> Đang thực hiện</span><span class="bg-white dark:bg-blue-900 text-xs px-2 py-0.5 rounded-full" id="kb-doing-count">0</span></div><div id="kb-doing" class="flex-1 space-y-3"></div></div>
-                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg flex flex-col kanban-col border border-red-100 dark:border-red-900/40 p-2"><div class="bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-fire mr-1"></i> Có việc trễ hạn</span><span class="bg-white dark:bg-red-900 text-xs px-2 py-0.5 rounded-full" id="kb-late-count">0</span></div><div id="kb-late" class="flex-1 space-y-3"></div></div>
-                    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex flex-col kanban-col border border-emerald-100 dark:border-emerald-900/40 p-2"><div class="bg-emerald-200 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 font-bold p-2 rounded mb-3 flex justify-between items-center text-sm shadow-sm"><span><i class="fas fa-check-double mr-1"></i> Đã hoàn thành</span><span class="bg-white dark:bg-emerald-900 text-xs px-2 py-0.5 rounded-full" id="kb-done-count">0</span></div><div id="kb-done" class="flex-1 space-y-3"></div></div>
-                </div>
-            </div>
-
-            <!-- 2.5 CALENDAR -->
-            <div id="view-calendar" class="hidden">
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Lịch Công Việc</h2>
-                    <div id="calendar" class="min-h-[600px] text-sm"></div>
-                </div>
-            </div>
-
-            <!-- 3. PROJECTS / MISSIONS -->
-            <div id="view-projects" class="hidden">
+            <div class="flex-1 min-w-0 w-full">
+            <!-- 3. PROJECTS / MISSIONS (GIAO DIỆN CHÍNH CỐT LÕI) -->
+            <div id="view-projects">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col xl:flex-row gap-4 justify-between items-center">
                     <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto items-center flex-1 flex-wrap">
                         <div class="relative w-full md:flex-1 md:min-w-[200px]"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border dark:border-gray-600 rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
@@ -349,7 +351,7 @@
                         <button onclick="window.fetchBackups()" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-4 py-2 rounded text-sm font-bold shadow-sm transition flex items-center gap-2"><i class="fas fa-sync-alt"></i> Tải danh sách</button>
                     </div>
                     <div class="overflow-x-auto bg-gray-50 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700 mt-4">
-                        <table class="w-full text-left border-collapse text-sm"><thead class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 uppercase text-xs"><tr><th class="p-3 w-16 text-center">ID</th><th class="p-3">Thời gian sao lưu</th><th class="p-3 w-40 text-center">Hành động</th></tr></thead><tbody id="backupsTableBody" class="dark:text-gray-300"><tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Bấm "Tải danh sách" phía trên để hiển thị.</td></tr></tbody></table>
+                        <table class="w-full text-left border-separate text-sm step-table"><thead class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 uppercase text-xs"><tr><th class="p-3 w-16 text-center">ID</th><th class="p-3">Thời gian sao lưu</th><th class="p-3 w-40 text-center">Hành động</th></tr></thead><tbody id="backupsTableBody" class="dark:text-gray-300"><tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Bấm "Tải danh sách" phía trên để hiển thị.</td></tr></tbody></table>
                     </div>
                 </div>
             </div>
@@ -379,7 +381,7 @@
             <input type="text" id="editMissionName" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thời hạn hoàn thành</label>
             <input type="date" id="editMissionDeadline" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white">
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-end gap-3 md:col-span-2">
                 <button onclick="window.closeEditMissionModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.saveEditMission()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium shadow-md">Lưu thay đổi</button>
             </div>
@@ -397,11 +399,11 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
             <select id="editPackageOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-3">Giá dự toán</label>
-<input type="text" id="editPackageBudget" oninput="let v=this.value.replace(/\./g,\'\'); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,\'.\');" placeholder="Ví dụ: 1.500.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
+<input type="text" id="editPackageBudget" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.500.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nhà thầu thực hiện</label>
 <input type="text" id="editPackageContractor" placeholder="Tên công ty trúng thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giá trúng thầu</label>
-<input type="text" id="editPackageWinningBid" oninput="let v=this.value.replace(/\./g,\'\'); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,\'.\');" placeholder="Ví dụ: 1.450.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 outline-none dark:text-white">
+<input type="text" id="editPackageWinningBid" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.450.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 outline-none dark:text-white">
             <div class="flex justify-end gap-3">
                 <button onclick="window.closeEditPackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.saveEditPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md">Lưu thay đổi</button>
@@ -472,19 +474,29 @@
         </div>
     </div>
 
-    <!-- Modal Tạo Gói thầu mới -->
+        <!-- Modal Tạo Gói thầu mới -->
     <div id="createPackageModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-blue-500">
             <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 pb-2 border-b dark:border-gray-700">Thêm Gói thầu mới</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quy trình áp dụng</label>
-            <select id="projType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên gói thầu</label>
-            <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày bắt đầu</label>
-            <input type="date" id="projStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
-            <select id="pkgOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
-            <div class="flex justify-end gap-3">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quy trình áp dụng</label>
+                    <select id="projType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên gói thầu</label>
+                    <input type="text" id="projName" placeholder="Tên gói thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày bắt đầu</label>
+                    <input type="date" id="projStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
+                    <select id="pkgOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
                 <button onclick="window.closeCreatePackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.createPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Thêm gói thầu</button>
             </div>
@@ -665,9 +677,7 @@ const LUNAR_HOLIDAYS = [
                 icon.classList.add('fa-moon'); 
                 icon.classList.replace('text-white', 'text-indigo-200'); 
             }
-            if (!document.getElementById('view-dashboard').classList.contains('hidden')) { 
-                window.renderCharts(); 
-            }
+            const vDash = document.getElementById('view-dashboard'); if (vDash && !vDash.classList.contains('hidden') && typeof window.renderCharts === 'function') { window.renderCharts(); }
         };
 
         function applyDefaultsIfMissing() {
@@ -1029,7 +1039,7 @@ const LUNAR_HOLIDAYS = [
                             if (activeTabObj) { 
                                 window.switchTab(activeTabObj.id.replace('tab-', '')); 
                             } else { 
-                                window.switchTab('dashboard'); 
+                                window.switchTab('projects'); 
                             }
                         } else { 
                             if (loader) loader.style.display = 'none'; 
@@ -1192,10 +1202,7 @@ const LUNAR_HOLIDAYS = [
                         applyDefaultsIfMissing();
                         const noModalOpen = document.querySelectorAll('#editMissionModal:not(.hidden), #editPackageModal:not(.hidden), #editStepModal:not(.hidden), #subTaskModal:not(.hidden), #commentsModal:not(.hidden)').length === 0;
                         if (noModalOpen) {
-                            if (!document.getElementById('view-dashboard').classList.contains('hidden')) window.renderDashboard();
-                            if (!document.getElementById('view-projects').classList.contains('hidden')) window.renderMissions();
-                            if (!document.getElementById('view-kanban').classList.contains('hidden')) window.renderKanban();
-                            if (!document.getElementById('view-calendar').classList.contains('hidden')) window.renderCalendar();
+                            const vProj = document.getElementById('view-projects'); if (vProj && !vProj.classList.contains('hidden')) window.renderMissions();
                         }
                     }
                 }
@@ -1305,7 +1312,7 @@ const LUNAR_HOLIDAYS = [
             });
             
             window.populateProcessDropdowns(); 
-            window.switchTab('dashboard');
+            window.switchTab('projects');
             
             if (autoSyncInterval) clearInterval(autoSyncInterval); 
             autoSyncInterval = setInterval(backgroundSync, 60000);
@@ -1324,7 +1331,7 @@ const LUNAR_HOLIDAYS = [
             if (currentUser.role !== 'admin' && ['settings', 'users', 'backups'].includes(tab)) { 
                 return Swal.fire('Lỗi', 'Không có quyền truy cập khu vực này!', 'error'); 
             }
-            ['dashboard', 'projects', 'kanban', 'calendar', 'settings', 'docs', 'users', 'backups'].forEach(t => {
+            ['projects', 'settings', 'docs', 'users', 'backups'].forEach(t => {
                 const viewEl = document.getElementById(`view-${t}`); 
                 if (viewEl) viewEl.classList.add('hidden');
                 const tabEl = document.getElementById(`tab-${t}`);
@@ -1345,9 +1352,9 @@ const LUNAR_HOLIDAYS = [
                     activeBtn.classList.add('text-blue-700', 'dark:text-blue-400', 'bg-white', 'dark:bg-gray-700', 'shadow-sm'); 
                 }
             }
-            if (tab === 'dashboard') window.renderDashboard(); 
-            if (tab === 'kanban') window.renderKanban(); 
-            if (tab === 'calendar') window.renderCalendar();
+             
+             
+            
             if (tab === 'settings') window.renderConfig(); 
             if (tab === 'docs') window.renderDocs(); 
             if (tab === 'users') window.renderUsers(); 
@@ -1761,7 +1768,7 @@ const LUNAR_HOLIDAYS = [
                                         
                                         let safeStepName = escapeHtml(step.name || ''); 
                                         let safeNote = escapeHtml(step.note || '');
-                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-medium text-gray-800 dark:text-gray-200'} text-[13px] leading-tight">${safeStepName}</div>`;
+                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-tight mb-0.5">${safeStepName}</div>`;
                                         
                                         let subTasksHtml = "";
                                         if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
@@ -1809,11 +1816,11 @@ const LUNAR_HOLIDAYS = [
                                         let dragHandle = "";
                                         if (canEditPkg) {
                                             dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mr-2 step-drag-handle inline-block"><i class="fas fa-grip-vertical"></i></div>`;
-                                            actCell = `<td class="p-2 text-right align-top min-w-[90px]"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
+                                            actCell = `<td class="py-2.5 px-2 text-center align-middle whitespace-nowrap space-x-1 w-32"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        return `<tr class="border-b dark:border-gray-700 transition hover:bg-gray-50 dark:hover:bg-gray-800 ${bgRow}"><td class="p-2 w-8 text-center align-top"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="p-2 align-top flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></td><td class="p-2 text-center align-top">${timeBudget}</td><td class="p-2 align-top">${dateHtml}</td><td class="p-2 align-top min-w-[150px]">${noteHtml}</td><td class="p-2 align-top min-w-[120px]"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
+                                        return `<tr class="step-row cursor-pointer ${bgRow}"><td class="py-2.5 px-2 w-8 text-center align-middle"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="py-2.5 px-2 align-middle flex items-start">${dragHandle}<div class="flex-1">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></td><td class="py-2.5 px-2 text-center align-middle w-14">${timeBudget}</td><td class="py-2.5 px-2 align-middle w-24">${dateHtml}</td><td class="py-2.5 px-2 align-top w-40 text-xs">${noteHtml}</td><td class="py-2.5 px-2 align-top w-28 text-xs"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
                                     }).join('');
                                 }
 
@@ -1840,13 +1847,13 @@ const LUNAR_HOLIDAYS = [
                                 let btnLogPkg = (['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
 let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
 
-                                let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (pkg.completed ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : 'bg-blue-50/50 dark:bg-blue-900/10');
-                                let borderColor = pkg.archived ? 'border-l-gray-400 opacity-90' : (pkg.completed ? 'border-l-emerald-400' : 'border-l-blue-500');
+                                let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (pkg.completed ? 'bg-emerald-50/40 dark:bg-emerald-900/20' : 'bg-slate-50 dark:bg-gray-800/90');
+                                let borderColor = pkg.archived ? 'border-gray-300 opacity-90' : (pkg.completed ? 'border-emerald-300' : 'border-gray-200 dark:border-gray-700');
                                 let pkgNameSafe = escapeHtml(pkg.name || "Gói thầu không tên"); 
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
 
                                 packagesHtml += `
-                                    <div class="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 border-l-4 ${borderColor} overflow-visible mb-4 shadow-sm relative">
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-visible mb-5 shadow-sm relative">
                                         <div class="${headerBg} px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center border-b ${pkg.archived ? 'border-gray-200 dark:border-gray-700' : 'border-blue-100 dark:border-blue-900/30'} gap-3">
                                             <div class="flex-1">
                                                 <div class="flex items-center gap-2 flex-wrap">
@@ -1875,11 +1882,11 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                             </div>
                                         </div>
                                         <div class="overflow-x-auto overflow-y-visible ${pkg.completed ? 'hidden' : ''}">
-                                            <table class="w-full text-left border-collapse text-sm">
-                                                <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                                    <tr><th class="p-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="p-2">Chi tiết việc</th><th class="p-2 w-16 text-center">Mức</th><th class="p-2 w-24">Hạn chót</th><th class="p-2 w-48">Ghi chú</th><th class="p-2 min-w-[120px]">Đính kèm</th>${canEditPkg ? '<th class="p-2 w-24 text-right"><i class="fas fa-cogs"></i></th>' : ''}</tr>
+                                            <table class="w-full text-left border-separate border-spacing-y-2 text-sm">
+                                                <thead class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+                                                    <tr><th class="py-2.5 px-2 w-8 text-center"><i class="fas fa-check"></i></th><th class="py-2.5 px-2 text-[13px]">Chi tiết việc</th><th class="py-2.5 px-2 w-14 text-center">Mức</th><th class="py-2.5 px-2 w-24">Hạn chót</th><th class="py-2.5 px-2 w-40">Ghi chú</th><th class="py-2.5 px-2 w-24">Đính kèm</th>${canEditPkg ? '<th class="py-2.5 px-2 w-28 text-center"><i class="fas fa-cogs"></i></th>' : ''}</tr>
                                                 </thead>
-                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-1.5 text-center bg-gray-50 dark:bg-gray-900"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
+                                                <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-2 text-center bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 transition"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                             </table>
                                         </div>
                                     </div>`;
@@ -1899,8 +1906,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                             }
                         }
 
-                        let mBorderColor = mission.completed ? 'border-emerald-500' : 'border-indigo-300 dark:border-indigo-700';
-                        let mBgColor = mission.completed ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-indigo-50 dark:bg-indigo-900/20';
+                        let mBorderColor = mission.completed ? 'border-emerald-500' : 'border-gray-200 dark:border-gray-700';
+                        let mBgColor = mission.completed ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-slate-50/80 dark:bg-slate-800/60';
 
                         let addPkgBtn = ""; 
                         let delMissionBtn = "";
@@ -1910,7 +1917,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                         }
 
                         container.innerHTML += `
-                            <div class="mission-block border-2 ${mBorderColor} rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm mb-6">
+                            <div class="mission-block border ${mBorderColor} rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm mb-6">
                                 <div class="${mBgColor} p-4 border-b border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 flex-wrap">
@@ -3098,9 +3105,32 @@ window.updateDoc = function(i, f, v) {
                 const today = new Date();
                 const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
                 
-                let txtActive = document.getElementById('dashActiveMissions') ? document.getElementById('dashActiveMissions').innerText : 0;
-                let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0;
-                let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
+                
+        let txtActive = 0, txtDone = 0, txtLate = 0;
+        const nowTime = new Date();
+        if (db && db.missions) {
+            db.missions.forEach(m => {
+                if (m.archived) return;
+                let mAllDone = true;
+                if (!m.completed) txtActive++;
+                if (m.packages && m.packages.length > 0) {
+                    m.packages.forEach(p => {
+                        let pAllDone = true;
+                        if (p.steps && p.steps.length > 0) {
+                            p.steps.forEach(s => {
+                                if (!s.completed) {
+                                    pAllDone = false;
+                                    mAllDone = false;
+                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                                }
+                            });
+                        }
+                        if (p.completed || pAllDone) txtDone++;
+                    });
+                }
+            });
+        }
+
                 
                 let reportHtml = `<div id="pdfPrintArea" style="font-family: 'Times New Roman', Times, serif; padding: 30px 40px; color: #000; line-height: 1.5; background: #fff;">`;
                 reportHtml += `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
@@ -3199,9 +3229,32 @@ window.updateDoc = function(i, f, v) {
                 const today = new Date(); 
                 const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
                 let html = `<html><head><title>Báo Cáo Giao Ban Đấu Thầu</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; } .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center; } .agency-name { font-size: 14px; } .agency-name-bold { font-weight: bold; text-decoration: underline; } .quoc-hieu { font-size: 14px; font-weight: bold; } .tieu-ngu { font-size: 14px; font-weight: bold; text-decoration: underline; } .report-date { text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px; } h1 { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;} h2 { font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; } table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; } th, td { border: 1px solid #000; padding: 6px 10px; text-align: left; vertical-align: top; } th { font-weight: bold; text-align: center; } .text-center { text-align: center; } ul { margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px; } .footer { margin-top: 40px; display: flex; justify-content: flex-end; } .signature { text-align: center; }</style></head><body>`;
-                let txtActive = document.getElementById('dashActiveMissions') ? document.getElementById('dashActiveMissions').innerText : 0; 
-                let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0; 
-                let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
+                
+        let txtActive = 0, txtDone = 0, txtLate = 0;
+        const nowTime = new Date();
+        if (db && db.missions) {
+            db.missions.forEach(m => {
+                if (m.archived) return;
+                let mAllDone = true;
+                if (!m.completed) txtActive++;
+                if (m.packages && m.packages.length > 0) {
+                    m.packages.forEach(p => {
+                        let pAllDone = true;
+                        if (p.steps && p.steps.length > 0) {
+                            p.steps.forEach(s => {
+                                if (!s.completed) {
+                                    pAllDone = false;
+                                    mAllDone = false;
+                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                                }
+                            });
+                        }
+                        if (p.completed || pAllDone) txtDone++;
+                    });
+                }
+            });
+        }
+
                 
                 html += `<div class="header-flex"><div class="agency-name">SỞ TÀI CHÍNH HÀ NỘI<br><span class="agency-name-bold">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div><div><span class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</span></div></div><div class="report-date">${dateStr}</div><h1>BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
                 html += `<h2>1. Số liệu tổng quan</h2><ul><li>Tổng số Nhiệm vụ đang triển khai: <b>${txtActive}</b></li><li>Tổng số Gói thầu đã hoàn thành: <b>${txtDone}</b></li><li>Số lượng công việc đang chậm tiến độ: <b>${txtLate}</b></li></ul>`;
@@ -3436,9 +3489,32 @@ window.printDashboard = function() {
     const today = new Date();
     const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
     
-    let txtActive = document.getElementById('dashActiveMissions') ? document.getElementById('dashActiveMissions').innerText : 0;
-    let txtDone = document.getElementById('dashCompletedPkgs') ? document.getElementById('dashCompletedPkgs').innerText : 0;
-    let txtLate = document.getElementById('dashOverdue') ? document.getElementById('dashOverdue').innerText : 0;
+    
+        let txtActive = 0, txtDone = 0, txtLate = 0;
+        const nowTime = new Date();
+        if (db && db.missions) {
+            db.missions.forEach(m => {
+                if (m.archived) return;
+                let mAllDone = true;
+                if (!m.completed) txtActive++;
+                if (m.packages && m.packages.length > 0) {
+                    m.packages.forEach(p => {
+                        let pAllDone = true;
+                        if (p.steps && p.steps.length > 0) {
+                            p.steps.forEach(s => {
+                                if (!s.completed) {
+                                    pAllDone = false;
+                                    mAllDone = false;
+                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                                }
+                            });
+                        }
+                        if (p.completed || pAllDone) txtDone++;
+                    });
+                }
+            });
+        }
+
     
     let reportHtml = `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
         <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>

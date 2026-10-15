@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sce-dauthau-v2';
+const CACHE_NAME = 'sce-dauthau-v3';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
