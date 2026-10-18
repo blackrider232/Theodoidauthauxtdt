@@ -264,6 +264,15 @@
                     <input type="text" id="regFullname" class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" placeholder="VD: Nguyễn Văn A">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phòng chuyên môn</label>
+                    <select id="regDepartment" class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                        <option value="Phòng Hành chính - Tổ chức">Phòng Hành chính - Tổ chức</option>
+                        <option value="Phòng Phát triển doanh nghiệp">Phòng Phát triển doanh nghiệp</option>
+                        <option value="Phòng Xúc tiến đầu tư">Phòng Xúc tiến đầu tư</option>
+                        <option value="Phòng Tư vấn doanh nghiệp">Phòng Tư vấn doanh nghiệp</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email đăng nhập</label>
                     <input type="email" id="regEmail" class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" placeholder="Nhập email của bạn...">
                 </div>
@@ -417,13 +426,23 @@
 
                     <!-- KHUNG TÌM KIẾM NÂNG CAO (MẶC ĐỊNH ẨN, ẤN VÀO MỚI MỞ RỘNG) -->
                     <div id="advancedSearchPanel" class="hidden pt-3 border-t border-dashed border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end bg-gray-50/80 dark:bg-gray-900/40 p-3 rounded-lg border border-gray-200/80 dark:border-gray-700/80">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end bg-gray-50/80 dark:bg-gray-900/40 p-3 rounded-lg border border-gray-200/80 dark:border-gray-700/80">
                             <div>
                                 <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1"><i class="fas fa-box-archive mr-1 text-blue-500"></i>Trạng thái hồ sơ</label>
                                 <select id="filterStatus" onchange="window.renderMissions()" class="w-full border dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm outline-none bg-white dark:bg-gray-700 dark:text-white font-medium text-gray-700">
                                     <option value="active">Đang chạy</option>
                                     <option value="archived">Lưu trữ</option>
                                     <option value="all">Tất cả (Đang chạy + Lưu trữ)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1"><i class="fas fa-building-user mr-1 text-purple-500"></i>Phòng chuyên môn</label>
+                                <select id="filterDepartment" onchange="window.onFilterDepartmentChange()" class="w-full border dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm outline-none bg-white dark:bg-gray-700 dark:text-white font-medium text-gray-700">
+                                    <option value="all">Tất cả các phòng</option>
+                                    <option value="Phòng Hành chính - Tổ chức">Phòng Hành chính - Tổ chức</option>
+                                    <option value="Phòng Phát triển doanh nghiệp">Phòng Phát triển doanh nghiệp</option>
+                                    <option value="Phòng Xúc tiến đầu tư">Phòng Xúc tiến đầu tư</option>
+                                    <option value="Phòng Tư vấn doanh nghiệp">Phòng Tư vấn doanh nghiệp</option>
                                 </select>
                             </div>
                             <div>
@@ -543,23 +562,29 @@
             <!-- 6. USERS -->
             <div id="view-users" class="hidden space-y-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Tạo tài khoản mới</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Tạo tài khoản & Phân quyền Phòng chuyên môn</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
                         <input type="text" id="newUserUsername" placeholder="Email đăng nhập (VD: chuyenvien@sce.gov.vn)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
-                        <input type="password" id="newUserPassword" placeholder="Mật khẩu" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
-                        <input type="text" id="newUserFullname" placeholder="Họ và tên chuyên viên" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
+                        <input type="password" id="newUserPassword" placeholder="Mật khẩu (Tự kích hoạt)" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
+                        <input type="text" id="newUserFullname" placeholder="Họ và tên cán bộ" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
+                        <select id="newUserDepartment" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
+                            <option value="Phòng Hành chính - Tổ chức">Phòng Hành chính - Tổ chức</option>
+                            <option value="Phòng Phát triển doanh nghiệp">Phòng Phát triển doanh nghiệp</option>
+                            <option value="Phòng Xúc tiến đầu tư">Phòng Xúc tiến đầu tư</option>
+                            <option value="Phòng Tư vấn doanh nghiệp">Phòng Tư vấn doanh nghiệp</option>
+                            <option value="Ban Giám đốc">Ban Giám đốc</option>
+                        </select>
                         <select id="newUserRole" class="border dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none dark:text-white">
                             <option value="user">Chuyên viên thực hiện</option>
-                <option value="leader">Ban Giám đốc (Chỉ xem)</option>
-                <option value="auditor">Kiểm toán viên (Chỉ xem)</option>
-                <option value="team_lead">Trưởng nhóm (Quản lý dự án)</option>
-                <option value="admin">Quản trị viên (Toàn quyền)</option>
+                            <option value="dept_leader">Lãnh đạo phòng (Xem trong phòng)</option>
+                            <option value="leader">Ban Giám đốc (Xem toàn Trung tâm)</option>
+                            <option value="admin">Quản trị viên (Toàn quyền)</option>
                         </select>
                     </div>
                     <button onclick="window.addNewUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow-sm">Thêm tài khoản</button>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm min-w-[600px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3">Tài khoản (ID)</th><th class="p-3">Họ và tên</th><th class="p-3">Vai trò</th><th class="p-3 text-right">Thao tác</th></tr></thead><tbody id="userTableBody" class="dark:text-gray-300"></tbody></table>
+                    <table class="w-full text-left border-collapse text-sm min-w-[750px]"><thead class="bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase text-xs"><tr><th class="p-3">Tài khoản (Email)</th><th class="p-3">Họ và tên</th><th class="p-3">Phòng chuyên môn</th><th class="p-3">Vai trò & Trạng thái</th><th class="p-3 text-right">Thao tác</th></tr></thead><tbody id="userTableBody" class="dark:text-gray-300"></tbody></table>
                 </div>
             </div>
 
@@ -738,6 +763,9 @@
             <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Email xác thực</label>
             <input type="text" id="profileEmail" disabled class="w-full border dark:border-gray-600 bg-gray-100 dark:bg-gray-900 p-2 rounded text-sm mb-3 cursor-not-allowed text-gray-500 dark:text-gray-400">
             
+            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Phòng chuyên môn & Vai trò</label>
+            <input type="text" id="profileRoleDeptInfo" disabled class="w-full border dark:border-gray-600 bg-gray-100 dark:bg-gray-900 p-2 rounded text-sm mb-3 cursor-not-allowed text-blue-700 dark:text-blue-400 font-semibold">
+
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Họ và Tên hiển thị</label>
             <input type="text" id="profileFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
             
@@ -820,18 +848,25 @@
     <!-- Modal Sửa tài khoản (Admin) -->
     <div id="editUserModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-user-cog mr-2 text-purple-600"></i>Sửa tài khoản</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID Đăng nhập</label>
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-user-cog mr-2 text-purple-600"></i>Sửa tài khoản & Phân phòng</h2>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID Đăng nhập (Email)</label>
             <input type="text" id="editUserUsername" disabled class="w-full border dark:border-gray-600 bg-gray-200 dark:bg-gray-900 p-2.5 rounded text-sm mb-3 cursor-not-allowed dark:text-gray-400">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên chuyên viên</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Họ và tên cán bộ</label>
             <input type="text" id="editUserFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phòng chuyên môn</label>
+            <select id="editUserDepartment" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                <option value="Phòng Hành chính - Tổ chức">Phòng Hành chính - Tổ chức</option>
+                <option value="Phòng Phát triển doanh nghiệp">Phòng Phát triển doanh nghiệp</option>
+                <option value="Phòng Xúc tiến đầu tư">Phòng Xúc tiến đầu tư</option>
+                <option value="Phòng Tư vấn doanh nghiệp">Phòng Tư vấn doanh nghiệp</option>
+                <option value="Ban Giám đốc">Ban Giám đốc</option>
+            </select>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vai trò</label>
             <select id="editUserRole" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-                <option value="user">Chuyên viên thực hiện</option>
-                <option value="leader">Ban Giám đốc (Chỉ xem)</option>
-                <option value="auditor">Kiểm toán viên (Chỉ xem)</option>
-                <option value="team_lead">Trưởng nhóm (Quản lý dự án)</option>
-                <option value="admin">Quản trị viên (Toàn quyền)</option>
+                <option value="user">Chuyên viên thực hiện (Chỉ gói thầu của mình)</option>
+                <option value="dept_leader">Lãnh đạo phòng (Xem & chỉ đạo trong phòng)</option>
+                <option value="leader">Ban Giám đốc (Xem & chỉ đạo toàn Trung tâm)</option>
+                <option value="admin">Quản trị viên (Toàn quyền hệ thống)</option>
             </select>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mật khẩu mới (Tùy chọn)</label>
             <input type="password" id="editUserPassword" placeholder="Mật khẩu mới" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
@@ -888,14 +923,93 @@
         const SUPABASE_URL = savedSbConfig.url || DEFAULT_SUPABASE_URL;
         const SUPABASE_ANON_KEY = savedSbConfig.key || DEFAULT_SUPABASE_ANON_KEY;
 
-        // Khởi tạo Supabase Auth Client chính thức (Quản lý phiên JWT + RLS + MFA)
-        const supabaseClient = (window.supabase && window.supabase.createClient)
+        let isRefreshingJwtPromise = null;
+        window.lastJwtRefreshTime = Date.now();
+
+        window.refreshSupabaseSessionNow = async function() {
+            if (!supabaseClient) return null;
+            if (isRefreshingJwtPromise) return isRefreshingJwtPromise;
+            isRefreshingJwtPromise = (async () => {
+                try {
+                    const { data, error } = await supabaseClient.auth.refreshSession();
+                    if (!error && data && data.session) {
+                        window.lastJwtRefreshTime = Date.now();
+                        return data.session;
+                    }
+                } catch (e) {
+                    console.warn("Không thể tự động làm mới JWT:", e);
+                } finally {
+                    isRefreshingJwtPromise = null;
+                }
+                return null;
+            })();
+            return isRefreshingJwtPromise;
+        };
+
+        window.sceSupabaseFetch = async function(url, options = {}) {
+            const urlStr = String(url || '');
+            const isAuthEndpoint = urlStr.includes('/auth/v1/');
+
+            // Chủ động làm mới token nếu tab mở quá 40 phút (tránh lỗi lệch múi giờ UTC giữa máy trạm và Server)
+            if (!isAuthEndpoint && window.lastJwtRefreshTime && (Date.now() - window.lastJwtRefreshTime > 40 * 60 * 1000)) {
+                const preRefreshed = await window.refreshSupabaseSessionNow();
+                if (preRefreshed && preRefreshed.access_token && options && options.headers) {
+                    if (typeof options.headers.set === 'function') {
+                        options.headers.set('Authorization', 'Bearer ' + preRefreshed.access_token);
+                    } else {
+                        options.headers['Authorization'] = 'Bearer ' + preRefreshed.access_token;
+                        delete options.headers['authorization'];
+                    }
+                }
+            }
+
+            let res = await fetch(url, options);
+
+            // Tự động bắt lỗi 401 / JWT expired từ PostgREST hoặc Storage để làm mới JWT và gửi lại yêu cầu ngay lập tức
+            if (!isAuthEndpoint && (res.status === 401 || res.status === 403)) {
+                let isJwtErr = (res.status === 401);
+                if (!isJwtErr) {
+                    try {
+                        const errBody = await res.clone().text();
+                        if (/jwt expired|pgrst301|invalid jwt|token is expired/i.test(errBody)) {
+                            isJwtErr = true;
+                        }
+                    } catch (e) {}
+                }
+                if (isJwtErr && supabaseClient) {
+                    const newSession = await window.refreshSupabaseSessionNow();
+                    if (newSession && newSession.access_token) {
+                        const retryOptions = Object.assign({}, options);
+                        if (retryOptions.headers) {
+                            if (typeof retryOptions.headers.set === 'function') {
+                                const newHeaders = new Headers(retryOptions.headers);
+                                newHeaders.set('Authorization', 'Bearer ' + newSession.access_token);
+                                retryOptions.headers = newHeaders;
+                            } else {
+                                retryOptions.headers = Object.assign({}, retryOptions.headers, {
+                                    Authorization: 'Bearer ' + newSession.access_token
+                                });
+                                delete retryOptions.headers['authorization'];
+                            }
+                        }
+                        res = await fetch(url, retryOptions);
+                    }
+                }
+            }
+            return res;
+        };
+
+        // Khởi tạo Supabase Auth Client chính thức (Quản lý phiên JWT + RLS + MFA + Auto-Retry JWT)
+        var supabaseClient = (window.supabase && window.supabase.createClient)
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
                     autoRefreshToken: true,
                     detectSessionInUrl: true,
                     storageKey: 'sce_v2_auth_token'
+                },
+                global: {
+                    fetch: window.sceSupabaseFetch
                 }
             })
             : null;
@@ -1177,18 +1291,23 @@
 -- HỆ THỐNG QUẢN TRỊ ĐẤU THẦU SCE V2 - ENTERPRISE SECURITY SCHEMA (PUBLIC GITHUB SAFE)
 -- 1. Khóa bảng cũ V1 (app_data, app_backups) chống đọc trộm qua Anon Key
 -- 2. Chặn người lạ tự đăng ký xem dữ liệu: Tài khoản mới mặc định Chờ Admin duyệt (is_active = false)
--- 3. Bật RLS Zero-Trust cho sce_v2_profiles, sce_v2_app_data, sce_v2_backups, sce_v2_audit_logs
+-- 3. Phân quyền 4 Phòng chuyên môn & 4 Vai trò (Admin, Ban Giám đốc, Lãnh đạo phòng, Chuyên viên)
 -- =====================================================================================
 
 CREATE TABLE IF NOT EXISTS public.sce_v2_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT UNIQUE NOT NULL,
     fullname TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'leader', 'team_lead', 'auditor', 'user')),
+    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'leader', 'dept_leader', 'team_lead', 'user')),
+    department TEXT NOT NULL DEFAULT '',
     is_active BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.sce_v2_profiles ADD COLUMN IF NOT EXISTS department TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.sce_v2_profiles DROP CONSTRAINT IF EXISTS sce_v2_profiles_role_check;
+ALTER TABLE public.sce_v2_profiles ADD CONSTRAINT sce_v2_profiles_role_check CHECK (role IN ('admin', 'leader', 'dept_leader', 'team_lead', 'user'));
 
 CREATE TABLE IF NOT EXISTS public.sce_v2_app_data (
     id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -1234,6 +1353,7 @@ DECLARE
     assigned_role TEXT;
     assigned_active BOOLEAN;
     default_name TEXT;
+    default_dept TEXT;
 BEGIN
     SELECT COUNT(*) INTO existing_count FROM public.sce_v2_profiles;
     IF existing_count = 0 THEN
@@ -1249,8 +1369,9 @@ BEGIN
         NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
         split_part(NEW.email, '@', 1)
     );
-    INSERT INTO public.sce_v2_profiles (id, email, fullname, role, is_active)
-    VALUES (NEW.id, NEW.email, default_name, assigned_role, assigned_active)
+    default_dept := COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'department'), ''), '');
+    INSERT INTO public.sce_v2_profiles (id, email, fullname, role, department, is_active)
+    VALUES (NEW.id, NEW.email, default_name, assigned_role, default_dept, assigned_active)
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
 END;
@@ -1291,13 +1412,13 @@ CREATE POLICY "sce_v2_app_data_select_auth" ON public.sce_v2_app_data
 DROP POLICY IF EXISTS "sce_v2_app_data_write_active_members" ON public.sce_v2_app_data;
 CREATE POLICY "sce_v2_app_data_write_active_members" ON public.sce_v2_app_data
     FOR UPDATE TO authenticated
-    USING (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'team_lead', 'user'))
-    WITH CHECK (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'team_lead', 'user'));
+    USING (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'leader', 'dept_leader', 'team_lead', 'user'))
+    WITH CHECK (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'leader', 'dept_leader', 'team_lead', 'user'));
 
 DROP POLICY IF EXISTS "sce_v2_app_data_insert_active_members" ON public.sce_v2_app_data;
 CREATE POLICY "sce_v2_app_data_insert_active_members" ON public.sce_v2_app_data
     FOR INSERT TO authenticated
-    WITH CHECK (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'team_lead', 'user'));
+    WITH CHECK (public.is_my_sce_account_active() AND public.get_my_sce_role() IN ('admin', 'leader', 'dept_leader', 'team_lead', 'user'));
 
 -- KHÓA BẢNG CŨ CỦA BẢN V1 (app_data & app_backups) TRÊN CÙNG PROJECT SUPABASE
 DO $$
@@ -1333,6 +1454,150 @@ const LUNAR_HOLIDAYS = [
 ];
 
         let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
+
+        // --- HỆ THỐNG PHÂN QUYỀN 4 PHÒNG CHUYÊN MÔN & 4 VAI TRÒ TRUNG TÂM SCE ---
+        window.SCE_DEPARTMENTS = [
+            'Phòng Hành chính - Tổ chức',
+            'Phòng Phát triển doanh nghiệp',
+            'Phòng Xúc tiến đầu tư',
+            'Phòng Tư vấn doanh nghiệp'
+        ];
+
+        window.normalizeRole = function(role) {
+            const r = String(role || 'user').toLowerCase().trim();
+            if (r === 'admin') return 'admin';
+            if (r === 'leader') return 'leader';
+            if (r === 'dept_leader' || r === 'team_lead') return 'dept_leader';
+            return 'user'; // Bỏ phân quyền kiểm toán viên (auditor -> user)
+        };
+
+        window.getRoleLabel = function(role) {
+            const r = window.normalizeRole(role);
+            if (r === 'admin') return 'Admin';
+            if (r === 'leader') return 'Ban Giám đốc';
+            if (r === 'dept_leader') return 'Lãnh đạo phòng';
+            return 'Chuyên viên';
+        };
+
+        window.isReadOnlySupervisor = function(user) {
+            const u = user || currentUser;
+            if (!u) return true;
+            const r = window.normalizeRole(u.role);
+            return r === 'leader' || r === 'dept_leader';
+        };
+
+        window.getUserDepartment = function(fullnameOrEmail) {
+            if (!fullnameOrEmail || !db || !Array.isArray(db.users)) return '';
+            const target = String(fullnameOrEmail).toLowerCase().trim();
+            const found = db.users.find(u =>
+                (u.fullname && u.fullname.toLowerCase().trim() === target) ||
+                (u.email && u.email.toLowerCase().trim() === target) ||
+                (u.username && u.username.toLowerCase().trim() === target)
+            );
+            return found && found.department ? String(found.department).trim() : '';
+        };
+
+        window.getMissionDepartment = function(mission) {
+            if (!mission) return '';
+            if (mission.department && String(mission.department).trim()) return String(mission.department).trim();
+            return window.getUserDepartment(mission.owner);
+        };
+
+        window.getPackageDepartment = function(mission, pkg) {
+            if (pkg && pkg.department && String(pkg.department).trim()) return String(pkg.department).trim();
+            if (pkg && pkg.owner) {
+                const ownerDept = window.getUserDepartment(pkg.owner);
+                if (ownerDept) return ownerDept;
+            }
+            return window.getMissionDepartment(mission);
+        };
+
+        window.canViewPackage = function(mission, pkg, user) {
+            const u = user || currentUser;
+            if (!u) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin' || role === 'leader') return true;
+            const pkgOwner = String((pkg && pkg.owner) || (mission && mission.owner) || '').trim();
+            if (role === 'dept_leader') {
+                const myDept = String(u.department || window.getUserDepartment(u.fullname) || '').trim();
+                const pkgDept = window.getPackageDepartment(mission, pkg);
+                if (myDept && pkgDept && myDept === pkgDept) return true;
+                return pkgOwner === u.fullname || (mission && mission.owner === u.fullname);
+            }
+            // Chuyên viên thực hiện (user): Chỉ xem và thực hiện gói thầu của chính mình phụ trách
+            return pkgOwner === u.fullname;
+        };
+
+        window.canViewMission = function(mission, user) {
+            const u = user || currentUser;
+            if (!u || !mission) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin' || role === 'leader') return true;
+            if (Array.isArray(mission.packages) && mission.packages.length > 0) {
+                if (mission.packages.some(p => window.canViewPackage(mission, p, u))) return true;
+            }
+            if (role === 'dept_leader') {
+                const myDept = String(u.department || window.getUserDepartment(u.fullname) || '').trim();
+                const mDept = window.getMissionDepartment(mission);
+                if (myDept && mDept && myDept === mDept) return true;
+            }
+            return String(mission.owner || '').trim() === u.fullname;
+        };
+
+        window.canEditPackage = function(mission, pkg, user) {
+            const u = user || currentUser;
+            if (!u) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin') return true;
+            if (role === 'leader' || role === 'dept_leader') return false;
+            const pkgOwner = String((pkg && pkg.owner) || (mission && mission.owner) || '').trim();
+            return pkgOwner === u.fullname;
+        };
+
+        window.canEditMission = function(mission, user) {
+            const u = user || currentUser;
+            if (!u || !mission) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin') return true;
+            if (role === 'leader' || role === 'dept_leader') return false;
+            const mOwner = String(mission.owner || '').trim();
+            return mOwner === u.fullname;
+        };
+
+        window.populateOwnerFilterByDepartment = function() {
+            const ownerSelect = document.getElementById('filterOwner');
+            const deptSelect = document.getElementById('filterDepartment');
+            if (!ownerSelect || !currentUser) return;
+            const role = window.normalizeRole(currentUser.role);
+            const myDept = String(currentUser.department || window.getUserDepartment(currentUser.fullname) || '').trim();
+            const currentSelectedOwner = ownerSelect.value || 'all';
+
+            if (role === 'user') {
+                ownerSelect.innerHTML = `<option value="${escapeHtml(currentUser.fullname)}">${escapeHtml(currentUser.fullname)}</option>`;
+                ownerSelect.value = currentUser.fullname;
+                ownerSelect.disabled = true;
+                return;
+            }
+            ownerSelect.disabled = false;
+            const selectedDept = deptSelect ? deptSelect.value : 'all';
+            ownerSelect.innerHTML = '<option value="all">Tất cả Chuyên viên</option>';
+            (db.users || []).forEach(u => {
+                const uDept = String(u.department || '').trim();
+                if (role === 'dept_leader' && myDept && uDept !== myDept) return;
+                if (selectedDept !== 'all' && uDept !== selectedDept) return;
+                ownerSelect.innerHTML += `<option value="${escapeHtml(u.fullname)}">${escapeHtml(u.fullname)}${uDept ? ' (' + escapeHtml(uDept.replace('Phòng ', 'P. ')) + ')' : ''}</option>`;
+            });
+            if (Array.from(ownerSelect.options).some(opt => opt.value === currentSelectedOwner)) {
+                ownerSelect.value = currentSelectedOwner;
+            } else {
+                ownerSelect.value = 'all';
+            }
+        };
+
+        window.onFilterDepartmentChange = function() {
+            window.populateOwnerFilterByDepartment();
+            window.renderMissions();
+        };
         
         // --- QUẢN LÝ HOÀN TÁC (UNDO / REDO) ---
         let undoStack = [];
@@ -1372,11 +1637,18 @@ const LUNAR_HOLIDAYS = [
 
         window.resetAdvancedSearch = function() {
             const stEl = document.getElementById('filterStatus');
+            const dpEl = document.getElementById('filterDepartment');
             const owEl = document.getElementById('filterOwner');
             const frEl = document.getElementById('filterFromDate');
             const toEl = document.getElementById('filterToDate');
             if (stEl) stEl.value = 'active';
-            if (owEl) owEl.value = 'all';
+            const role = currentUser ? window.normalizeRole(currentUser.role) : 'user';
+            const myDept = currentUser ? String(currentUser.department || window.getUserDepartment(currentUser.fullname) || '').trim() : '';
+            if (dpEl) {
+                dpEl.value = ((role === 'dept_leader' || role === 'user') && myDept) ? myDept : 'all';
+            }
+            window.populateOwnerFilterByDepartment();
+            if (owEl && role !== 'user') owEl.value = 'all';
             if (frEl) frEl.value = '';
             if (toEl) toEl.value = '';
             window.renderMissions();
@@ -1611,7 +1883,8 @@ const LUNAR_HOLIDAYS = [
                 username: u.email || u.username || 'user@sce.gov.vn',
                 email: u.email || u.username || 'user@sce.gov.vn',
                 fullname: u.fullname || 'Chuyên viên SCE',
-                role: u.role || 'user',
+                role: window.normalizeRole(u.role || 'user'),
+                department: u.department ? String(u.department).trim() : '',
                 is_active: u.is_active !== false
             }));
         }
@@ -1631,7 +1904,7 @@ const LUNAR_HOLIDAYS = [
             if (!db.users || db.users.length === 0) {
                 db.users = currentUser
                     ? [sanitizeDbUsers([currentUser])[0]]
-                    : [{ username: "admin@sce.gov.vn", email: "admin@sce.gov.vn", fullname: "Quản trị viên SCE", role: "admin" }];
+                    : [{ username: "admin@sce.gov.vn", email: "admin@sce.gov.vn", fullname: "Quản trị viên SCE", role: "admin", department: "" }];
             } else {
                 // Tuyệt đối loại bỏ mọi trường password dạng rõ (plaintext) còn sót lại
                 db.users = sanitizeDbUsers(db.users);
@@ -1766,13 +2039,25 @@ const LUNAR_HOLIDAYS = [
                 applyDefaultsIfMissing();
 
                 if (supabaseClient) {
-                    const { data: { session }, error } = await supabaseClient.auth.getSession();
+                    let { data: { session }, error } = await supabaseClient.auth.getSession();
                     if (session && session.user) {
                         const lText = document.getElementById('loaderText');
                         const loader = document.getElementById('loader');
-                        if (lText) lText.innerText = "Đang đăng nhập...";
+                        if (lText) lText.innerText = "Đang đồng bộ phiên bảo mật...";
                         if (loader) loader.style.display = 'flex';
                         try {
+                            // Chủ động làm mới JWT ngay khi mở trang để đồng bộ thời gian thực với Server Supabase
+                            const refreshed = await window.refreshSupabaseSessionNow();
+                            if (refreshed && refreshed.user) {
+                                session = refreshed;
+                            } else {
+                                const { data: uCheck, error: uErr } = await supabaseClient.auth.getUser();
+                                if (uErr || !uCheck || !uCheck.user) {
+                                    await supabaseClient.auth.signOut();
+                                    localStorage.removeItem('sce_v2_auth_token');
+                                    throw new Error("Phiên đăng nhập trước đó đã hết hạn. Vui lòng đăng nhập lại để tiếp tục!");
+                                }
+                            }
                             await window.completeAuthenticatedSession(session.user);
                         } catch (sessErr) {
                             showLoginError(sessErr.message);
@@ -1792,10 +2077,27 @@ const LUNAR_HOLIDAYS = [
         window.syncProfilesFromSupabase = async function(authUser) {
             if (!supabaseClient) return null;
             try {
+                const existingMap = {};
+                if (db && Array.isArray(db.users)) {
+                    db.users.forEach(u => {
+                        const k = String(u.email || u.username || '').toLowerCase().trim();
+                        if (k) existingMap[k] = u;
+                    });
+                }
+
                 let { data: profiles, error } = await supabaseClient
                     .from('sce_v2_profiles')
-                    .select('id, email, fullname, role, is_active')
+                    .select('id, email, fullname, role, department, is_active')
                     .order('created_at', { ascending: true });
+
+                if (error) {
+                    const fallbackRes = await supabaseClient
+                        .from('sce_v2_profiles')
+                        .select('id, email, fullname, role, is_active')
+                        .order('created_at', { ascending: true });
+                    profiles = fallbackRes.data;
+                    error = fallbackRes.error;
+                }
 
                 if (!error && Array.isArray(profiles)) {
                     let myProfile = profiles.find(p => p.id === authUser.id);
@@ -1804,24 +2106,61 @@ const LUNAR_HOLIDAYS = [
                         const isFirstUser = profiles.length === 0;
                         const defaultRole = isFirstUser ? 'admin' : 'user';
                         const defaultName = authUser.user_metadata?.fullname || authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email.split('@')[0];
-                        const { data: inserted, error: insErr } = await supabaseClient
+                        const defaultDept = authUser.user_metadata?.department || '';
+                        let { data: inserted, error: insErr } = await supabaseClient
                             .from('sce_v2_profiles')
                             .upsert({
                                 id: authUser.id,
                                 email: authUser.email,
                                 fullname: defaultName,
                                 role: defaultRole,
+                                department: defaultDept,
                                 is_active: isFirstUser ? true : false
                             })
                             .select()
                             .single();
+                        if (insErr) {
+                            const fbIns = await supabaseClient
+                                .from('sce_v2_profiles')
+                                .upsert({
+                                    id: authUser.id,
+                                    email: authUser.email,
+                                    fullname: defaultName,
+                                    role: defaultRole,
+                                    is_active: isFirstUser ? true : false
+                                })
+                                .select()
+                                .single();
+                            inserted = fbIns.data;
+                            insErr = fbIns.error;
+                        }
                         if (!insErr && inserted) {
                             myProfile = inserted;
                             profiles.push(inserted);
                         }
                     }
                     if (profiles.length > 0) {
-                        db.users = sanitizeDbUsers(profiles);
+                        const mergedProfiles = profiles.map(p => {
+                            const k = String(p.email || '').toLowerCase().trim();
+                            const ex = existingMap[k] || {};
+                            return {
+                                id: p.id,
+                                email: p.email,
+                                username: p.email,
+                                fullname: p.fullname || ex.fullname || 'Chuyên viên SCE',
+                                role: window.normalizeRole(p.role || ex.role || 'user'),
+                                department: (p.department && String(p.department).trim()) ? String(p.department).trim() : (ex.department || ''),
+                                is_active: p.is_active !== false
+                            };
+                        });
+                        // Giữ lại các tài khoản do Admin tạo trước trong db.users nhưng chưa đăng ký Auth
+                        Object.values(existingMap).forEach(exUser => {
+                            const exKey = String(exUser.email || exUser.username || '').toLowerCase().trim();
+                            if (exKey && !mergedProfiles.some(mp => String(mp.email || '').toLowerCase().trim() === exKey)) {
+                                mergedProfiles.push(exUser);
+                            }
+                        });
+                        db.users = sanitizeDbUsers(mergedProfiles);
                     }
                     return myProfile;
                 }
@@ -2130,8 +2469,7 @@ const LUNAR_HOLIDAYS = [
                         if (m.packages && Array.isArray(m.packages)) {
                             m.packages.forEach(p => {
                                 if (p.archived || p.completed) return;
-                                let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                                if (!isOwner) return;
+                                if (!window.canViewPackage(m, p, currentUser)) return;
                                 
                                 if (p.steps && Array.isArray(p.steps)) {
                                     p.steps.forEach(s => {
@@ -2311,6 +2649,7 @@ const LUNAR_HOLIDAYS = [
 
         // Hoàn tất phiên đăng nhập sau khi xác thực JWT (và MFA nếu có)
         window.completeAuthenticatedSession = async function(authUser) {
+            await window.loadDataFromGAS();
             const profile = await window.syncProfilesFromSupabase(authUser);
 
             if (profile && profile.is_active === false) {
@@ -2318,22 +2657,20 @@ const LUNAR_HOLIDAYS = [
                 throw new Error("Tài khoản đang chờ Quản trị viên phê duyệt hoặc đã bị khóa!");
             }
 
-            await window.loadDataFromGAS();
-            // Đồng bộ lại danh sách hồ sơ vào db.users sau khi tải xong dữ liệu
-            await window.syncProfilesFromSupabase(authUser);
-
-            // Xác định quyền và họ tên từ bảng sce_v2_profiles hoặc user_metadata
+            // Xác định quyền, phòng chuyên môn và họ tên từ bảng sce_v2_profiles, db.users hoặc user_metadata
             const email = authUser.email || 'user@sce.gov.vn';
-            let role = profile?.role || authUser.user_metadata?.role || 'user';
-            let fullname = profile?.fullname || authUser.user_metadata?.fullname || authUser.user_metadata?.full_name || authUser.user_metadata?.name || email.split('@')[0];
-
-            // Nếu trong db.users đã có phân quyền của email này thì đồng bộ
             const existingInDb = (db.users || []).find(u => (u.email || u.username || '').toLowerCase() === email.toLowerCase());
-            if (!profile && existingInDb) {
-                role = existingInDb.role || role;
-                fullname = existingInDb.fullname || fullname;
-            } else if (!profile && (!db.users || db.users.length <= 1)) {
-                // Nếu là người dùng đầu tiên đăng nhập vào hệ thống mới
+            let rawRole = profile?.role || existingInDb?.role || authUser.user_metadata?.role || 'user';
+            if (existingInDb?.role === 'dept_leader' && rawRole === 'team_lead') {
+                rawRole = 'dept_leader';
+            }
+            let role = window.normalizeRole(rawRole);
+            let fullname = profile?.fullname || existingInDb?.fullname || authUser.user_metadata?.fullname || authUser.user_metadata?.full_name || authUser.user_metadata?.name || email.split('@')[0];
+            let department = (profile?.department && String(profile.department).trim())
+                ? String(profile.department).trim()
+                : (existingInDb?.department || authUser.user_metadata?.department || '');
+
+            if (!profile && !existingInDb && (!db.users || db.users.length <= 1)) {
                 role = 'admin';
             }
 
@@ -2342,16 +2679,25 @@ const LUNAR_HOLIDAYS = [
                 username: email,
                 email: email,
                 fullname: fullname,
-                role: role
+                role: role,
+                department: department
             };
 
             // Đảm bảo người dùng hiện tại có mặt trong danh sách Chuyên viên (db.users) mà KHÔNG lưu mật khẩu
             if (!db.users) db.users = [];
             const idx = db.users.findIndex(u => (u.email || u.username || '').toLowerCase() === email.toLowerCase());
             if (idx === -1) {
-                db.users.push({ id: authUser.id, username: email, email: email, fullname: fullname, role: role, is_active: true });
+                db.users.push({ id: authUser.id, username: email, email: email, fullname: fullname, role: role, department: department, is_active: true });
             } else {
-                db.users[idx] = { id: authUser.id, username: email, email: email, fullname: fullname, role: role, is_active: db.users[idx].is_active !== false };
+                db.users[idx] = {
+                    id: authUser.id,
+                    username: email,
+                    email: email,
+                    fullname: fullname,
+                    role: role,
+                    department: department || db.users[idx].department || '',
+                    is_active: db.users[idx].is_active !== false
+                };
             }
 
             resetInactivityTimer();
@@ -2501,11 +2847,16 @@ const LUNAR_HOLIDAYS = [
         // Đăng ký tài khoản mới qua Supabase Auth
         window.handleRegisterAuth = async function() {
             const fullname = document.getElementById('regFullname').value.trim();
+            const deptEl = document.getElementById('regDepartment');
+            const department = deptEl ? deptEl.value.trim() : '';
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value.trim();
 
             if (!fullname || !email || !password) {
                 return showLoginError("Vui lòng điền đầy đủ Họ tên, Email và Mật khẩu.");
+            }
+            if (!department) {
+                return showLoginError("Vui lòng chọn Phòng chuyên môn công tác tại Trung tâm.");
             }
             if (!email.includes('@')) {
                 return showLoginError("Email không hợp lệ.");
@@ -2524,7 +2875,7 @@ const LUNAR_HOLIDAYS = [
                     email: email,
                     password: password,
                     options: {
-                        data: { fullname: fullname }
+                        data: { fullname: fullname, department: department }
                     }
                 });
                 if (loader) loader.style.display = 'none';
@@ -2587,6 +2938,10 @@ const LUNAR_HOLIDAYS = [
             document.getElementById('loginError').classList.add('hidden'); 
             document.getElementById('loginScreen').classList.add('hidden'); 
             document.getElementById('appScreen').classList.remove('hidden');
+            currentUser.role = window.normalizeRole(currentUser.role);
+            if (!currentUser.department) {
+                currentUser.department = window.getUserDepartment(currentUser.fullname) || window.getUserDepartment(currentUser.email) || '';
+            }
             window.renderUserBadge(); 
             autoCleanArchivedData();
             
@@ -2596,26 +2951,37 @@ const LUNAR_HOLIDAYS = [
                 const lastLawUpdate = localStorage.getItem('lastLawUpdateDate');
                 if (lastLawUpdate !== today) {
                     setTimeout(() => {
-                        // window.silentUpdateBiddingLaws();
                         localStorage.setItem('lastLawUpdateDate', today);
-                    }, 1500); // Đợi giao diện render xong rồi mới báo
+                    }, 1500);
                 }
             }
 
             const btnCreate = document.getElementById('btnCreateProject');
-            if (currentUser.role !== 'leader') { 
+            if (!window.isReadOnlySupervisor(currentUser)) { 
                 btnCreate.classList.replace('hidden', 'flex'); 
             } else { 
                 btnCreate.classList.replace('flex', 'hidden'); 
             }
-            
-            const ownerFilters = document.getElementById('filterOwner');
-            if(ownerFilters) { 
-                ownerFilters.innerHTML = '<option value="all">Tất cả Chuyên viên</option>'; 
-                db.users.forEach(u => { 
-                    ownerFilters.innerHTML += `<option value="${escapeHtml(u.fullname)}">${escapeHtml(u.fullname)}</option>`; 
-                }); 
+
+            // Thiết lập bộ lọc Phòng chuyên môn & Chuyên viên theo phân quyền
+            const deptFilter = document.getElementById('filterDepartment');
+            if (deptFilter) {
+                const role = window.normalizeRole(currentUser.role);
+                const myDept = String(currentUser.department || '').trim();
+                if ((role === 'dept_leader' || role === 'user') && myDept) {
+                    deptFilter.innerHTML = `<option value="${escapeHtml(myDept)}">${escapeHtml(myDept)}</option>`;
+                    deptFilter.value = myDept;
+                    deptFilter.disabled = true;
+                } else {
+                    deptFilter.disabled = false;
+                    deptFilter.innerHTML = '<option value="all">Tất cả 4 Phòng chuyên môn</option>';
+                    window.SCE_DEPARTMENTS.forEach(d => {
+                        deptFilter.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`;
+                    });
+                    deptFilter.value = 'all';
+                }
             }
+            window.populateOwnerFilterByDepartment();
             
             document.querySelectorAll('.admin-only').forEach(el => { 
                 if (currentUser.role === 'admin') el.classList.remove('hidden'); 
@@ -2633,10 +2999,10 @@ const LUNAR_HOLIDAYS = [
         };
 
         window.renderUserBadge = function() {
-            let roleBadge = 'Chuyên viên'; 
-            if (currentUser.role === 'admin') roleBadge = 'Admin'; 
-            else if (currentUser.role === 'leader') roleBadge = 'Lãnh đạo';
-            document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> <span class="truncate max-w-[90px] sm:max-w-none">${escapeHtml(currentUser.fullname)}</span> <span class="hidden sm:inline text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${roleBadge}</span>`;
+            const roleLabel = window.getRoleLabel(currentUser.role);
+            const deptStr = currentUser.department ? String(currentUser.department).replace('Phòng ', 'P. ') : '';
+            const deptBadge = deptStr ? `<span class="hidden md:inline text-[10px] bg-indigo-900/70 text-indigo-100 border border-indigo-400/30 px-1.5 py-0.5 rounded ml-1">${escapeHtml(deptStr)}</span>` : '';
+            document.getElementById('userBadge').innerHTML = `<i class="fas fa-user-circle"></i> <span class="truncate max-w-[90px] sm:max-w-none">${escapeHtml(currentUser.fullname)}</span> <span class="hidden sm:inline text-[10px] bg-blue-700 px-1.5 py-0.5 rounded ml-1 uppercase">${escapeHtml(roleLabel)}</span>${deptBadge}`;
         };
 
         window.switchTab = function(tab) {
@@ -2686,8 +3052,7 @@ const LUNAR_HOLIDAYS = [
                     if (m.packages && Array.isArray(m.packages)) {
                         m.packages.forEach(p => {
                             if (p.archived || p.completed) return;
-                            let isOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                            if ((currentUser.role || '').toLowerCase() === 'user' && !isOwner) return;
+                            if (!window.canViewPackage(m, p, currentUser)) return;
                             
                             if (p.steps && Array.isArray(p.steps)) {
                                 p.steps.forEach(s => {
@@ -2742,12 +3107,10 @@ const LUNAR_HOLIDAYS = [
             if (db.missions) {
                 db.missions.forEach(m => {
                     if (m.archived) return; 
-                    let isViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                     if (m.packages) {
                         m.packages.forEach(p => {
                             if (p.archived) return; 
-                            let isPkgOwner = isViewer || p.owner === currentUser.fullname; 
-                            if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
+                            if (!window.canViewPackage(m, p, currentUser)) return;
                             if (p.completed || m.completed) { 
                                 sDone++; 
                             } else {
@@ -2803,31 +3166,29 @@ const LUNAR_HOLIDAYS = [
                 globalOverdueTasksList = []; 
                 let missionsHTML = ""; 
                 let overdueHTML = "";
+                const role = window.normalizeRole(currentUser.role);
                 
-                if ((currentUser.role || '').toLowerCase() === 'user') { 
+                if (role === 'user') { 
                     document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; 
+                } else if (role === 'dept_leader') {
+                    document.getElementById('dashTitle').innerHTML = `Báo cáo Tiến độ ${escapeHtml(currentUser.department || 'Phòng chuyên môn')}`;
                 } else { 
-                    document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể`; 
+                    document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể Trung tâm`; 
                 }
                 
                 if (db.missions && Array.isArray(db.missions)) {
                     db.missions.forEach((m) => {
                         if (m.archived) return; 
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner; 
-                        let hasOwnedPackage = false; 
                         let visiblePackages = [];
                         if (m.packages && Array.isArray(m.packages)) {
                             m.packages.forEach(p => { 
                                 if (p.archived) return; 
-                                let pOwnerSafe = p.owner || m.owner; 
-                                let isPkgOwner = currentUser.role === 'admin' || currentUser.role === 'leader' || pOwnerSafe === currentUser.fullname || m.owner === currentUser.fullname; 
-                                if (isPkgOwner) { 
-                                    hasOwnedPackage = true; 
+                                if (window.canViewPackage(m, p, currentUser)) { 
                                     visiblePackages.push(p); 
                                 } 
                             });
                         }
-                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return; 
+                        if (!window.canViewMission(m, currentUser) && visiblePackages.length === 0) return; 
                         if (!m.completed) activeMs++; 
                         let mTotalSteps = 0; 
                         let mCompletedSteps = 0;
@@ -2912,12 +3273,10 @@ const LUNAR_HOLIDAYS = [
                 if (db.missions && Array.isArray(db.missions)) {
                     db.missions.forEach((m) => {
                         if (m.archived) return; 
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
                         if (m.packages && Array.isArray(m.packages)) {
                             m.packages.forEach((p) => {
                                 if (p.archived) return; 
-                                let isPkgOwner = isMissionViewer || p.owner === currentUser.fullname; 
-                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgOwner) return;
+                                if (!window.canViewPackage(m, p, currentUser)) return;
                                 
                                 let safePkgName = p.name || 'Gói thầu'; 
                                 let ownerName = p.owner || m.owner; 
@@ -2972,15 +3331,20 @@ const LUNAR_HOLIDAYS = [
                 const searchKw = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
                 const sq = searchKw;
                 const filterStat = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : 'active';
+                const filterDept = document.getElementById('filterDepartment') ? document.getElementById('filterDepartment').value : 'all';
                 const filterOwner = document.getElementById('filterOwner') ? document.getElementById('filterOwner').value : 'all';
                 const filterFrom = document.getElementById('filterFromDate') && document.getElementById('filterFromDate').value ? new Date(document.getElementById('filterFromDate').value).setHours(0,0,0,0) : null;
                 const filterTo = document.getElementById('filterToDate') && document.getElementById('filterToDate').value ? new Date(document.getElementById('filterToDate').value).setHours(23,59,59,999) : null;
                 const now = new Date(new Date().setHours(0,0,0,0));
                 const quickFilter = window.activeQuickProgressFilter || 'all';
+                const curRole = currentUser ? window.normalizeRole(currentUser.role) : 'user';
+                const curDept = currentUser ? String(currentUser.department || window.getUserDepartment(currentUser.fullname) || '').trim() : '';
 
                 const advBadge = document.getElementById('advSearchActiveBadge');
                 if (advBadge) {
-                    const hasAdvFilter = (filterStat !== 'active') || (filterOwner !== 'all') || (filterFrom !== null) || (filterTo !== null);
+                    const defaultDept = ((curRole === 'dept_leader' || curRole === 'user') && curDept) ? curDept : 'all';
+                    const defaultOwner = (curRole === 'user' && currentUser) ? currentUser.fullname : 'all';
+                    const hasAdvFilter = (filterStat !== 'active') || (filterDept !== defaultDept && filterDept !== 'all') || (filterOwner !== defaultOwner && filterOwner !== 'all') || (filterFrom !== null) || (filterTo !== null);
                     if (hasAdvFilter) advBadge.classList.remove('hidden');
                     else advBadge.classList.add('hidden');
                 }
@@ -3008,6 +3372,7 @@ const LUNAR_HOLIDAYS = [
                     db.missions.forEach((mission, mIndex) => {
                         let mNameSafe = mission.name || "Chưa có tên"; 
                         let mOwnerSafe = mission.owner || "Chưa xác định"; 
+                        let mDeptSafe = window.getMissionDepartment(mission);
                         let matchSearch = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw); 
                         let visiblePackages = [];
                         
@@ -3016,6 +3381,10 @@ const LUNAR_HOLIDAYS = [
                             const baseMatchedPackages = mission.packages.filter(pkg => {
                                 if (filterStat === 'active' && pkg.archived) return false; 
                                 if (filterStat === 'archived' && !pkg.archived) return false; 
+                                if (!window.canViewPackage(mission, pkg, currentUser)) return false;
+
+                                const pkgDept = window.getPackageDepartment(mission, pkg);
+                                if (filterDept !== 'all' && pkgDept !== filterDept) return false;
                                 if (filterOwner !== 'all' && pkg.owner !== filterOwner) return false;
                                 
                                 let finalD = pkg.steps && pkg.steps.length > 0 ? new Date(pkg.steps[pkg.steps.length-1].deadline).getTime() : null;
@@ -3028,8 +3397,6 @@ const LUNAR_HOLIDAYS = [
                                 let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.includes(searchKw) || pContractorSafe.includes(searchKw) || matchStep; 
                                 if (!matchSearchPkg) return false;
                                 
-                                let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
-                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return false; 
                                 return true;
                             });
 
@@ -3048,18 +3415,21 @@ const LUNAR_HOLIDAYS = [
                         }
                         
                         let showMission = false; 
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mOwnerSafe;
                         if (visiblePackages.length > 0) { 
                             showMission = true; 
-                        } else if (quickFilter === 'all' && filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && filterOwner === 'all' && !filterFrom && !filterTo) { 
-                            if (currentUser.role !== 'user' || isMissionViewer) showMission = true; 
+                        } else if (quickFilter === 'all' && filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && !filterFrom && !filterTo) { 
+                            const matchEmptyMissionDept = (filterDept === 'all' || mDeptSafe === filterDept);
+                            const matchEmptyMissionOwner = (filterOwner === 'all' || mOwnerSafe === filterOwner);
+                            if (matchEmptyMissionDept && matchEmptyMissionOwner && window.canViewMission(mission, currentUser)) {
+                                showMission = true; 
+                            }
                         }
                         if (!showMission) return; 
                         visibleCount++;
                         
-                        let isAdmin = currentUser.role === 'admin'; 
-                        let isLeader = currentUser.role === 'leader'; 
-                        let canEditMission = (isAdmin || currentUser.fullname === mOwnerSafe) && !isLeader; 
+                        let isAdmin = curRole === 'admin'; 
+                        let isSupervisor = window.isReadOnlySupervisor(currentUser); 
+                        let canEditMission = window.canEditMission(mission, currentUser); 
                         let btnCompleteMission = "";
                         
                         if (canEditMission) {
@@ -3082,8 +3452,8 @@ const LUNAR_HOLIDAYS = [
                             visiblePackages.forEach((pkg, vIdx) => {
                                 const pkgOrderNum = String(vIdx + 1).padStart(2, '0');
                                 let pkgIndex = mission.packages.indexOf(pkg); 
-                                let isPkgOwner = currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
-                                let canEditPkg = (isAdmin || isPkgOwner) && !isLeader;
+                                let canEditPkg = window.canEditPackage(mission, pkg, currentUser);
+                                let pkgDept = window.getPackageDepartment(mission, pkg);
                                 const finalDate = pkg.steps && pkg.steps.length > 0 ? window.formatDate(pkg.steps[pkg.steps.length - 1].deadline) : "Chưa xác định";
 
                                 // Xác định bước đang triển khai và tiến độ gói thầu
@@ -3283,7 +3653,7 @@ const LUNAR_HOLIDAYS = [
                                 }
 
                                 let archiveBtn = "";
-                                if (isAdmin && !isLeader) {
+                                if (isAdmin && !isSupervisor) {
                                     if (pkg.archived) { 
                                         archiveBtn = `<button onclick="window.archivePackage(${mIndex}, ${pkgIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 px-2 py-1.5 rounded border border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm"><i class="fas fa-trash-restore"></i> Khôi phục</button>`; 
                                     } else { 
@@ -3302,8 +3672,9 @@ const LUNAR_HOLIDAYS = [
                                     btnCompletePkg = `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-700"><i class="fas fa-check-circle"></i> Đã xong</span>`; 
                                 }
 
-                                let btnLogPkg = (['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
-let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
+                                let btnLogPkg = (['admin', 'leader', 'dept_leader'].includes(curRole)) ? `<button onclick="window.openAuditLogModal(${mIndex}, ${pkgIndex})" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/30 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-1 transition" title="Nhật ký Hoạt động (Audit Log)"><i class="fas fa-history"></i> Nhật ký</button>` : "";
+                                let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
+                                let pkgDeptBadge = pkgDept ? `<span class="inline-flex items-center gap-1 shrink-0 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded text-[11px] font-semibold"><i class="fas fa-building-user text-[10px]"></i>${escapeHtml(pkgDept)}</span>` : '';
 
                                 let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (isPkgDone ? 'bg-emerald-50/40 dark:bg-emerald-900/20' : (isPkgOverdue ? 'bg-red-50/30 dark:bg-red-900/10' : 'bg-slate-50 dark:bg-gray-800/90'));
                                 let borderColor = pkg.archived ? 'border-gray-300 opacity-90' : (isPkgDone ? 'border-emerald-300 dark:border-emerald-800' : (isPkgOverdue ? 'border-red-300 dark:border-red-800' : 'border-gray-200 dark:border-gray-700'));
@@ -3342,6 +3713,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                                         <!-- HÀNG QUY TRÌNH, CHỐT GÓI, SỬA & NHẬT KÝ -->
                                                         <div class="flex items-center gap-2 flex-wrap">
                                                             <span class="inline-block bg-slate-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[11px] font-medium shadow-sm">${pkgProcessTitle}</span>
+                                                            ${pkgDeptBadge}
                                                             ${btnCompletePkg}
                                                             ${btnEditPkg}
                                                             ${btnLogPkg}
@@ -3363,7 +3735,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                                             ${archiveBtn}
                                                             <button onclick="window.exportExcel(${mIndex}, ${pkgIndex})" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 px-2 py-1.5 rounded border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition" title="Xuất Excel gói thầu"><i class="fas fa-file-excel mr-1"></i>Xuất</button>
                                                             <button onclick="window.printProject(${mIndex}, ${pkgIndex})" class="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium shadow-sm transition"><i class="fas fa-print mr-1"></i>In</button>
-                                                            ${isAdmin && !isLeader ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm transition" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                                            ${isAdmin && !isSupervisor ? `<button onclick="window.deletePackage(${mIndex}, ${pkgIndex})" class="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-sm transition" title="Xóa gói thầu"><i class="fas fa-trash-alt"></i></button>` : ''}
                                                         </div>
                                                         
                                                         <!-- NÚT CLICK TIẾP ĐỂ MỞ BƯỚC 3 (CHI TIẾT CÁC BƯỚC) -->
@@ -3434,13 +3806,16 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                             delMissionBtn = `<button onclick="window.deleteMission(${mIndex})" class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>`;
                         }
 
-                        // Tính chỉ số tiến độ tổng của Nhiệm vụ lớn (Hoàn thành X/Y gói thầu)
-                        const mActivePkgs = (mission.packages || []).filter(p => !p.archived);
+                        // Tính chỉ số tiến độ tổng của Nhiệm vụ lớn (Hoàn thành X/Y gói thầu trong phạm vi quyền xem)
+                        const mActivePkgs = (mission.packages || []).filter(p => !p.archived && window.canViewPackage(mission, p, currentUser));
                         const mTotalPkgs = mActivePkgs.length;
                         const mDonePkgs = mActivePkgs.filter(p => getPkgProgressType(p) === 'completed').length;
                         const mProgPct = mTotalPkgs > 0 ? Math.round((mDonePkgs / mTotalPkgs) * 100) : (mission.completed ? 100 : 0);
                         const mProgressBadgeHtml = mTotalPkgs > 0
                             ? `<span class="inline-flex items-center gap-1.5 bg-indigo-100/80 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-200 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-700"><i class="fas fa-chart-pie text-indigo-600 dark:text-indigo-400 text-[11px]"></i> Hoàn thành: ${mDonePkgs}/${mTotalPkgs} gói thầu (${mProgPct}%)</span>`
+                            : '';
+                        const mDeptBadgeHtml = mDeptSafe
+                            ? `<span class="inline-flex items-center gap-1 bg-white/80 dark:bg-gray-800 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs font-semibold border border-indigo-200 dark:border-indigo-700"><i class="fas fa-building-user text-[10px]"></i> ${escapeHtml(mDeptSafe)}</span>`
                             : '';
 
                         container.innerHTML += `
@@ -3456,6 +3831,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                             <span><i class="far fa-clock mr-1"></i>Hạn tổng: <b>${window.formatDate(mission.deadline)}</b></span>
                                             <span>|</span>
                                             <span><i class="far fa-user mr-1"></i>Owner: <b>${escapeHtml(mOwnerSafe)}</b></span>
+                                            ${mDeptBadgeHtml}
                                             ${mProgressBadgeHtml}
                                         </div>
                                         ${docsHtml}
@@ -3522,7 +3898,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                     btnToggleAllText.innerText = (window.expandedPackages && window.expandedPackages.size >= totalPkgs && totalPkgs > 0) ? 'Thu gọn tất cả' : 'Mở rộng tất cả';
                 }
 
-                document.querySelectorAll('.step-list-tbody').forEach(tbody => {
+                if (!window.isReadOnlySupervisor(currentUser)) {
+                    document.querySelectorAll('.step-list-tbody').forEach(tbody => {
                         let inst = Sortable.create(tbody, {
                             handle: '.step-drag-handle', 
                             animation: 150,
@@ -3530,6 +3907,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                 if (evt.oldIndex === evt.newIndex) return;
                                 let mIdx = parseInt(tbody.getAttribute('data-mindex')); 
                                 let pIdx = parseInt(tbody.getAttribute('data-pindex'));
+                                if (!window.canEditPackage(db.missions[mIdx], db.missions[mIdx].packages[pIdx], currentUser)) return;
                                 let arr = db.missions[mIdx].packages[pIdx].steps; 
                                 arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]);
                                 window.logActivity(mIdx, pIdx, `Đổi thứ tự công việc`); 
@@ -3538,6 +3916,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                         });
                         sortableInstancesList.push(inst);
                     });
+                }
                 }, 200);
             } catch (e) { 
                 console.error("Lỗi Render Nhiệm vụ:", e); 
@@ -3547,8 +3926,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
 
         // --- CÁC HÀM XỬ LÝ MODAL "SỬA" ---
         window.openEditMissionModal = function(mIndex) { 
+            let m = db.missions[mIndex];
+            if (!window.canEditMission(m, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa Nhiệm vụ này!', 'warning');
             cEditM = mIndex; 
-            let m = db.missions[mIndex]; 
             document.getElementById('editMissionName').value = m.name || ""; 
             document.getElementById('editMissionDeadline').value = window.formatForDateInput(m.deadline); 
             document.getElementById('editMissionModal').classList.remove('hidden'); 
@@ -3557,6 +3937,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             document.getElementById('editMissionModal').classList.add('hidden'); 
         };
         window.saveEditMission = function() {
+            let m = db.missions[cEditM];
+            if (!window.canEditMission(m, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa Nhiệm vụ này!', 'warning');
             let name = document.getElementById('editMissionName').value.trim(); 
             let date = document.getElementById('editMissionDeadline').value;
             if(!name || !date) return Swal.fire('Lỗi', 'Vui lòng nhập đủ tên và hạn chót!', 'warning');
@@ -3568,13 +3950,15 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.openEditPackageModal = function(mIndex, pIndex) {
+            let m = db.missions[mIndex];
+            let p = m.packages[pIndex];
+            if (!window.canEditPackage(m, p, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa Gói thầu này!', 'warning');
             cEditM = mIndex; 
             cEditP = pIndex; 
-            let p = db.missions[mIndex].packages[pIndex];
             document.getElementById('editPackageName').value = p.name || "";
-    document.getElementById('editPackageBudget').value = p.budget || "";
-    document.getElementById('editPackageContractor').value = p.contractor || "";
-    document.getElementById('editPackageWinningBid').value = p.winningBid || "";
+            document.getElementById('editPackageBudget').value = p.budget || "";
+            document.getElementById('editPackageContractor').value = p.contractor || "";
+            document.getElementById('editPackageWinningBid').value = p.winningBid || "";
             let defaultStart = new Date();
             if(p.steps && p.steps.length > 0 && p.steps[0].originalDays) { 
                 defaultStart = new Date(p.steps[0].deadline); 
@@ -3583,26 +3967,35 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             document.getElementById('editPackageStartDate').value = window.formatForDateInput(defaultStart);
             const sel = document.getElementById('editPackageOwner'); 
             sel.innerHTML = ''; 
-            db.users.forEach(u => { 
-                let isSelected = (u.fullname === p.owner) ? 'selected' : ''; 
-                sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${isSelected}>${escapeHtml(u.fullname)}</option>`; 
-            }); 
+            const normRole = window.normalizeRole(currentUser.role);
+            if (normRole === 'user') {
+                sel.innerHTML = `<option value="${escapeHtml(currentUser.fullname)}" selected>${escapeHtml(currentUser.fullname)}${currentUser.department ? ' (' + escapeHtml(currentUser.department) + ')' : ''}</option>`;
+            } else {
+                db.users.forEach(u => { 
+                    let isSelected = (u.fullname === p.owner) ? 'selected' : ''; 
+                    let deptTxt = u.department ? ` (${u.department})` : '';
+                    sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${isSelected}>${escapeHtml(u.fullname + deptTxt)}</option>`; 
+                }); 
+            }
             document.getElementById('editPackageModal').classList.remove('hidden');
         };
         window.closeEditPackageModal = function() { 
             document.getElementById('editPackageModal').classList.add('hidden'); 
         };
         window.saveEditPackage = function() {
+            let m = db.missions[cEditM];
+            let pkg = m ? m.packages[cEditP] : null;
+            if (!window.canEditPackage(m, pkg, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa Gói thầu này!', 'warning');
             let name = document.getElementById('editPackageName').value.trim(); 
             let owner = document.getElementById('editPackageOwner').value; 
             let sDate = document.getElementById('editPackageStartDate').value;
             if(!name) return Swal.fire('Lỗi', 'Tên gói thầu không được để trống!', 'warning');
-            let pkg = db.missions[cEditM].packages[cEditP]; 
             pkg.name = name; 
             pkg.owner = owner;
-    pkg.budget = document.getElementById('editPackageBudget').value.trim();
-    pkg.contractor = document.getElementById('editPackageContractor').value.trim();
-    pkg.winningBid = document.getElementById('editPackageWinningBid').value.trim();
+            pkg.department = window.getUserDepartment(owner) || pkg.department || currentUser.department || '';
+            pkg.budget = document.getElementById('editPackageBudget').value.trim();
+            pkg.contractor = document.getElementById('editPackageContractor').value.trim();
+            pkg.winningBid = document.getElementById('editPackageWinningBid').value.trim();
             if (sDate && pkg.steps && pkg.steps.length > 0) {
                 let currentDt = new Date(sDate);
                 pkg.steps.forEach(st => { 
@@ -3619,6 +4012,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.openEditStepModal = function(mIndex, pIndex, sIndex) {
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
             cEditM = mIndex; 
             cEditP = pIndex; 
             cEditS = sIndex; 
@@ -3632,6 +4026,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             document.getElementById('editStepModal').classList.add('hidden'); 
         };
         window.saveEditStep = function() {
+            if (!window.canEditPackage(db.missions[cEditM], db.missions[cEditM].packages[cEditP], currentUser)) return;
             let name = document.getElementById('editStepName').value.trim(); 
             let date = document.getElementById('editStepDeadline').value; 
             let note = document.getElementById('editStepNote').value.trim();
@@ -3652,6 +4047,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.openCommentsModal = function(mIndex, pIndex, sIndex) {
+            if (!window.canViewPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
             cEditM = mIndex;
             cEditP = pIndex;
             cEditS = sIndex;
@@ -3697,6 +4093,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.saveComment = function() {
+            if (!window.canViewPackage(db.missions[cEditM], db.missions[cEditM].packages[cEditP], currentUser)) return;
             const txt = document.getElementById('newCommentText').value.trim();
             if (!txt) return;
             const step = db.missions[cEditM].packages[cEditP].steps[cEditS];
@@ -3714,6 +4111,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.openSubTaskModal = function(mIndex, pIndex, sIndex) { 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
             cEditM = mIndex; 
             cEditP = pIndex; 
             cEditS = sIndex; 
@@ -3725,6 +4123,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             document.getElementById('subTaskModal').classList.add('hidden'); 
         };
         window.saveSubTask = function() {
+            if (!window.canEditPackage(db.missions[cEditM], db.missions[cEditM].packages[cEditP], currentUser)) return;
             let name = document.getElementById('subTaskName').value.trim(); 
             if(!name) return;
             let step = db.missions[cEditM].packages[cEditP].steps[cEditS]; 
@@ -3735,6 +4134,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             window.saveDataToGAS(false);
         };
         window.deleteSubTask = function(mIndex, pIndex, sIndex, subIndex) { 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
             Swal.fire({ 
                 title: 'Xóa việc nhỏ?', 
                 icon: 'warning', 
@@ -3751,6 +4151,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             }); 
         };
         window.toggleSubTask = function(mIndex, pIndex, sIndex, subIndex, checked) { 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
             db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks[subIndex].completed = checked; 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
@@ -3758,7 +4159,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
 
         // --- CÁC HÀM XÓA, LƯU TRỮ VÀ HOÀN THÀNH ---
         window.deleteMission = function(mIndex) { 
-            if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning'); 
+            if (window.isReadOnlySupervisor(currentUser)) return Swal.fire('Cảnh báo', 'Tài khoản Lãnh đạo chỉ có quyền giám sát và bình luận chỉ đạo!', 'warning'); 
+            if (!window.canEditMission(db.missions[mIndex], currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền xóa Nhiệm vụ này!', 'warning');
             Swal.fire({ 
                 title: 'Xóa Nhiệm vụ?', 
                 text: `Xóa toàn bộ "${db.missions[mIndex].name}" và tất cả gói thầu?`, 
@@ -3776,7 +4178,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.deletePackage = function(mIndex, pkgIndex) { 
-            if (currentUser.role === 'leader') return Swal.fire('Cảnh báo', 'Lãnh đạo chỉ có quyền xem!', 'warning'); 
+            if (window.isReadOnlySupervisor(currentUser)) return Swal.fire('Cảnh báo', 'Tài khoản Lãnh đạo chỉ có quyền giám sát và bình luận chỉ đạo!', 'warning'); 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền xóa Gói thầu này!', 'warning');
             Swal.fire({ 
                 title: 'Xóa Gói thầu?', 
                 icon: 'error', 
@@ -3793,7 +4196,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.deleteProjStep = function(mIndex, pkgIndex, sIndex) { 
-            if (currentUser.role === 'leader') return; 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return; 
             Swal.fire({ 
                 title: 'Xóa công việc?', 
                 icon: 'warning', 
@@ -3888,7 +4291,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { 
-            if (currentUser.role === 'leader') return; 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return; 
             Swal.fire({title: 'Xóa đính kèm?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
                 if(r.isConfirmed){ 
                     let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
@@ -3903,7 +4306,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.archivePackage = function(mIndex, pkgIndex) {
-            if (currentUser.role === 'leader') return; 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return; 
             let pkg = db.missions[mIndex].packages[pkgIndex]; 
             let action = pkg.archived ? "Khôi phục" : "Lưu trữ";
             Swal.fire({ 
@@ -3924,9 +4327,8 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.toggleMissionComplete = function(mIndex) { 
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== m.owner) {
+            if (!window.canEditMission(m, currentUser)) {
                 return Swal.fire('Cảnh báo','Chỉ người tạo Nhiệm vụ hoặc Admin mới được phép chốt!','warning'); 
             }
             m.completed = !m.completed; 
@@ -3935,10 +4337,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.togglePackageComplete = function(mIndex, pkgIndex) { 
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) {
+            if (!window.canEditPackage(m, pkg, currentUser)) {
                 return Swal.fire('Cảnh báo','Chỉ Chuyên viên phụ trách hoặc Admin mới được phép chốt!','warning'); 
             }
             pkg.completed = !pkg.completed; 
@@ -3948,11 +4349,10 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked) { 
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let p = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== p.owner && currentUser.fullname !== m.owner) {
-                return Swal.fire('Lỗi','Bạn không có quyền thao tác!','error'); 
+            if (!window.canEditPackage(m, p, currentUser)) {
+                return Swal.fire('Lỗi','Bạn không có quyền thao tác trên gói thầu này!','error'); 
             }
             p.steps[stepIndex].completed = checked; 
             p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; 
@@ -3962,10 +4362,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.addProjStep = function(mIndex, pkgIndex) { 
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; 
+            if (!window.canEditPackage(m, pkg, currentUser)) return; 
             let newDeadline = new Date(); 
             if (pkg.steps.length > 0) { 
                 newDeadline = new Date(pkg.steps[pkg.steps.length - 1].deadline); 
@@ -3993,10 +4392,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
         };
 
         window.uploadFileDrive = async function(inputElem, mIndex, pkgIndex, sIndex) {
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; 
+            if (!window.canEditPackage(m, pkg, currentUser)) return; 
 
             if (!inputElem.files || inputElem.files.length === 0) return;
             let file = inputElem.files[0];
@@ -4039,10 +4437,9 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
             }
         };
 window.addLink = function(mIndex, pkgIndex, sIndex) { 
-            if (currentUser.role === 'leader') return; 
             let m = db.missions[mIndex]; 
             let pkg = m.packages[pkgIndex]; 
-            if (currentUser.role !== 'admin' && currentUser.fullname !== pkg.owner && currentUser.fullname !== m.owner) return; 
+            if (!window.canEditPackage(m, pkg, currentUser)) return; 
             const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); 
             const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); 
             if (!u) return Swal.fire('Lỗi', 'Vui lòng nhập đường dẫn hợp lệ!', 'warning'); 
@@ -4073,6 +4470,12 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         let enrollingFactorId = null;
         window.openProfileModal = async function() {
             document.getElementById('profileEmail').value = currentUser.email || currentUser.username || '';
+            const roleDeptInfoEl = document.getElementById('profileRoleDeptInfo');
+            if (roleDeptInfoEl) {
+                const roleName = window.getRoleLabel(currentUser.role);
+                const deptName = currentUser.department || (window.normalizeRole(currentUser.role) === 'leader' ? 'Ban Giám đốc' : (window.normalizeRole(currentUser.role) === 'admin' ? 'Toàn Trung tâm' : 'Chưa phân phòng'));
+                roleDeptInfoEl.value = `${roleName} — ${deptName}`;
+            }
             document.getElementById('profileFullname').value = currentUser.fullname || '';
             document.getElementById('profilePassword').value = '';
             document.getElementById('mfaEnrollContainer').classList.add('hidden');
@@ -4187,13 +4590,14 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         };
 
         window.openCreateMissionModal = function() { 
-            if (currentUser.role === 'leader') return; 
+            if (window.isReadOnlySupervisor(currentUser)) return; 
             document.getElementById('createMissionModal').classList.remove('hidden'); 
         };
         window.closeCreateMissionModal = function() { 
             document.getElementById('createMissionModal').classList.add('hidden'); 
         };
         window.createMission = function() { 
+            if (window.isReadOnlySupervisor(currentUser)) return;
             const name = document.getElementById('missionName').value.trim(); 
             const deadlineStr = document.getElementById('missionDeadline').value; 
             if (!name || !deadlineStr) return Swal.fire('Lỗi', 'Vui lòng điền đủ thông tin!', 'warning'); 
@@ -4202,6 +4606,7 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                 name: name, 
                 deadline: new Date(deadlineStr).toISOString(), 
                 owner: currentUser.fullname, 
+                department: currentUser.department || window.getUserDepartment(currentUser.fullname) || '',
                 packages: [], 
                 completed: false 
             }); 
@@ -4212,19 +4617,26 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         };
 
         window.openCreatePackageModal = function(mIndex) { 
-            if (currentUser.role === 'leader') return; 
+            if (window.isReadOnlySupervisor(currentUser)) return; 
             currentMissionIndexForNewPackage = mIndex; 
             const sel = document.getElementById('pkgOwner'); 
             sel.innerHTML = ''; 
-            db.users.forEach(u => { 
-                sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${escapeHtml(u.fullname)}</option>`; 
-            }); 
+            const normRole = window.normalizeRole(currentUser.role);
+            if (normRole === 'user') {
+                sel.innerHTML = `<option value="${escapeHtml(currentUser.fullname)}" selected>${escapeHtml(currentUser.fullname)}${currentUser.department ? ' (' + escapeHtml(currentUser.department) + ')' : ''}</option>`;
+            } else {
+                db.users.forEach(u => { 
+                    let deptTxt = u.department ? ` (${u.department})` : '';
+                    sel.innerHTML += `<option value="${escapeHtml(u.fullname)}" ${u.fullname === currentUser.fullname ? 'selected' : ''}>${escapeHtml(u.fullname + deptTxt)}</option>`; 
+                }); 
+            }
             document.getElementById('createPackageModal').classList.remove('hidden'); 
         };
         window.closeCreatePackageModal = function() { 
             document.getElementById('createPackageModal').classList.add('hidden'); 
         };
         window.createPackage = function() { 
+            if (window.isReadOnlySupervisor(currentUser)) return;
             const mIndex = currentMissionIndexForNewPackage; 
             const name = document.getElementById('projName').value.trim(); 
             const startDateStr = document.getElementById('projStartDate').value; 
@@ -4250,11 +4662,13 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                     }; 
                 }); 
             }
+            const pkgDept = window.getUserDepartment(owner) || currentUser.department || '';
             db.missions[mIndex].packages.push({ 
                 id: Date.now(), 
                 name: name, 
                 processTitle: db.processTemplates[typeKey].title, 
                 owner: owner, 
+                department: pkgDept,
                 archived: false, 
                 completed: false, 
                 logs: [`Khởi tạo gói thầu`], 
@@ -4516,24 +4930,32 @@ window.updateDoc = function(i, f, v) {
 
             // Đồng bộ mới nhất từ bảng sce_v2_profiles nếu có
             if (supabaseClient && currentUser) {
-                await window.syncProfilesFromSupabase({ id: currentUser.id, email: currentUser.email, user_metadata: { fullname: currentUser.fullname, role: currentUser.role } });
+                await window.syncProfilesFromSupabase({ id: currentUser.id, email: currentUser.email, user_metadata: { fullname: currentUser.fullname, role: currentUser.role, department: currentUser.department } });
             }
 
             const roleLabels = {
-                admin: '<span class="px-2 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 rounded-full text-xs font-bold">Quản trị viên (Admin)</span>',
-                leader: '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full text-xs font-bold">Ban Giám đốc (Chỉ xem)</span>',
-                team_lead: '<span class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-xs font-bold">Trưởng nhóm</span>',
-                auditor: '<span class="px-2 py-0.5 bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 rounded-full text-xs font-bold">Kiểm toán viên</span>',
-                user: '<span class="px-2 py-0.5 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">Chuyên viên</span>'
+                admin: '<span class="px-2 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 rounded-full text-xs font-bold"><i class="fas fa-user-shield mr-1"></i>Quản trị viên (Admin)</span>',
+                leader: '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full text-xs font-bold"><i class="fas fa-crown mr-1"></i>Ban Giám đốc (Xem toàn Trung tâm)</span>',
+                dept_leader: '<span class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-xs font-bold"><i class="fas fa-user-tie mr-1"></i>Lãnh đạo phòng (Giám sát phòng)</span>',
+                user: '<span class="px-2 py-0.5 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-xs font-medium"><i class="fas fa-user-check mr-1"></i>Chuyên viên thực hiện</span>'
             };
 
             db.users.forEach((u, i) => {
                 const emailOrUser = u.email || u.username || '';
+                const normRole = window.normalizeRole(u.role);
+                u.role = normRole;
                 const isSelf = currentUser && (emailOrUser.toLowerCase() === (currentUser.email || currentUser.username || '').toLowerCase());
                 const isActive = u.is_active !== false;
                 const statusBadge = isActive
                     ? '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full text-[10px] font-bold"><i class="fas fa-check-circle mr-0.5"></i>Đã kích hoạt</span>'
                     : '<span class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full text-[10px] font-bold animate-pulse"><i class="fas fa-clock mr-0.5"></i>Chờ duyệt / Đã khóa</span>';
+                const deptBadge = u.department
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800 rounded-md text-xs font-semibold"><i class="fas fa-building text-[10px]"></i> ${escapeHtml(u.department)}</span>`
+                    : (normRole === 'leader'
+                        ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 rounded-md text-xs font-semibold"><i class="fas fa-building-columns text-[10px]"></i> Ban Giám đốc</span>`
+                        : (normRole === 'admin'
+                            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800 rounded-md text-xs font-semibold"><i class="fas fa-globe text-[10px]"></i> Toàn Trung tâm</span>`
+                            : `<span class="text-xs italic text-gray-400"><i class="fas fa-circle-exclamation text-amber-500 mr-1"></i>Chưa gán phòng</span>`));
                 const toggleBtn = !isSelf
                     ? (isActive
                         ? `<button onclick="window.toggleUserActiveStatus(${i})" class="px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded text-xs font-bold mr-2 transition" title="Khóa tạm thời tài khoản này"><i class="fas fa-lock mr-1"></i>Khóa</button>`
@@ -4543,10 +4965,11 @@ window.updateDoc = function(i, f, v) {
                     <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition">
                         <td class="p-3 font-mono text-xs">${escapeHtml(emailOrUser)} ${u.id ? '<i class="fas fa-shield-check text-emerald-500 ml-1" title="Đã liên kết Supabase Auth UUID"></i>' : ''}</td>
                         <td class="p-3 font-medium">${escapeHtml(u.fullname)}</td>
-                        <td class="p-3">${roleLabels[u.role] || escapeHtml(u.role)} ${statusBadge}</td>
+                        <td class="p-3">${deptBadge}</td>
+                        <td class="p-3">${roleLabels[normRole] || escapeHtml(normRole)} ${statusBadge}</td>
                         <td class="p-3 text-right whitespace-nowrap">
                             ${toggleBtn}
-                            <button onclick="window.openEditUserModal(${i})" class="text-blue-500 hover:text-blue-700 mr-2" title="Phân quyền & Sửa tên"><i class="fas fa-user-pen"></i></button>
+                            <button onclick="window.openEditUserModal(${i})" class="text-blue-500 hover:text-blue-700 mr-2" title="Phân quyền & Gán phòng chuyên môn"><i class="fas fa-user-pen"></i></button>
                             ${!isSelf ? `<button onclick="window.deleteUser(${i})" class="text-red-500 hover:text-red-700" title="Xóa tài khoản"><i class="fas fa-trash"></i></button>` : ''}
                         </td>
                     </tr>`;
@@ -4562,13 +4985,38 @@ window.updateDoc = function(i, f, v) {
 
             if (supabaseClient && targetUser.id) {
                 try {
-                    const { error } = await supabaseClient
+                    let { error } = await supabaseClient
                         .from('sce_v2_profiles')
                         .update({ is_active: nextState, updated_at: new Date().toISOString() })
                         .eq('id', targetUser.id);
-                    if (error) throw error;
+                    if (error && /jwt expired|pgrst301|invalid jwt|token is expired/i.test(error.message || '')) {
+                        const refreshed = await window.refreshSupabaseSessionNow();
+                        if (refreshed) {
+                            const retryRes = await supabaseClient
+                                .from('sce_v2_profiles')
+                                .update({ is_active: nextState, updated_at: new Date().toISOString() })
+                                .eq('id', targetUser.id);
+                            error = retryRes.error;
+                        }
+                    }
+                    if (error) {
+                        console.warn('Cảnh báo cập nhật sce_v2_profiles:', error.message);
+                        if (/jwt expired|pgrst301|invalid jwt|token is expired/i.test(error.message || '')) {
+                            await window.renderUsers();
+                            await window.saveDataToGAS(false);
+                            return Swal.fire({
+                                title: 'Phiên bảo mật đã hết hạn',
+                                html: `Đã ghi nhận trạng thái <b>${nextState ? 'Phê duyệt' : 'Khóa'}</b> cho <b>${escapeHtml(targetUser.fullname)}</b>.<br><br>Tuy nhiên phiên đăng nhập của bạn đã hết hạn sau thời gian chờ. Vui lòng bấm <b>Đăng nhập lại</b> để đồng bộ lên máy chủ Supabase!`,
+                                icon: 'warning',
+                                confirmButtonText: 'Đăng nhập lại ngay',
+                                confirmButtonColor: '#2563eb'
+                            }).then(() => {
+                                window.handleLogout(false);
+                            });
+                        }
+                    }
                 } catch (e) {
-                    return Swal.fire('Lỗi', 'Không thể cập nhật trạng thái trên Supabase: ' + e.message, 'error');
+                    console.warn('Lỗi cập nhật sce_v2_profiles:', e);
                 }
             }
 
@@ -4583,12 +5031,17 @@ window.updateDoc = function(i, f, v) {
         window.addNewUser = async function() {
             if (currentUser.role !== 'admin') return;
             const email = document.getElementById('newUserUsername').value.trim();
-            const password = document.getElementById('newUserPassword').value.trim();
+            const password = document.getElementById('newUserPassword') ? document.getElementById('newUserPassword').value.trim() : '';
             const fullname = document.getElementById('newUserFullname').value.trim();
-            const role = document.getElementById('newUserRole').value;
+            const deptEl = document.getElementById('newUserDepartment');
+            const department = deptEl ? deptEl.value.trim() : '';
+            const role = window.normalizeRole(document.getElementById('newUserRole').value);
 
             if (!email || !fullname) {
-                return Swal.fire('Lỗi', 'Vui lòng nhập Email đăng nhập và Họ tên chuyên viên!', 'warning');
+                return Swal.fire('Lỗi', 'Vui lòng nhập Email đăng nhập và Họ tên!', 'warning');
+            }
+            if ((role === 'user' || role === 'dept_leader') && (!department || !window.SCE_DEPARTMENTS.includes(department))) {
+                return Swal.fire('Thiếu Phòng chuyên môn', 'Đối với Lãnh đạo phòng và Chuyên viên thực hiện, vui lòng chọn đúng 1 trong 4 Phòng chuyên môn thuộc Trung tâm!', 'warning');
             }
             if (!email.includes('@')) {
                 return Swal.fire('Lỗi định dạng', 'Trong bản V2 bảo mật cao, tài khoản đăng nhập phải là địa chỉ Email (VD: chuyenvien@sce.gov.vn).', 'warning');
@@ -4602,18 +5055,22 @@ window.updateDoc = function(i, f, v) {
                 username: email,
                 email: email,
                 fullname: fullname,
-                role: role
+                role: role,
+                department: department,
+                is_active: true
             });
 
             document.getElementById('newUserUsername').value = '';
-            document.getElementById('newUserPassword').value = '';
+            if (document.getElementById('newUserPassword')) document.getElementById('newUserPassword').value = '';
             document.getElementById('newUserFullname').value = '';
+            if (deptEl) deptEl.value = '';
+            window.populateOwnerFilterByDepartment();
             await window.renderUsers();
             await window.saveDataToGAS(false);
 
             Swal.fire({
-                title: 'Đã cấp quyền Chuyên viên!',
-                html: `Đã thêm <b>${escapeHtml(fullname)} (${escapeHtml(email)})</b> với vai trò <b>${escapeHtml(role)}</b>.<br><br><span class="text-xs text-gray-500">Vì lý do bảo mật Zero-Plaintext, mật khẩu không lưu trong cơ sở dữ liệu JSON. Chuyên viên chỉ cần vào tab <b>"Đăng ký Auth mới"</b> ngoài màn hình đăng nhập với đúng Email <b>${escapeHtml(email)}</b> để kích hoạt mật khẩu mã hóa Bcrypt.</span>`,
+                title: 'Đã cấp quyền Tài khoản!',
+                html: `Đã thêm <b>${escapeHtml(fullname)} (${escapeHtml(email)})</b><br>Vai trò: <b>${escapeHtml(window.getRoleLabel(role))}</b>${department ? `<br>Đơn vị: <b>${escapeHtml(department)}</b>` : ''}.<br><br><span class="text-xs text-gray-500">Người dùng có thể đăng nhập bằng Google hoặc vào tab <b>"Đăng ký Auth mới"</b> ngoài màn hình đăng nhập với đúng Email <b>${escapeHtml(email)}</b>.</span>`,
                 icon: 'success'
             });
         };
@@ -4624,7 +5081,9 @@ window.updateDoc = function(i, f, v) {
             const u = db.users[i];
             document.getElementById('editUserUsername').value = u.email || u.username || '';
             document.getElementById('editUserFullname').value = u.fullname || '';
-            document.getElementById('editUserRole').value = u.role || 'user';
+            const deptEl = document.getElementById('editUserDepartment');
+            if (deptEl) deptEl.value = u.department || '';
+            document.getElementById('editUserRole').value = window.normalizeRole(u.role || 'user');
             const passInput = document.getElementById('editUserPassword');
             if (passInput) {
                 passInput.value = '';
@@ -4641,20 +5100,52 @@ window.updateDoc = function(i, f, v) {
         window.saveEditUser = async function() {
             if (currentUser.role !== 'admin') return;
             const f = document.getElementById('editUserFullname').value.trim();
-            const r = document.getElementById('editUserRole').value;
+            const deptEl = document.getElementById('editUserDepartment');
+            const d = deptEl ? deptEl.value.trim() : '';
+            const r = window.normalizeRole(document.getElementById('editUserRole').value);
             if (!f) return Swal.fire('Lỗi', 'Vui lòng nhập Họ và tên hiển thị!', 'warning');
+            if ((r === 'user' || r === 'dept_leader') && (!d || !window.SCE_DEPARTMENTS.includes(d))) {
+                return Swal.fire('Thiếu Phòng chuyên môn', 'Vui lòng chọn 1 trong 4 Phòng chuyên môn cho Lãnh đạo phòng / Chuyên viên!', 'warning');
+            }
 
             const targetUser = db.users[currentEditUserIndex];
+            const oldFullname = targetUser.fullname;
             targetUser.fullname = f;
             targetUser.role = r;
+            targetUser.department = d;
+
+            // Đồng bộ tên/phòng cho các gói thầu do chuyên viên này phụ trách
+            if (db.missions && Array.isArray(db.missions)) {
+                db.missions.forEach(m => {
+                    if (m.owner === oldFullname || m.owner === f) {
+                        m.owner = f;
+                        if (d) m.department = d;
+                    }
+                    if (m.packages && Array.isArray(m.packages)) {
+                        m.packages.forEach(p => {
+                            if (p.owner === oldFullname || p.owner === f) {
+                                p.owner = f;
+                                if (d) p.department = d;
+                            }
+                        });
+                    }
+                });
+            }
 
             // Cập nhật lên bảng sce_v2_profiles nếu tài khoản đã có UUID
             if (supabaseClient && targetUser.id) {
                 try {
-                    await supabaseClient
+                    const { error } = await supabaseClient
                         .from('sce_v2_profiles')
-                        .update({ fullname: f, role: r, updated_at: new Date().toISOString() })
+                        .update({ fullname: f, role: r, department: d, updated_at: new Date().toISOString() })
                         .eq('id', targetUser.id);
+                    if (error) {
+                        // Fallback tương thích ngược nếu DB chưa chạy lệnh ALTER TABLE thêm cột department
+                        await supabaseClient
+                            .from('sce_v2_profiles')
+                            .update({ fullname: f, role: (r === 'dept_leader' ? 'team_lead' : r), updated_at: new Date().toISOString() })
+                            .eq('id', targetUser.id);
+                    }
                 } catch (e) {
                     console.warn("Lỗi cập nhật sce_v2_profiles:", e);
                 }
@@ -4663,13 +5154,16 @@ window.updateDoc = function(i, f, v) {
             if ((currentUser.email || currentUser.username) === (targetUser.email || targetUser.username)) {
                 currentUser.fullname = f;
                 currentUser.role = r;
+                currentUser.department = d;
                 window.renderUserBadge();
             }
 
+            window.populateOwnerFilterByDepartment();
             window.closeEditUserModal();
             await window.renderUsers();
+            window.renderMissions();
             await window.saveDataToGAS(false);
-            window.toast.fire({ icon: 'success', title: 'Đã cập nhật phân quyền người dùng!' });
+            window.toast.fire({ icon: 'success', title: 'Đã cập nhật phân quyền & phòng chuyên môn!' });
         };
 
         // --- XUẤT EXCEL CHUẨN (.XLSX) DÙNG SHEETJS ---
@@ -4678,25 +5172,21 @@ window.updateDoc = function(i, f, v) {
                 if (typeof XLSX === 'undefined') throw new Error("Chưa tải được thư viện SheetJS");
                 const aoa = [
                     ["BÁO CÁO TỔNG HỢP TIẾN ĐỘ ĐẤU THẦU (SCE ENTERPRISE)"],
-                    [`Ngày xuất báo cáo: ${window.formatDate(new Date().toISOString())}`],
+                    [`Ngày xuất báo cáo: ${window.formatDate(new Date().toISOString())} | Người xuất: ${currentUser.fullname} (${window.getRoleLabel(currentUser.role)}${currentUser.department ? ' - ' + currentUser.department : ''})`],
                     [],
-                    ["STT", "Nhiệm vụ", "Trạng thái NV", "Gói thầu", "Chuyên viên phụ trách", "Tiến độ hoàn thành", "Hạn chót cuối cùng"]
+                    ["STT", "Nhiệm vụ", "Trạng thái NV", "Gói thầu", "Phòng chuyên môn", "Chuyên viên phụ trách", "Tiến độ hoàn thành", "Hạn chót cuối cùng"]
                 ];
 
                 let stt = 1;
                 if(db.missions) {
                     db.missions.forEach(m => {
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
-                        let hasOwnedPackage = false;
-                        if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if (!window.canViewMission(m, currentUser)) return;
                         
                         let mStatusStr = m.completed ? "Hoàn thành" : "Đang thực hiện";
                         if(m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return; 
-                                let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === p.owner || currentUser.fullname === m.owner;
-                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
+                                if (!window.canViewPackage(m, p, currentUser)) return;
                                 
                                 let total = 0, done = 0;
                                 if(p.steps) { 
@@ -4705,12 +5195,14 @@ window.updateDoc = function(i, f, v) {
                                 }
                                 let deadline = p.steps && p.steps.length > 0 ? window.formatDate(p.steps[p.steps.length-1].deadline) : "";
                                 let pStatusStr = p.completed ? "Đã hoàn thành" : `${done}/${total} việc`;
+                                let pkgDept = window.getPackageDepartment(m, p) || "Chưa phân phòng";
                                 
                                 aoa.push([
                                     stt++,
                                     m.name || "Nhiệm vụ",
                                     mStatusStr,
                                     p.name || "Gói thầu",
+                                    pkgDept,
                                     p.owner || m.owner,
                                     pStatusStr,
                                     deadline
@@ -4729,6 +5221,7 @@ window.updateDoc = function(i, f, v) {
                     { wch: 35 }, // Nhiệm vụ
                     { wch: 18 }, // Trạng thái NV
                     { wch: 35 }, // Gói thầu
+                    { wch: 28 }, // Phòng chuyên môn
                     { wch: 25 }, // Chuyên viên
                     { wch: 20 }, // Tiến độ
                     { wch: 18 }  // Hạn chót
@@ -4747,12 +5240,14 @@ window.updateDoc = function(i, f, v) {
                 if (typeof XLSX === 'undefined') throw new Error("Chưa tải được thư viện SheetJS");
                 const mission = db.missions[mIndex]; 
                 const pkg = mission.packages[pkgIndex]; 
+                if (!window.canViewPackage(mission, pkg, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền xuất gói thầu này!', 'warning');
                 const processLabel = pkg.processTitle || "Quy trình đấu thầu";
+                const pkgDept = window.getPackageDepartment(mission, pkg);
 
                 const aoa = [
                     [`NHIỆM VỤ: ${(mission.name || '').toUpperCase()}`],
                     [`GÓI THẦU: ${pkg.name || ''}`],
-                    [`Quy trình áp dụng: ${processLabel} | Phụ trách: ${pkg.owner || mission.owner}`],
+                    [`Quy trình áp dụng: ${processLabel} | Phụ trách: ${pkg.owner || mission.owner}${pkgDept ? ' (' + pkgDept + ')' : ''}`],
                     [`Ngày xuất dữ liệu: ${window.formatDate(new Date().toISOString())}`],
                     []
                 ];
@@ -4825,33 +5320,33 @@ window.updateDoc = function(i, f, v) {
                 const today = new Date();
                 const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
                 
-                
-        let txtActive = 0, txtDone = 0, txtLate = 0;
-        const nowTime = new Date();
-        if (db && db.missions) {
-            db.missions.forEach(m => {
-                if (m.archived) return;
-                let mAllDone = true;
-                if (!m.completed) txtActive++;
-                if (m.packages && m.packages.length > 0) {
-                    m.packages.forEach(p => {
-                        let pAllDone = true;
-                        if (p.steps && p.steps.length > 0) {
-                            p.steps.forEach(s => {
-                                if (!s.completed) {
-                                    pAllDone = false;
-                                    mAllDone = false;
-                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                let txtActive = 0, txtDone = 0, txtLate = 0;
+                const nowTime = new Date();
+                if (db && db.missions) {
+                    db.missions.forEach(m => {
+                        if (m.archived) return;
+                        if (!window.canViewMission(m, currentUser)) return;
+                        let hasVisiblePkg = false;
+                        if (m.packages && m.packages.length > 0) {
+                            m.packages.forEach(p => {
+                                if (!window.canViewPackage(m, p, currentUser)) return;
+                                hasVisiblePkg = true;
+                                let pAllDone = true;
+                                if (p.steps && p.steps.length > 0) {
+                                    p.steps.forEach(s => {
+                                        if (!s.completed) {
+                                            pAllDone = false;
+                                            if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                                        }
+                                    });
                                 }
+                                if (p.completed || pAllDone) txtDone++;
                             });
                         }
-                        if (p.completed || pAllDone) txtDone++;
+                        if (hasVisiblePkg && !m.completed) txtActive++;
                     });
                 }
-            });
-        }
 
-                
                 let reportHtml = `<div id="pdfPrintArea" style="font-family: 'Times New Roman', Times, serif; padding: 30px 40px; color: #000; line-height: 1.5; background: #fff;">`;
                 reportHtml += `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
                     <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>
@@ -4868,11 +5363,17 @@ window.updateDoc = function(i, f, v) {
                 reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">II. CHI TIẾT TÌNH HÌNH THỰC HIỆN DỰ ÁN</h2>`;
                 
                 if (db.missions && db.missions.length > 0) {
-                    db.missions.forEach((m, mIndex) => {
+                    let visibleMIdx = 0;
+                    db.missions.forEach((m) => {
+                        if (!window.canViewMission(m, currentUser)) return;
+                        const visiblePkgs = (m.packages || []).filter(p => window.canViewPackage(m, p, currentUser));
+                        if (visiblePkgs.length === 0 && window.normalizeRole(currentUser.role) === 'user' && m.owner !== currentUser.fullname) return;
+                        visibleMIdx++;
                         let mName = m.name || "Chưa có tên";
                         let mOwner = m.owner || "Không rõ";
-                        reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${mIndex + 1}. Dự án: ${mName} (Phụ trách: ${mOwner})</h3>`;
-                        if (m.packages && m.packages.length > 0) {
+                        let mDept = window.getMissionDepartment(m);
+                        reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${visibleMIdx}. Dự án: ${mName} (Phụ trách: ${mOwner}${mDept ? ' - ' + mDept : ''})</h3>`;
+                        if (visiblePkgs.length > 0) {
                             reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
                             reportHtml += `<tr>
                                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 5%;">STT</th>
@@ -4881,7 +5382,7 @@ window.updateDoc = function(i, f, v) {
                                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ngân sách / Trúng thầu</th>
                                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ghi chú</th>
                             </tr>`;
-                            m.packages.forEach((pkg, pIndex) => {
+                            visiblePkgs.forEach((pkg, pIndex) => {
                                 let pkgName = pkg.name || "";
                                 let budgetInfo = ``;
                                 if (pkg.budget) budgetInfo += `Dự toán: ${window.formatMoney(pkg.budget)}<br>`;
@@ -4950,32 +5451,33 @@ window.updateDoc = function(i, f, v) {
                 const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
                 let html = `<html><head><title>Báo Cáo Giao Ban Đấu Thầu</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; } .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center; } .agency-name { font-size: 14px; } .agency-name-bold { font-weight: bold; text-decoration: underline; } .quoc-hieu { font-size: 14px; font-weight: bold; } .tieu-ngu { font-size: 14px; font-weight: bold; text-decoration: underline; } .report-date { text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px; } h1 { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;} h2 { font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; } table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; } th, td { border: 1px solid #000; padding: 6px 10px; text-align: left; vertical-align: top; } th { font-weight: bold; text-align: center; } .text-center { text-align: center; } ul { margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px; } .footer { margin-top: 40px; display: flex; justify-content: flex-end; } .signature { text-align: center; }</style></head><body>`;
                 
-        let txtActive = 0, txtDone = 0, txtLate = 0;
-        const nowTime = new Date();
-        if (db && db.missions) {
-            db.missions.forEach(m => {
-                if (m.archived) return;
-                let mAllDone = true;
-                if (!m.completed) txtActive++;
-                if (m.packages && m.packages.length > 0) {
-                    m.packages.forEach(p => {
-                        let pAllDone = true;
-                        if (p.steps && p.steps.length > 0) {
-                            p.steps.forEach(s => {
-                                if (!s.completed) {
-                                    pAllDone = false;
-                                    mAllDone = false;
-                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                let txtActive = 0, txtDone = 0, txtLate = 0;
+                const nowTime = new Date();
+                if (db && db.missions) {
+                    db.missions.forEach(m => {
+                        if (m.archived) return;
+                        if (!window.canViewMission(m, currentUser)) return;
+                        let hasVisiblePkg = false;
+                        if (m.packages && m.packages.length > 0) {
+                            m.packages.forEach(p => {
+                                if (!window.canViewPackage(m, p, currentUser)) return;
+                                hasVisiblePkg = true;
+                                let pAllDone = true;
+                                if (p.steps && p.steps.length > 0) {
+                                    p.steps.forEach(s => {
+                                        if (!s.completed) {
+                                            pAllDone = false;
+                                            if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                                        }
+                                    });
                                 }
+                                if (p.completed || pAllDone) txtDone++;
                             });
                         }
-                        if (p.completed || pAllDone) txtDone++;
+                        if (hasVisiblePkg && !m.completed) txtActive++;
                     });
                 }
-            });
-        }
 
-                
                 html += `<div class="header-flex"><div class="agency-name">SỞ TÀI CHÍNH HÀ NỘI<br><span class="agency-name-bold">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div><div><span class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</span></div></div><div class="report-date">${dateStr}</div><h1>BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
                 html += `<h2>1. Số liệu tổng quan</h2><ul><li>Tổng số Nhiệm vụ đang triển khai: <b>${txtActive}</b></li><li>Tổng số Gói thầu đã hoàn thành: <b>${txtDone}</b></li><li>Số lượng công việc đang chậm tiến độ: <b>${txtLate}</b></li></ul>`;
                 html += `<h2>2. Tiến độ chi tiết các Nhiệm vụ đang thực hiện</h2><table><thead><tr><th style="width: 40px">STT</th><th>Tên Nhiệm vụ</th><th style="width: 150px">Chuyên viên Phụ trách</th><th style="width: 100px">Hạn chót</th><th style="width: 80px">Tiến độ</th></tr></thead><tbody>`;
@@ -4983,16 +5485,12 @@ window.updateDoc = function(i, f, v) {
                 let stt = 1;
                 if (db.missions) {
                     db.missions.forEach(m => {
-                        let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === m.owner;
-                        let hasOwnedPackage = false;
-                        if (m.packages) { m.packages.forEach(p => { if (p.owner === currentUser.fullname) hasOwnedPackage = true; }); }
-                        if ((currentUser.role || '').toLowerCase() === 'user' && !isMissionViewer && !hasOwnedPackage) return;
+                        if (!window.canViewMission(m, currentUser)) return;
                         let mTotalSteps = 0, mCompletedSteps = 0, hasActive = false;
                         if (m.packages) {
                             m.packages.forEach(p => {
                                 if (p.archived) return;
-                                let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || p.owner === currentUser.fullname || m.owner === currentUser.fullname;
-                                if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
+                                if (!window.canViewPackage(m, p, currentUser)) return;
                                 hasActive = true; 
                                 if (p.steps) p.steps.forEach(s => { mTotalSteps++; if(s.completed) mCompletedSteps++; });
                             });
@@ -5034,10 +5532,12 @@ window.updateDoc = function(i, f, v) {
         window.printMission = function(mIndex) {
             try {
                 const mission = db.missions[mIndex];
+                if (!window.canViewMission(mission, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền in Nhiệm vụ này!', 'warning');
                 const today = new Date(); 
                 const dateStr = `Ngày in: ${("0" + today.getDate()).slice(-2)}/${("0" + (today.getMonth()+1)).slice(-2)}/${today.getFullYear()}`;
+                const mDept = window.getMissionDepartment(mission);
                 let html = `<html><head><title>In Nhiệm vụ - ${escapeHtml(mission.name)}</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; } h1 { text-align: center; font-size: 20px; text-transform: uppercase; margin-bottom: 10px; } .mission-info { font-size: 15px; margin-bottom: 20px; } h2 { font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 5px; color: #1e3a8a; } table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; } th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; vertical-align: top; } th { background-color: #f2f2f2; font-weight: bold; text-align: center; } .text-center { text-align: center; } .status-done { font-weight: bold; color: #166534; }</style></head><body>`;
-                html += `<h1>BÁO CÁO TIẾN ĐỘ NHIỆM VỤ</h1><div class="mission-info"><b>Tên nhiệm vụ:</b> ${escapeHtml(mission.name)}<br><b>Người chủ trì:</b> ${escapeHtml(mission.owner)}<br><b>Hạn hoàn thành:</b> ${window.formatDate(mission.deadline)}<br><b>Trạng thái:</b> ${mission.completed ? 'Đã hoàn thành' : 'Đang thực hiện'}</div>`;
+                html += `<h1>BÁO CÁO TIẾN ĐỘ NHIỆM VỤ</h1><div class="mission-info"><b>Tên nhiệm vụ:</b> ${escapeHtml(mission.name)}<br><b>Người chủ trì:</b> ${escapeHtml(mission.owner)}${mDept ? ' (' + escapeHtml(mDept) + ')' : ''}<br><b>Hạn hoàn thành:</b> ${window.formatDate(mission.deadline)}<br><b>Trạng thái:</b> ${mission.completed ? 'Đã hoàn thành' : 'Đang thực hiện'}</div>`;
                 
                 if (!mission.packages || mission.packages.length === 0) { 
                     html += `<p style="font-style: italic;">Chưa có gói thầu nào trong nhiệm vụ này.</p>`; 
@@ -5045,10 +5545,10 @@ window.updateDoc = function(i, f, v) {
                     let hasVisiblePkg = false;
                     mission.packages.forEach((pkg, pIdx) => {
                         if (pkg.archived) return; 
-                        let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mission.owner;
-                        if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return;
+                        if (!window.canViewPackage(mission, pkg, currentUser)) return;
                         hasVisiblePkg = true;
-                        html += `<h2>Gói thầu ${pIdx + 1}: ${escapeHtml(pkg.name)}</h2><p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${escapeHtml(pkg.processTitle)} | Phụ trách: ${escapeHtml(pkg.owner)}</i></p>`;
+                        const pDept = window.getPackageDepartment(mission, pkg);
+                        html += `<h2>Gói thầu ${pIdx + 1}: ${escapeHtml(pkg.name)}</h2><p style="font-size: 13px; margin-top: 0;"><i>Quy trình: ${escapeHtml(pkg.processTitle)} | Phụ trách: ${escapeHtml(pkg.owner)}${pDept ? ' (' + escapeHtml(pDept) + ')' : ''}</i></p>`;
                         html += `<table><thead><tr><th style="width: 30px">STT</th><th>Nội dung công việc</th><th style="width: 70px">Định mức</th><th style="width: 80px">Hạn chót</th><th style="width: 120px">Trạng thái</th><th style="width: 180px">Ghi chú</th></tr></thead><tbody>`;
                         if (pkg.steps && pkg.steps.length > 0) {
                             pkg.steps.forEach((step, sIdx) => {
@@ -5091,9 +5591,11 @@ window.updateDoc = function(i, f, v) {
             try {
                 const mission = db.missions[mIndex]; 
                 const pkg = mission.packages[pkgIndex]; 
+                if (!window.canViewPackage(mission, pkg, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền in Gói thầu này!', 'warning');
                 const processLabel = pkg.processTitle || "Quy trình đấu thầu";
+                const pDept = window.getPackageDepartment(mission, pkg);
                 let html = `<html><head><title>In Tiến độ - ${escapeHtml(pkg.name)}</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; } h1 { text-align: center; font-size: 18px; text-transform: uppercase; margin-bottom: 5px; } h2 { text-align: center; font-size: 16px; margin-top: 5px; margin-bottom: 5px; } h3 { text-align: center; font-size: 14px; font-weight: normal; margin-top: 0; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; } th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; } th { background-color: #f2f2f2; font-weight: bold; text-align: center; } .text-center { text-align: center; } .status-done { font-weight: bold; color: #000; } .docs-section { margin-bottom: 15px; font-size: 12px; border-left: 3px solid #666; padding-left: 10px; } .docs-section ul { margin: 5px 0 0 0; padding-left: 20px; }</style></head><body>`;
-                html += `<h1>NHIỆM VỤ: ${escapeHtml(mission.name)}</h1><h2>GÓI THẦU: ${escapeHtml(pkg.name)}</h2><h3>Loại: ${escapeHtml(processLabel)} | Phụ trách: ${escapeHtml(pkg.owner || mission.owner)}</h3>`;
+                html += `<h1>NHIỆM VỤ: ${escapeHtml(mission.name)}</h1><h2>GÓI THẦU: ${escapeHtml(pkg.name)}</h2><h3>Loại: ${escapeHtml(processLabel)} | Phụ trách: ${escapeHtml(pkg.owner || mission.owner)}${pDept ? ' (' + escapeHtml(pDept) + ')' : ''}</h3>`;
                 
                 if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
                     html += `<div class="docs-section"><b>Căn cứ triển khai chung:</b><ul style="margin:5px 0 0; padding-left:20px">`;
@@ -5159,11 +5661,15 @@ window.updateDoc = function(i, f, v) {
             if (!db.missions || db.missions.length === 0) return Swal.fire('Thông báo', 'Không có dữ liệu để xuất.', 'info');
             let data = [];
             db.missions.forEach(m => {
+                if (!window.canViewMission(m, currentUser)) return;
                 if(m.packages) m.packages.forEach(p => {
+                    if (!window.canViewPackage(m, p, currentUser)) return;
+                    let pkgDept = window.getPackageDepartment(m, p) || '';
                     if(p.steps) p.steps.forEach((s, idx) => {
                         data.push({
                             'Dự án': m.name,
                             'Gói thầu': p.name,
+                            'Phòng chuyên môn': pkgDept,
                             'Chủ trì': p.owner || m.owner,
                             'Bước': idx + 1,
                             'Tên công việc': s.name,
@@ -5209,33 +5715,33 @@ window.printDashboard = function() {
     const today = new Date();
     const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
     
-    
-        let txtActive = 0, txtDone = 0, txtLate = 0;
-        const nowTime = new Date();
-        if (db && db.missions) {
-            db.missions.forEach(m => {
-                if (m.archived) return;
-                let mAllDone = true;
-                if (!m.completed) txtActive++;
-                if (m.packages && m.packages.length > 0) {
-                    m.packages.forEach(p => {
-                        let pAllDone = true;
-                        if (p.steps && p.steps.length > 0) {
-                            p.steps.forEach(s => {
-                                if (!s.completed) {
-                                    pAllDone = false;
-                                    mAllDone = false;
-                                    if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
-                                }
-                            });
-                        }
-                        if (p.completed || pAllDone) txtDone++;
-                    });
-                }
-            });
-        }
+    let txtActive = 0, txtDone = 0, txtLate = 0;
+    const nowTime = new Date();
+    if (db && db.missions) {
+        db.missions.forEach(m => {
+            if (m.archived) return;
+            if (!window.canViewMission(m, currentUser)) return;
+            let hasVisiblePkg = false;
+            if (m.packages && m.packages.length > 0) {
+                m.packages.forEach(p => {
+                    if (!window.canViewPackage(m, p, currentUser)) return;
+                    hasVisiblePkg = true;
+                    let pAllDone = true;
+                    if (p.steps && p.steps.length > 0) {
+                        p.steps.forEach(s => {
+                            if (!s.completed) {
+                                pAllDone = false;
+                                if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
+                            }
+                        });
+                    }
+                    if (p.completed || pAllDone) txtDone++;
+                });
+            }
+            if (hasVisiblePkg && !m.completed) txtActive++;
+        });
+    }
 
-    
     let reportHtml = `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
         <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>
         <div><span style="font-size: 14px; font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span style="font-size: 14px; font-weight: bold; text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></div>
@@ -5251,11 +5757,17 @@ window.printDashboard = function() {
     reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">II. CHI TIẾT TÌNH HÌNH THỰC HIỆN DỰ ÁN</h2>`;
     
     if (db.missions && db.missions.length > 0) {
-        db.missions.forEach((m, mIndex) => {
+        let visibleMIdx = 0;
+        db.missions.forEach((m) => {
+            if (!window.canViewMission(m, currentUser)) return;
+            const visiblePkgs = (m.packages || []).filter(p => window.canViewPackage(m, p, currentUser));
+            if (visiblePkgs.length === 0 && window.normalizeRole(currentUser.role) === 'user' && m.owner !== currentUser.fullname) return;
+            visibleMIdx++;
             let mName = m.name || "Chưa có tên";
             let mOwner = m.owner || "Không rõ";
-            reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${mIndex + 1}. Dự án: ${mName} (Phụ trách: ${mOwner})</h3>`;
-            if (m.packages && m.packages.length > 0) {
+            let mDept = window.getMissionDepartment(m);
+            reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${visibleMIdx}. Dự án: ${mName} (Phụ trách: ${mOwner}${mDept ? ' - ' + mDept : ''})</h3>`;
+            if (visiblePkgs.length > 0) {
                 reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
                 reportHtml += `<tr>
                     <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 5%;">STT</th>
@@ -5264,7 +5776,7 @@ window.printDashboard = function() {
                     <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ngân sách / Trúng thầu</th>
                     <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ghi chú</th>
                 </tr>`;
-                m.packages.forEach((pkg, pIndex) => {
+                visiblePkgs.forEach((pkg, pIndex) => {
                     let pkgName = pkg.name || "";
                     let budgetInfo = ``;
                     if (pkg.budget) budgetInfo += `Dự toán: ${window.formatMoney(pkg.budget)}<br>`;
@@ -5365,8 +5877,11 @@ window.exportReportToWord = function() {
 
 <script>
 window.openAuditLogModal = function(mIndex, pIndex) {
-    if (!['admin', 'leader', 'team_lead'].includes((currentUser.role || '').toLowerCase())) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký', 'error');
-    let pkg = db.missions[mIndex].packages[pIndex];
+    const normRole = window.normalizeRole(currentUser.role);
+    if (!['admin', 'leader', 'dept_leader', 'team_lead'].includes(normRole)) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký', 'error');
+    let m = db.missions[mIndex];
+    let pkg = m ? m.packages[pIndex] : null;
+    if (!window.canViewPackage(m, pkg, currentUser)) return Swal.fire('Lỗi', 'Bạn không có quyền xem Nhật ký gói thầu ngoài phạm vi phòng!', 'error');
     document.getElementById('auditLogPkgName').innerText = "Gói thầu: " + (pkg.name || "");
     
     let container = document.getElementById('auditLogContent');
