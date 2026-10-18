@@ -1,10 +1,13 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
     './logo-192.png',
-    './logo-512.png'
+    './logo-512.png',
+    './apple-touch-icon.png',
+    './app-icon-192.png',
+    './app-icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
