@@ -41,14 +41,14 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @media (min-width: 769px) {
         .uniform-step-row {
-            height: 105px !important;
+            height: auto !important;
         }
         .uniform-step-row td {
-            height: 105px !important;
+            height: auto !important;
         }
         .uniform-note-box {
-            height: 52px;
-            min-height: 52px;
+            height: auto;
+            min-height: 30px;
         }
     }
     @media (max-width: 768px) {
@@ -102,8 +102,8 @@
         width: 100% !important;
     }
 
-    /* Thu gọn nút bấm thao tác thành thanh công cụ Icon ở dưới đáy */
-    table tbody td:last-child {
+    /* Thu gọn nút bấm thao tác thành thanh công cụ Icon ở dưới đáy cho các bảng quản trị khác */
+    table tbody:not(.step-list-tbody) td:last-child {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
@@ -112,7 +112,22 @@
         border-top: 1px solid #f1f5f9 !important;
         justify-content: flex-start !important;
     }
-    .dark table tbody td:last-child { border-color: #334155 !important; }
+    .dark table tbody:not(.step-list-tbody) td:last-child { border-color: #334155 !important; }
+
+    /* Riêng thẻ bước công việc gói thầu (.step-list-tbody): gọn gàng, không lồng khung con */
+    .step-list-tbody tr.step-row {
+        padding: 10px 12px !important;
+        margin-bottom: 8px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    }
+    .step-list-tbody tr.step-row td {
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
     
     /* Làm đẹp thẻ Thêm việc phát sinh */
     table tbody tr:last-child td { border-top: none !important; margin-top: 0 !important; justify-content: center !important; }
@@ -135,55 +150,37 @@
     <style>
     .step-table {
         border-collapse: separate !important;
-        border-spacing: 0 10px !important;
+        border-spacing: 0 8px !important;
     }
     .step-row {
-        background-color: #ffffff !important;
+        background-color: #ffffff;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .dark .step-row {
-        background-color: #1e293b !important;
-    }
-    .step-row td {
-        border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
-        padding-top: 12px !important;
-        padding-bottom: 12px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .dark .step-row td {
-        border-top-color: #334155;
-        border-bottom-color: #334155;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-    .step-row td:first-child {
-        border-left: 1px solid #e2e8f0;
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
-        padding-left: 14px !important;
-    }
-    .dark .step-row td:first-child { border-left-color: #334155; }
-    .step-row td:last-child {
-        border-right: 1px solid #e2e8f0;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
-        padding-right: 14px !important;
-    }
-    .dark .step-row td:last-child { border-right-color: #334155; }
-    
-    /* Hover - pops up like a Kanban card */
-    .step-row:hover {
-        transform: translateY(-2px);
-    }
-    .step-row:hover td {
-        background-color: #ffffff;
-        border-color: #cbd5e1;
-        box-shadow: 0 6px 16px -2px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
-    }
-    .dark .step-row:hover td {
         background-color: #1e293b;
-        border-color: #475569;
-        box-shadow: 0 6px 16px -2px rgba(0,0,0,0.4);
+    }
+    @media (min-width: 769px) {
+        .step-row td {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 14px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .dark .step-row td {
+            border-color: #334155;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        }
+        .step-row:hover {
+            transform: translateY(-1px);
+        }
+        .step-row:hover td {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.08);
+        }
+        .dark .step-row:hover td {
+            border-color: #475569;
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.35);
+        }
     }
     </style>
 </head>
@@ -3594,7 +3591,7 @@ const LUNAR_HOLIDAYS = [
                                         
                                         let safeStepName = escapeHtml(step.name || ''); 
                                         let safeNote = escapeHtml(step.note || '');
-                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-tight mb-0.5">${safeStepName}</div>`;
+                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-snug break-words">${safeStepName}</div>`;
                                         
                                         let subTasksHtml = "";
                                         if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
@@ -3609,46 +3606,97 @@ const LUNAR_HOLIDAYS = [
                                             subTasksHtml += `</div>`;
                                         }
                                         
-                                        let fullTaskHtml = nameHtml + subTasksHtml; 
-                                        let dateHtml = `<span class="text-[13px] ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
-                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : "-"; 
+                                        let dateHtml = `<span class="text-[13px] font-semibold ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
+                                        let timeBudget = (step.originalDays > 0) ? `<span class="bg-blue-50/70 dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm whitespace-nowrap">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : ""; 
+                                        let completedByHtml = step.completedBy ? `<span class="text-[11.5px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-check text-[10px]"></i> ${escapeHtml(step.completedBy)}</span>` : "";
+
                                         let cCount = (step.comments && step.comments.length > 0) ? step.comments.length : 0;
                                         let cClass = cCount > 0 ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 font-bold" : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
                                         let noteBoxHtml = safeNote 
-                                            ? `<div class="text-[11px] text-gray-700 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1.5 rounded h-8 flex items-center overflow-hidden text-ellipsis whitespace-nowrap" title="${safeNote}">${safeNote}</div>`
-                                            : `<div class="text-[11px] text-gray-400 dark:text-gray-500 italic bg-gray-50/50 dark:bg-gray-900/50 border border-dashed border-gray-200 dark:border-gray-800 p-1.5 rounded h-8 flex items-center">Không có ghi chú</div>`;
-                                        let noteHtml = `<div class="flex flex-col justify-between uniform-note-box">${noteBoxHtml}<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="self-start text-[10px] ${cClass} px-2 py-0.5 rounded border shadow-sm transition hover:opacity-80 flex items-center gap-1"><i class="fas fa-comments text-gray-400"></i> Trao đổi (${cCount})</button></div>`;
+                                            ? `<div class="flex-1 min-w-0 text-[11.5px] text-gray-700 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-lg h-7 flex items-center overflow-hidden text-ellipsis whitespace-nowrap" title="${safeNote}">${safeNote}</div>`
+                                            : `<div class="flex-1 min-w-0 text-[11.5px] text-gray-400 dark:text-gray-500 italic bg-gray-50/60 dark:bg-gray-900/50 border border-dashed border-gray-200 dark:border-gray-800 px-2.5 py-1 rounded-lg h-7 flex items-center overflow-hidden text-ellipsis whitespace-nowrap">Không có ghi chú</div>`;
+                                        let noteHtml = `<div class="flex items-center gap-1.5 uniform-note-box w-full">${noteBoxHtml}<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="shrink-0 h-7 text-[11px] ${cClass} px-2.5 rounded-lg border shadow-sm transition hover:opacity-80 inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-comments text-gray-400"></i> Trao đổi (${cCount})</button></div>`;
                                         
                                         let linksDisplayHtml = "";
-                                        if (step.links && Array.isArray(step.links)) {
-                                            linksDisplayHtml = step.links.map((l, lIndex) => {
+                                        if (step.links && Array.isArray(step.links) && step.links.length > 0) {
+                                            linksDisplayHtml = `<div class="flex flex-wrap gap-1 mt-1.5">` + step.links.map((l, lIndex) => {
                                                 let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : '';
-                                                return `<div class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-gray-600 px-2 py-1 rounded text-[11px] mr-1 mb-1 shadow-sm"><a href="${escapeHtml(l.url)}" target="_blank" class="hover:underline font-medium truncate max-w-[100px]" title="${escapeHtml(l.url)}"><i class="fas fa-link mr-1"></i>${escapeHtml(l.name)}</a>${actDelLink}</div>`;
-                                            }).join('');
+                                                return `<div class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-gray-600 px-2 py-0.5 rounded text-[11px] shadow-sm"><a href="${escapeHtml(l.url)}" target="_blank" class="hover:underline font-medium truncate max-w-[140px]" title="${escapeHtml(l.url)}"><i class="fas fa-link mr-1"></i>${escapeHtml(l.name)}</a>${actDelLink}</div>`;
+                                            }).join('') + `</div>`;
                                         }
                                         
-                                        const linkInputHtml = canEditPkg ? `
-                                            <div class="mt-1 relative">
-                                                <button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800 mr-1"><i class="fas fa-link"></i> Link web</button>
-                                                <button onclick="document.getElementById('uploadFile_${mIndex}_${pkgIndex}_${sIndex}').click()" class="text-[10px] text-teal-600 dark:text-teal-400 font-medium bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded border border-teal-100 dark:border-teal-800" title="Tải file đính kèm"><i class="fas fa-cloud-upload-alt"></i> Tải file lên</button>
-                                                <input type="file" id="uploadFile_${mIndex}_${pkgIndex}_${sIndex}" class="hidden" onchange="window.uploadFileDrive(this, ${mIndex}, ${pkgIndex}, ${sIndex})">
-                                                
-                                                <div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-1 p-2 bg-white dark:bg-gray-800 rounded shadow-lg absolute z-20 w-48 border dark:border-gray-700">
-                                                    <input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file" class="w-full mb-1 p-1 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
-                                                    <input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1 p-1 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
-                                                    <button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs w-full">Lưu</button>
-                                                </div>
-                                            </div>` : '';
+                                        const linkButtonsHtml = canEditPkg ? `
+                                            <button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded-md border border-indigo-100 dark:border-indigo-800 inline-flex items-center gap-1 transition whitespace-nowrap"><i class="fas fa-link text-[10px]"></i> Link web</button>
+                                            <button onclick="document.getElementById('uploadFile_${mIndex}_${pkgIndex}_${sIndex}').click()" class="text-[11px] text-teal-600 dark:text-teal-400 font-medium bg-teal-50 hover:bg-teal-100 dark:bg-teal-900/30 px-2 py-1 rounded-md border border-teal-100 dark:border-teal-800 inline-flex items-center gap-1 transition whitespace-nowrap" title="Tải file đính kèm"><i class="fas fa-cloud-upload-alt text-[10px]"></i> Tải file lên</button>
+                                            <input type="file" id="uploadFile_${mIndex}_${pkgIndex}_${sIndex}" class="hidden" onchange="window.uploadFileDrive(this, ${mIndex}, ${pkgIndex}, ${sIndex})">
+                                        ` : '';
+
+                                        const linkFormPopupHtml = canEditPkg ? `
+                                            <div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-2 p-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-md w-full sm:w-64 border border-indigo-200 dark:border-gray-700">
+                                                <input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file / tài liệu" class="w-full mb-1.5 p-1.5 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
+                                                <input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1.5 p-1.5 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
+                                                <button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-semibold w-full">Lưu đính kèm</button>
+                                            </div>
+                                        ` : '';
                                             
-                                        let actCell = ""; 
                                         let dragHandle = "";
+                                        let actionIconsHtml = "";
+                                        const calLinkHtml = `<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a>`;
                                         if (canEditPkg) {
-                                            dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mr-2 step-drag-handle inline-block"><i class="fas fa-grip-vertical"></i></div>`;
-                                            actCell = `<td class="py-2.5 px-2 text-center align-middle whitespace-nowrap space-x-1 w-32"><button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button><button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-500 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-block" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a><button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition" title="Xóa"><i class="fas fa-trash"></i></button></td>`;
+                                            dragHandle = `<div class="cursor-move text-gray-300 dark:text-gray-600 hover:text-blue-500 mt-0.5 step-drag-handle shrink-0"><i class="fas fa-grip-vertical"></i></div>`;
+                                            actionIconsHtml = `
+                                                <button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button>
+                                                <button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button>
+                                                ${calLinkHtml}
+                                                <button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition inline-flex items-center justify-center" title="Xóa"><i class="fas fa-trash"></i></button>
+                                            `;
+                                        } else {
+                                            actionIconsHtml = calLinkHtml;
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        return `<tr class="step-row uniform-step-row cursor-pointer ${bgRow}"><td class="py-2.5 px-3 w-8 text-center align-middle"><input type="checkbox" class="w-4 h-4 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 mt-1" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : ''}"></td><td class="py-2.5 px-3 align-middle"><div class="flex items-center gap-2">${dragHandle}<div class="flex-1 min-w-0">${fullTaskHtml}${step.completedBy?`<div class="text-[10px] text-green-600 dark:text-green-400 mt-1 flex items-center gap-1"><i class="fas fa-check"></i> ${escapeHtml(step.completedBy)}</div>`:''}</div></div></td><td class="py-2.5 px-2 text-center align-middle w-14">${timeBudget}</td><td class="py-2.5 px-3 text-center align-middle w-24">${dateHtml}</td><td class="py-2.5 px-3 align-middle w-48 text-xs">${noteHtml}</td><td class="py-2.5 px-3 align-middle w-32 text-xs"><div class="flex flex-wrap">${linksDisplayHtml}</div>${linkInputHtml}</td>${actCell}</tr>`;
+                                        let checkboxHtml = `<input type="checkbox" class="w-5 h-5 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 rounded shrink-0" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : 'Đánh dấu hoàn thành bước công việc'}">`;
+
+                                        return `
+                                            <tr class="step-row uniform-step-row ${bgRow}">
+                                                <td colspan="7" class="align-middle">
+                                                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 lg:gap-4 w-full">
+                                                        <!-- KHỐI 1: TÊN CÔNG VIỆC + DÒNG THỜI HẠN & ĐỊNH MỨC (1 LV + NGÀY + NGƯỜI HOÀN THÀNH CÙNG 1 DÒNG) -->
+                                                        <div class="flex items-start gap-2 flex-1 min-w-0">
+                                                            ${dragHandle}
+                                                            <div class="flex-1 min-w-0">
+                                                                ${nameHtml}
+                                                                <div class="flex items-center flex-wrap gap-2 mt-1">
+                                                                    ${dateHtml}
+                                                                    ${timeBudget}
+                                                                    ${completedByHtml}
+                                                                </div>
+                                                                ${subTasksHtml}
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- KHỐI 2: GHI CHÚ & TRAO ĐỔI NẰM NGANG TRÊN CÙNG 1 HÀNG -->
+                                                        <div class="w-full lg:w-72 xl:w-80 shrink-0">
+                                                            ${noteHtml}
+                                                            ${linksDisplayHtml}
+                                                        </div>
+
+                                                        <!-- KHỐI 3: THANH CÔNG CỤ ĐÁY (ICON THAO TÁC + LINK WEB + TẢI FILE BÊN TRÁI, CHECKBOX BÊN PHẢI) -->
+                                                        <div class="w-full lg:w-auto shrink-0 pt-1.5 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-700/70">
+                                                            <div class="flex items-center justify-between lg:justify-end gap-2 w-full">
+                                                                <div class="flex items-center gap-1 flex-wrap">
+                                                                    ${actionIconsHtml}
+                                                                    ${linkButtonsHtml}
+                                                                </div>
+                                                                <div class="flex items-center pl-2 shrink-0">
+                                                                    ${checkboxHtml}
+                                                                </div>
+                                                            </div>
+                                                            ${linkFormPopupHtml}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>`;
                                     }).join('');
                                 }
 
@@ -3771,9 +3819,17 @@ const LUNAR_HOLIDAYS = [
 
                                             <!-- BƯỚC 3: BẢNG CHI TIẾT CÁC BƯỚC THỰC HIỆN (HIỆN RA KHI CLICK TIẾP XEM CÁC BƯỚC CHI TIẾT) -->
                                             <div id="steps_container_${pkgKey}" class="overflow-x-auto overflow-y-visible border-t border-gray-100 dark:border-gray-800 ${isExpanded ? '' : 'hidden'}">
-                                                <table class="w-full text-left border-separate border-spacing-y-2 text-sm px-3">
-                                                    <thead class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                                        <tr><th class="py-2 px-3 w-8 text-center"><i class="fas fa-check"></i></th><th class="py-2 px-3 text-[13px]">Chi tiết việc</th><th class="py-2 px-2 w-14 text-center">Mức</th><th class="py-2 px-3 w-24 text-center">Hạn chót</th><th class="py-2 px-3 w-48">Ghi chú & Trao đổi</th><th class="py-2 px-3 w-32">Đính kèm</th>${canEditPkg ? '<th class="py-2.5 px-2 w-28 text-center"><i class="fas fa-cogs"></i></th>' : ''}</tr>
+                                                <table class="w-full text-left border-separate border-spacing-y-2 text-sm px-2.5 sm:px-3">
+                                                    <thead class="hidden lg:table-header-group text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider">
+                                                        <tr>
+                                                            <th colspan="7" class="py-1.5 px-3.5 font-semibold">
+                                                                <div class="flex items-center justify-between gap-4 w-full">
+                                                                    <div class="flex-1 min-w-0">Chi tiết công việc & Thời hạn</div>
+                                                                    <div class="w-72 xl:w-80 shrink-0">Ghi chú & Trao đổi</div>
+                                                                    <div class="w-64 shrink-0 text-right">Thao tác, Đính kèm & Hoàn thành</div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
                                                     </thead>
                                                     <tbody class="step-list-tbody" data-mindex="${mIndex}" data-pindex="${pkgIndex}">${stepsHtml} ${canEditPkg ? `<tr><td colspan="7" class="p-2 text-center bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 transition"><button onclick="window.addProjStep(${mIndex}, ${pkgIndex})" class="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"><i class="fas fa-plus mr-1"></i> Thêm việc phát sinh</button></td></tr>` : ''}</tbody>
                                                 </table>
