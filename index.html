@@ -377,18 +377,43 @@
             <div class="flex-1 min-w-0 w-full">
             <!-- 3. PROJECTS / MISSIONS (GIAO DIỆN CHÍNH CỐT LÕI) -->
             <div id="view-projects">
-                <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col xl:flex-row gap-3 sm:gap-4 justify-between items-center">
-                    <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto items-center flex-1 flex-wrap">
-                        <div class="relative w-full md:flex-1 md:min-w-[200px]"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm tên nhiệm vụ, gói thầu..." class="w-full pl-9 pr-3 py-2 border dark:border-gray-600 rounded-md text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                        <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                            <select id="filterStatus" onchange="window.renderMissions()" class="flex-1 md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="active">Đang chạy</option><option value="archived">Lưu trữ</option><option value="all">Tất cả</option></select>
-                            <input type="text" id="globalSearchInput" placeholder="🔍 Tìm dự án, gói thầu..." class="border dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white p-2 rounded-lg text-sm w-full sm:w-48 md:w-64 focus:ring-2 focus:ring-blue-500 outline-none" onkeyup="window.renderMissions()">
-                    <select id="filterOwner" onchange="window.renderMissions()" class="flex-[2] md:flex-none border dark:border-gray-600 rounded-md px-3 py-2 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
+                <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 space-y-3">
+                    <div class="flex flex-col lg:flex-row gap-2.5 w-full items-stretch lg:items-center justify-between">
+                        <div class="relative flex-1 min-w-[220px]">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                            <input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm nhiệm vụ, gói thầu, nhà thầu, bước công việc..." class="w-full pl-9 pr-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition">
                         </div>
-                        <div class="flex items-center justify-between w-full md:w-auto gap-1 text-xs sm:text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2 py-1.5 rounded-md min-w-0 max-w-full overflow-hidden"><span class="text-gray-500 dark:text-gray-300 shrink-0">Từ</span><input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0 text-xs sm:text-sm"><span class="text-gray-500 dark:text-gray-300 text-center shrink-0">đến</span><input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white flex-1 min-w-0 text-xs sm:text-sm"></div>
-                        <button onclick="window.toggleAllPackages()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md text-xs font-semibold border dark:border-gray-600 flex items-center gap-1.5 shadow-sm transition whitespace-nowrap" title="Mở rộng hoặc thu gọn toàn bộ các gói thầu"><i class="fas fa-layer-group text-blue-500"></i><span id="btnToggleAllText">Mở rộng tất cả</span></button>
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
+                            <select id="filterStatus" onchange="window.renderMissions()" class="border dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="active">Đang chạy</option><option value="archived">Lưu trữ</option><option value="all">Tất cả</option></select>
+                            <select id="filterOwner" onchange="window.renderMissions()" class="border dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm outline-none bg-gray-50 dark:bg-gray-700 dark:text-white font-medium text-gray-700"><option value="all">Tất cả Chuyên viên</option></select>
+                            <div class="flex items-center gap-1.5 text-xs sm:text-sm bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 px-2.5 py-1.5 rounded-lg shrink-0">
+                                <span class="text-gray-500 dark:text-gray-300">Từ</span>
+                                <input type="date" id="filterFromDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white text-xs sm:text-sm">
+                                <span class="text-gray-500 dark:text-gray-300">đến</span>
+                                <input type="date" id="filterToDate" onchange="window.renderMissions()" class="bg-transparent outline-none dark:text-white text-xs sm:text-sm">
+                            </div>
+                            <button onclick="window.toggleAllPackages()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-semibold border dark:border-gray-600 flex items-center gap-1.5 shadow-sm transition whitespace-nowrap" title="Mở rộng hoặc thu gọn toàn bộ các gói thầu"><i class="fas fa-layer-group text-blue-500"></i><span id="btnToggleAllText">Mở rộng tất cả</span></button>
+                        </div>
                     </div>
-                    <div id="archiveWarning" class="hidden text-[11px] md:text-xs text-red-600 font-medium bg-red-50 dark:bg-red-900/30 px-3 py-2 rounded-md border border-red-200 dark:border-red-800 flex items-center gap-1.5 whitespace-nowrap shadow-sm"><i class="fas fa-trash-alt"></i> Tự động xóa sau 30 ngày</div>
+
+                    <!-- DẢI THẺ LỌC NHANH THEO TIẾN ĐỘ (QUICK STATUS CHIPS) -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/70">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="qchip_all" onclick="window.setQuickProgressFilter('all')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition shadow-sm bg-slate-800 text-white border-slate-800 dark:bg-blue-600 dark:border-blue-500">
+                                <i class="fas fa-list-ul text-[11px]"></i> Tất cả <span id="chipCountAll" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-white/20 text-[11px]">0</span>
+                            </button>
+                            <button id="qchip_in_progress" onclick="window.setQuickProgressFilter('in_progress')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-blue-50/70 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800">
+                                <i class="fas fa-clock text-[11px]"></i> Đang thực hiện <span id="chipCountInProgress" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-blue-200/70 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-[11px]">0</span>
+                            </button>
+                            <button id="qchip_overdue" onclick="window.setQuickProgressFilter('overdue')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-red-50/70 hover:bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
+                                <i class="fas fa-exclamation-triangle text-[11px]"></i> Chậm tiến độ <span id="chipCountOverdue" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-red-200/70 dark:bg-red-900 text-red-800 dark:text-red-200 text-[11px]">0</span>
+                            </button>
+                            <button id="qchip_completed" onclick="window.setQuickProgressFilter('completed')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+                                <i class="fas fa-check-circle text-[11px]"></i> Đã xong <span id="chipCountDone" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-emerald-200/70 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[11px]">0</span>
+                            </button>
+                        </div>
+                        <div id="archiveWarning" class="hidden text-[11px] md:text-xs text-red-600 font-medium bg-red-50 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800 flex items-center gap-1.5 whitespace-nowrap shadow-sm"><i class="fas fa-trash-alt"></i> Tự động xóa sau 30 ngày</div>
+                    </div>
                 </div>
                 <div id="projectList" class="space-y-8"></div>
             </div>
@@ -1267,10 +1292,17 @@ const LUNAR_HOLIDAYS = [
         let expandedPackages = new Set();         // Bước 3: Hiện bảng các bước chi tiết của gói thầu
         window.expandedOverviewPackages = expandedOverviewPackages;
         window.expandedPackages = expandedPackages;
+        window.activeQuickProgressFilter = 'all'; // 'all' | 'in_progress' | 'overdue' | 'completed'
+
+        window.setQuickProgressFilter = function(mode) {
+            window.activeQuickProgressFilter = mode || 'all';
+            window.renderMissions();
+        };
 
         // Click Bước 1 -> Đóng/Mở Bước 2 (Thông tin cơ bản gói thầu)
         window.togglePackageOverview = function(mIndex, pkgIndex) {
             const key = `${mIndex}_${pkgIndex}`;
+            const pkgCard = document.getElementById(`pkg_card_${key}`);
             const overviewContainer = document.getElementById(`overview_container_${key}`);
             const chevronIcon = document.getElementById(`overview_chevron_${key}`);
 
@@ -1280,6 +1312,9 @@ const LUNAR_HOLIDAYS = [
                 if (overviewContainer) overviewContainer.classList.add('hidden');
                 if (chevronIcon) {
                     chevronIcon.classList.remove('rotate-90', 'text-blue-600', 'dark:text-blue-400');
+                }
+                if (pkgCard) {
+                    pkgCard.classList.remove('border-l-4', 'border-l-blue-600', 'dark:border-l-blue-400', 'shadow-md', 'ring-1', 'ring-blue-500/20');
                 }
                 const stepsContainer = document.getElementById(`steps_container_${key}`);
                 const btn = document.getElementById(`btn_expand_${key}`);
@@ -1301,6 +1336,9 @@ const LUNAR_HOLIDAYS = [
                 if (overviewContainer) overviewContainer.classList.remove('hidden');
                 if (chevronIcon) {
                     chevronIcon.classList.add('rotate-90', 'text-blue-600', 'dark:text-blue-400');
+                }
+                if (pkgCard) {
+                    pkgCard.classList.add('border-l-4', 'border-l-blue-600', 'dark:border-l-blue-400', 'shadow-md', 'ring-1', 'ring-blue-500/20');
                 }
             }
         };
@@ -2849,12 +2887,25 @@ const LUNAR_HOLIDAYS = [
                 container.innerHTML = '';
                 
                 const searchKw = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
+                const sq = searchKw;
                 const filterStat = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : 'active';
                 const filterOwner = document.getElementById('filterOwner') ? document.getElementById('filterOwner').value : 'all';
-            const sq = document.getElementById('globalSearchInput') ? document.getElementById('globalSearchInput').value.toLowerCase().trim() : '';
                 const filterFrom = document.getElementById('filterFromDate') && document.getElementById('filterFromDate').value ? new Date(document.getElementById('filterFromDate').value).setHours(0,0,0,0) : null;
                 const filterTo = document.getElementById('filterToDate') && document.getElementById('filterToDate').value ? new Date(document.getElementById('filterToDate').value).setHours(23,59,59,999) : null;
                 const now = new Date(new Date().setHours(0,0,0,0));
+                const quickFilter = window.activeQuickProgressFilter || 'all';
+
+                const getPkgProgressType = (pkg) => {
+                    const steps = Array.isArray(pkg.steps) ? pkg.steps : [];
+                    const total = steps.length;
+                    const done = steps.filter(s => s.completed).length;
+                    if (pkg.completed || (total > 0 && done === total)) return 'completed';
+                    const hasLate = steps.some(s => !s.completed && s.deadline && new Date(s.deadline) < now);
+                    if (hasLate) return 'overdue';
+                    return 'in_progress';
+                };
+
+                let countAll = 0, countInProgress = 0, countOverdue = 0, countDone = 0;
                 
                 const warningEl = document.getElementById('archiveWarning'); 
                 if (warningEl) { 
@@ -2872,7 +2923,7 @@ const LUNAR_HOLIDAYS = [
                         
                         if (mission.packages && Array.isArray(mission.packages)) {
                             mission.packages.forEach(p => { if (!p.owner) p.owner = mOwnerSafe; });
-                            visiblePackages = mission.packages.filter(pkg => {
+                            const baseMatchedPackages = mission.packages.filter(pkg => {
                                 if (filterStat === 'active' && pkg.archived) return false; 
                                 if (filterStat === 'archived' && !pkg.archived) return false; 
                                 if (filterOwner !== 'all' && pkg.owner !== filterOwner) return false;
@@ -2881,13 +2932,28 @@ const LUNAR_HOLIDAYS = [
                                 if (filterFrom && finalD && finalD < filterFrom) return false; 
                                 if (filterTo && finalD && finalD > filterTo) return false;
                                 
-                                let pNameSafe = pkg.name || ""; 
-                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.toLowerCase().includes(searchKw); 
+                                let pNameSafe = (pkg.name || "").toLowerCase();
+                                let pContractorSafe = (pkg.contractor || "").toLowerCase();
+                                let matchStep = pkg.steps && Array.isArray(pkg.steps) && pkg.steps.some(st => (st.name || '').toLowerCase().includes(searchKw) || (st.note || '').toLowerCase().includes(searchKw));
+                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.includes(searchKw) || pContractorSafe.includes(searchKw) || matchStep; 
                                 if (!matchSearchPkg) return false;
                                 
                                 let isPkgViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === pkg.owner || currentUser.fullname === mOwnerSafe; 
                                 if ((currentUser.role || '').toLowerCase() === 'user' && !isPkgViewer) return false; 
                                 return true;
+                            });
+
+                            baseMatchedPackages.forEach(pkg => {
+                                countAll++;
+                                const pType = getPkgProgressType(pkg);
+                                if (pType === 'completed') countDone++;
+                                else if (pType === 'overdue') countOverdue++;
+                                else countInProgress++;
+                            });
+
+                            visiblePackages = baseMatchedPackages.filter(pkg => {
+                                if (quickFilter === 'all') return true;
+                                return getPkgProgressType(pkg) === quickFilter;
                             });
                         }
                         
@@ -2895,7 +2961,7 @@ const LUNAR_HOLIDAYS = [
                         let isMissionViewer = currentUser.role === 'admin' || currentUser.role === 'leader' || currentUser.fullname === mOwnerSafe;
                         if (visiblePackages.length > 0) { 
                             showMission = true; 
-                        } else if (filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && filterOwner === 'all' && !filterFrom && !filterTo) { 
+                        } else if (quickFilter === 'all' && filterStat === 'active' && (!mission.packages || mission.packages.length === 0) && matchSearch && filterOwner === 'all' && !filterFrom && !filterTo) { 
                             if (currentUser.role !== 'user' || isMissionViewer) showMission = true; 
                         }
                         if (!showMission) return; 
@@ -3162,7 +3228,7 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
 
                                 packagesHtml += `
-                                    <div class="bg-white dark:bg-gray-800 rounded-xl border ${borderColor} overflow-hidden mb-3 shadow-sm hover:shadow transition-shadow">
+                                    <div id="pkg_card_${pkgKey}" class="bg-white dark:bg-gray-800 rounded-xl border ${borderColor} ${isOverviewExpanded ? 'border-l-4 border-l-blue-600 dark:border-l-blue-400 shadow-md ring-1 ring-blue-500/20' : 'shadow-sm'} overflow-hidden mb-3 hover:shadow transition-all">
                                         <!-- BƯỚC 1: CHỈ HIỆN TÊN GÓI THẦU & TRẠNG THÁI (ĐANG THỰC HIỆN / CHẬM TIẾN ĐỘ / ĐÃ XONG) -->
                                         <div onclick="window.togglePackageOverview(${mIndex}, ${pkgIndex})" class="${headerBg} px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition select-none" title="Bấm vào để xem thông tin cơ bản của gói thầu">
                                             <div class="flex items-center gap-2.5 min-w-0 flex-1">
@@ -3278,6 +3344,15 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                             delMissionBtn = `<button onclick="window.deleteMission(${mIndex})" class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition" title="Xóa toàn bộ nhiệm vụ"><i class="fas fa-trash-alt"></i></button>`;
                         }
 
+                        // Tính chỉ số tiến độ tổng của Nhiệm vụ lớn (Hoàn thành X/Y gói thầu)
+                        const mActivePkgs = (mission.packages || []).filter(p => !p.archived);
+                        const mTotalPkgs = mActivePkgs.length;
+                        const mDonePkgs = mActivePkgs.filter(p => getPkgProgressType(p) === 'completed').length;
+                        const mProgPct = mTotalPkgs > 0 ? Math.round((mDonePkgs / mTotalPkgs) * 100) : (mission.completed ? 100 : 0);
+                        const mProgressBadgeHtml = mTotalPkgs > 0
+                            ? `<span class="inline-flex items-center gap-1.5 bg-indigo-100/80 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-200 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-700"><i class="fas fa-chart-pie text-indigo-600 dark:text-indigo-400 text-[11px]"></i> Hoàn thành: ${mDonePkgs}/${mTotalPkgs} gói thầu (${mProgPct}%)</span>`
+                            : '';
+
                         container.innerHTML += `
                             <div class="mission-block border ${mBorderColor} rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm mb-6">
                                 <div class="${mBgColor} p-3 sm:p-4 border-b border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
@@ -3287,9 +3362,12 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                                                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg mr-2 shadow-sm shrink-0 align-middle ${mission.completed ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}"><i class="fas fa-clipboard-list text-xs"></i></span>Nhiệm vụ: ${escapeHtml(mNameSafe)} ${btnEditMission}
                                             </h2>
                                         </div>
-                                        <p class="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
-                                            <i class="far fa-clock mr-1"></i>Hạn tổng: <b>${window.formatDate(mission.deadline)}</b> | <i class="far fa-user mr-1"></i>Owner: <b>${escapeHtml(mOwnerSafe)}</b>
-                                        </p>
+                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-indigo-700 dark:text-indigo-300 mt-1.5">
+                                            <span><i class="far fa-clock mr-1"></i>Hạn tổng: <b>${window.formatDate(mission.deadline)}</b></span>
+                                            <span>|</span>
+                                            <span><i class="far fa-user mr-1"></i>Owner: <b>${escapeHtml(mOwnerSafe)}</b></span>
+                                            ${mProgressBadgeHtml}
+                                        </div>
                                         ${docsHtml}
                                     </div>
                                     <div class="flex flex-wrap gap-1.5 sm:gap-2 items-center w-full md:w-auto mt-2 md:mt-0">
@@ -3300,6 +3378,41 @@ let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mI
                             </div>`;
                     });
                 }
+
+                // Cập nhật số lượng và trạng thái active trên 4 Thẻ lọc nhanh (Quick Status Chips)
+                const elAll = document.getElementById('chipCountAll');
+                const elInProg = document.getElementById('chipCountInProgress');
+                const elOverdue = document.getElementById('chipCountOverdue');
+                const elDone = document.getElementById('chipCountDone');
+                if (elAll) elAll.innerText = countAll;
+                if (elInProg) elInProg.innerText = countInProgress;
+                if (elOverdue) elOverdue.innerText = countOverdue;
+                if (elDone) elDone.innerText = countDone;
+
+                const chipStyles = {
+                    all: {
+                        active: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition shadow-sm bg-slate-800 text-white border-slate-800 dark:bg-blue-600 dark:border-blue-500',
+                        inactive: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
+                    },
+                    in_progress: {
+                        active: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition shadow-sm bg-blue-600 text-white border-blue-600',
+                        inactive: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-blue-50/70 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+                    },
+                    overdue: {
+                        active: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition shadow-sm bg-red-600 text-white border-red-600',
+                        inactive: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-red-50/70 hover:bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
+                    },
+                    completed: {
+                        active: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition shadow-sm bg-emerald-600 text-white border-emerald-600',
+                        inactive: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                    }
+                };
+                ['all', 'in_progress', 'overdue', 'completed'].forEach(k => {
+                    const btn = document.getElementById(`qchip_${k}`);
+                    if (btn && chipStyles[k]) {
+                        btn.className = (quickFilter === k) ? chipStyles[k].active : chipStyles[k].inactive;
+                    }
+                });
 
                 if (visibleCount === 0) {
                     container.innerHTML = `<div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"><i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-5xl mb-4"></i><p class="text-gray-500 dark:text-gray-400 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp bộ lọc.</p></div>`;
