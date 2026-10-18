@@ -19,9 +19,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <!-- SheetJS (XLSX) for Native Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- PWA Manifest -->
+    <!-- PWA Manifest & iOS Standalone App Meta -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="Logo (tách nền sát cạnh).png">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Đấu thầu SCE">
+    <link rel="apple-touch-icon" href="logo-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="logo-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="logo-512.png">
     <style>
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -271,6 +278,14 @@
                     Đã có tài khoản? <button type="button" onclick="window.switchAuthMode('login')" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Quay lại Đăng nhập</button>
                 </div>
             </div>
+
+            <!-- Nút Cài đặt App cho Điện thoại (iPhone / Android) & Máy tính -->
+            <div id="btnInstallAppLogin" class="mt-3 pt-2.5 border-t border-dashed border-gray-200 dark:border-gray-700 text-center">
+                <button type="button" onclick="window.handleInstallApp()" class="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-xs font-semibold transition shadow-sm">
+                    <i class="fas fa-mobile-screen-button text-blue-600 dark:text-blue-400"></i>
+                    <span>Tải / Cài đặt App về Điện thoại</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -334,6 +349,11 @@
                         <a href="https://luatvietnam.vn/" target="_blank" rel="noopener noreferrer" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-yellow-300 hover:text-white hover:bg-yellow-600/60 transition group relative shrink-0" title="Tra cứu Luật Việt Nam">
                             <i class="fas fa-gavel text-xs"></i>
                         </a>
+
+                        <!-- 7b. Cài đặt App (iPhone / Android / PC) -->
+                        <button onclick="window.handleInstallApp()" id="btnInstallAppHeader" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-cyan-300 hover:text-white hover:bg-cyan-600/60 transition group relative shrink-0" title="Tải / Cài đặt App ra màn hình chính">
+                            <i class="fas fa-mobile-screen-button text-xs"></i>
+                        </button>
 
                         <div class="w-px h-3.5 sm:h-4 bg-white/20 dark:bg-gray-700 mx-0.5 shrink-0"></div>
 
@@ -5315,6 +5335,90 @@ window.openAuditLogModal = function(mIndex, pIndex) {
       navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered')).catch(err => console.error('SW Error', err));
     });
   }
+
+  // Hỗ trợ cài đặt App (PWA) cho cả iPhone/iPad (Safari) và Android/Máy tính (Chrome/Edge)
+  window.deferredPwaPrompt = null;
+
+  window.updateInstallAppVisibility = function() {
+    const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    const btnLogin = document.getElementById('btnInstallAppLogin');
+    const btnHeader = document.getElementById('btnInstallAppHeader');
+    if (isStandalone) {
+      if (btnLogin) btnLogin.classList.add('hidden');
+      if (btnHeader) btnHeader.classList.add('hidden');
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', window.updateInstallAppVisibility);
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredPwaPrompt = e;
+    window.updateInstallAppVisibility();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    window.deferredPwaPrompt = null;
+    const btnLogin = document.getElementById('btnInstallAppLogin');
+    const btnHeader = document.getElementById('btnInstallAppHeader');
+    if (btnLogin) btnLogin.classList.add('hidden');
+    if (btnHeader) btnHeader.classList.add('hidden');
+  });
+
+  window.handleInstallApp = async function() {
+    if (window.deferredPwaPrompt) {
+      window.deferredPwaPrompt.prompt();
+      const { outcome } = await window.deferredPwaPrompt.userChoice;
+      if (outcome === 'accepted') {
+        window.deferredPwaPrompt = null;
+      }
+      return;
+    }
+
+    const ua = window.navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      Swal.fire({
+        title: 'Cài đặt App trên iPhone / iPad',
+        html: `
+          <div class="text-left text-sm space-y-3 text-gray-700 leading-relaxed">
+            <p class="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg p-2.5 font-medium">
+              <i class="fas fa-circle-info mr-1"></i> Trên iPhone (Safari), bạn chỉ cần làm 3 bước đơn giản sau để tải App ra màn hình chính:
+            </p>
+            <div class="flex items-start gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+              <div>Nhấn vào biểu tượng <b>Chia sẻ (Share)</b> <span class="inline-flex items-center justify-center px-1.5 py-0.5 bg-white border border-gray-300 rounded text-blue-600 font-bold"><i class="fas fa-arrow-up-from-bracket"></i></span> ở thanh công cụ dưới cùng của trình duyệt Safari.</div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+              <div>Kéo xuống và chọn dòng <b>"Thêm vào MH chính"</b> <i>(Add to Home Screen)</i> <span class="inline-flex items-center justify-center px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-700"><i class="fas fa-square-plus"></i></span>.</div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+              <div>Nhấn nút <b>"Thêm" (Add)</b> ở góc trên cùng bên phải màn hình.</div>
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'Đã hiểu',
+        confirmButtonColor: '#2563eb'
+      });
+    } else {
+      Swal.fire({
+        title: 'Cài đặt Ứng dụng Đấu thầu SCE',
+        html: `
+          <div class="text-left text-sm space-y-2.5 text-gray-700 leading-relaxed">
+            <p><b>• Trên Điện thoại Android (Chrome):</b> Nhấn biểu tượng <b>Menu 3 chấm (⋮)</b> ở góc phải trên cùng &rarr; Chọn <b>"Cài đặt ứng dụng"</b> hoặc <b>"Thêm vào màn hình chính"</b>.</p>
+            <p><b>• Trên iPhone / iPad (Safari):</b> Nhấn nút <b>Chia sẻ</b> <i class="fas fa-arrow-up-from-bracket text-blue-600"></i> ở dưới cùng &rarr; Chọn <b>"Thêm vào MH chính"</b>.</p>
+            <p><b>• Trên Máy tính (Chrome / Edge):</b> Nhấn biểu tượng <b>Cài đặt (ô màn hình có mũi tên tải xuống)</b> nằm ở góc phải thanh địa chỉ trình duyệt.</p>
+          </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#2563eb'
+      });
+    }
+  };
 </script>
 
 <script>
