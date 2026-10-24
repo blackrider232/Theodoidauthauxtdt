@@ -734,8 +734,10 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hạn chót</label>
             <input type="date" id="editStepDeadline" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-1 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white">
             <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-3 italic">*Đổi hạn chót tự động đẩy lùi lịch các bước phía sau.</p>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ghi chú / Báo cáo</label>
-            <textarea id="editStepNote" rows="3" placeholder="Ghi chú, lý do trễ hạn..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"></textarea>
+            <div class="hidden">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ghi chú / Báo cáo</label>
+                <textarea id="editStepNote" rows="3" placeholder="Ghi chú, lý do trễ hạn..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"></textarea>
+            </div>
             <div class="flex justify-end gap-3">
                 <button onclick="window.closeEditStepModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.saveEditStep()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium shadow-md">Lưu cập nhật</button>
@@ -3501,8 +3503,9 @@ const LUNAR_HOLIDAYS = [
                                 
                                 let pNameSafe = (pkg.name || "").toLowerCase();
                                 let pContractorSafe = (pkg.contractor || "").toLowerCase();
-                                let matchStep = pkg.steps && Array.isArray(pkg.steps) && pkg.steps.some(st => (st.name || '').toLowerCase().includes(searchKw) || (st.note || '').toLowerCase().includes(searchKw));
-                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.includes(searchKw) || pContractorSafe.includes(searchKw) || matchStep; 
+                                let pNoteSafe = (pkg.note || "").toLowerCase();
+                                let matchStep = pkg.steps && Array.isArray(pkg.steps) && pkg.steps.some(st => (st.name || '').toLowerCase().includes(searchKw));
+                                let matchSearchPkg = searchKw === '' || mNameSafe.toLowerCase().includes(searchKw) || pNameSafe.includes(searchKw) || pContractorSafe.includes(searchKw) || pNoteSafe.includes(searchKw) || matchStep; 
                                 if (!matchSearchPkg) return false;
                                 
                                 return true;
@@ -3605,7 +3608,7 @@ const LUNAR_HOLIDAYS = [
                                 let isAutoExpandedBySearch = false;
                                 if (searchKw || sq) {
                                     const q = searchKw || sq;
-                                    if (pkg.steps && pkg.steps.some(st => (st.name || '').toLowerCase().includes(q) || (st.note || '').toLowerCase().includes(q))) {
+                                    if ((pkg.steps && pkg.steps.some(st => (st.name || '').toLowerCase().includes(q))) || (pkg.note && pkg.note.toLowerCase().includes(q))) {
                                         isAutoExpandedBySearch = true;
                                     }
                                 }
@@ -3702,7 +3705,6 @@ const LUNAR_HOLIDAYS = [
                                         }
                                         
                                         let safeStepName = escapeHtml(step.name || ''); 
-                                        let safeNote = escapeHtml(step.note || '');
                                         let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-snug break-words">${safeStepName}</div>`;
                                         
                                         let subTasksHtml = "";
@@ -3722,13 +3724,6 @@ const LUNAR_HOLIDAYS = [
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-blue-50/70 dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm whitespace-nowrap">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : ""; 
                                         let completedByHtml = step.completedBy ? `<span class="text-[11.5px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-check text-[10px]"></i> ${escapeHtml(step.completedBy)}</span>` : "";
 
-                                        let cCount = (step.comments && step.comments.length > 0) ? step.comments.length : 0;
-                                        let cClass = cCount > 0 ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 font-bold" : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
-                                        let noteBoxHtml = safeNote 
-                                            ? `<div class="flex-1 min-w-0 text-[11.5px] text-gray-700 dark:text-gray-300 italic bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-lg h-7 flex items-center overflow-hidden text-ellipsis whitespace-nowrap" title="${safeNote}">${safeNote}</div>`
-                                            : `<div class="flex-1 min-w-0 text-[11.5px] text-gray-400 dark:text-gray-500 italic bg-gray-50/60 dark:bg-gray-900/50 border border-dashed border-gray-200 dark:border-gray-800 px-2.5 py-1 rounded-lg h-7 flex items-center overflow-hidden text-ellipsis whitespace-nowrap">Không có ghi chú</div>`;
-                                        let noteHtml = `<div class="flex items-center gap-1.5 uniform-note-box w-full">${noteBoxHtml}<button onclick="window.openCommentsModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="shrink-0 h-7 text-[11px] ${cClass} px-2.5 rounded-lg border shadow-sm transition hover:opacity-80 inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-comments text-gray-400"></i> Trao đổi (${cCount})</button></div>`;
-                                        
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links) && step.links.length > 0) {
                                             linksDisplayHtml = `<div class="flex flex-wrap gap-1 mt-1.5">` + step.links.map((l, lIndex) => {
@@ -3767,7 +3762,7 @@ const LUNAR_HOLIDAYS = [
                                                 `;
                                             }
                                             actionIconsHtml = `
-                                                <button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Sửa chi tiết & Ghi chú"><i class="fas fa-edit"></i></button>
+                                                <button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Sửa chi tiết công việc"><i class="fas fa-edit"></i></button>
                                                 <button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button>
                                                 ${calLinkHtml}
                                                 <button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition inline-flex items-center justify-center" title="Xóa"><i class="fas fa-trash"></i></button>
@@ -3785,7 +3780,7 @@ const LUNAR_HOLIDAYS = [
                                             <tr class="step-row uniform-step-row ${bgRow} ${reorderRowHighlight}">
                                                 <td colspan="7" class="align-middle">
                                                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 lg:gap-4 w-full">
-                                                        <!-- KHỐI 1: TÊN CÔNG VIỆC + DÒNG THỜI HẠN & ĐỊNH MỨC (1 LV + NGÀY + NGƯỜI HOÀN THÀNH CÙNG 1 DÒNG) -->
+                                                        <!-- KHỐI 1: TÊN CÔNG VIỆC + DÒNG THỜI HẠN, ĐỊNH MỨC + VIỆC NHỎ + ĐÍNH KÈM -->
                                                         <div class="flex items-start gap-2 flex-1 min-w-0">
                                                             ${dragHandle}
                                                             <div class="flex-1 min-w-0">
@@ -3796,16 +3791,11 @@ const LUNAR_HOLIDAYS = [
                                                                     ${completedByHtml}
                                                                 </div>
                                                                 ${subTasksHtml}
+                                                                ${linksDisplayHtml}
                                                             </div>
                                                         </div>
 
-                                                        <!-- KHỐI 2: GHI CHÚ & TRAO ĐỔI NẰM NGANG TRÊN CÙNG 1 HÀNG -->
-                                                        <div class="w-full lg:w-72 xl:w-80 shrink-0">
-                                                            ${noteHtml}
-                                                            ${linksDisplayHtml}
-                                                        </div>
-
-                                                        <!-- KHỐI 3: THANH CÔNG CỤ ĐÁY (ICON THAO TÁC + LINK WEB + TẢI FILE BÊN TRÁI, CHECKBOX BÊN PHẢI) -->
+                                                        <!-- KHỐI 2: THANH CÔNG CỤ (ICON THAO TÁC + LINK WEB + TẢI FILE BÊN TRÁI, CHECKBOX BÊN PHẢI) -->
                                                         <div class="w-full lg:w-auto shrink-0 pt-1.5 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-700/70">
                                                             <div class="flex items-center justify-between lg:justify-end gap-2 w-full">
                                                                 <div class="flex items-center gap-1 flex-wrap">
@@ -3860,6 +3850,44 @@ const LUNAR_HOLIDAYS = [
                                 let pkgNameSafe = escapeHtml(pkg.name || "Gói thầu không tên"); 
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
 
+                                // Khối hiển thị Ghi chú gói thầu (chỉ hiện khi có nội dung ghi chú)
+                                let pkgNoteHtml = "";
+                                if (pkg.note && pkg.note.trim()) {
+                                    pkgNoteHtml = `
+                                        <div class="mt-2.5 p-2.5 sm:px-3 sm:py-2 rounded-lg bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-amber-900 dark:text-amber-200 text-xs flex items-start justify-between gap-2.5 shadow-xs">
+                                            <div class="flex items-start gap-2 flex-1 min-w-0">
+                                                <i class="fas fa-sticky-note text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                                                <div class="flex-1 min-w-0">
+                                                    <span class="font-bold text-amber-800 dark:text-amber-300 mr-1.5 uppercase text-[10.5px] tracking-wide inline-block">Ghi chú gói thầu:</span>
+                                                    <span class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(pkg.note)}</span>
+                                                </div>
+                                            </div>
+                                            ${canEditPkg ? `
+                                                <div class="flex items-center gap-1 shrink-0 ml-2">
+                                                    <button onclick="window.openPackageNoteModal(${mIndex}, ${pkgIndex})" class="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 hover:bg-amber-200/60 dark:hover:bg-amber-800/60 px-1.5 py-0.5 rounded text-[11px] font-semibold transition" title="Sửa ghi chú">
+                                                        <i class="fas fa-edit mr-0.5"></i> Sửa
+                                                    </button>
+                                                    <button onclick="window.deletePackageNote(${mIndex}, ${pkgIndex})" class="text-red-500 hover:text-red-700 hover:bg-red-100/60 dark:hover:bg-red-900/40 px-1.5 py-0.5 rounded text-[11px] font-semibold transition" title="Xóa ghi chú">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            ` : ''}
+                                        </div>`;
+                                }
+
+                                // Nút Ghi chú trên thanh thao tác: CHỈ HIỆN KHI CHƯA CÓ GHI CHÚ
+                                let btnNotePkg = "";
+                                if (canEditPkg && (!pkg.note || !pkg.note.trim())) {
+                                    btnNotePkg = `
+                                        <button onclick="window.openPackageNoteModal(${mIndex}, ${pkgIndex})" class="text-amber-700 dark:text-amber-400 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-700 px-2 py-1.5 rounded text-xs font-medium shadow-sm transition inline-flex items-center gap-1" title="Thêm ghi chú nhanh cho gói thầu">
+                                            <i class="fas fa-sticky-note text-amber-500"></i>
+                                            <span>Ghi chú</span>
+                                        </button>`;
+                                }
+
+                                // Badge báo hiệu gói thầu có ghi chú ở Bước 1
+                                let pkgNoteBadge = (pkg.note && pkg.note.trim()) ? `<span title="Gói thầu có ghi chú: ${escapeHtml(pkg.note)}" class="inline-flex items-center text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 cursor-pointer" onclick="event.stopPropagation(); window.openPackageNoteModal(${mIndex}, ${pkgIndex})"><i class="fas fa-sticky-note text-amber-500 mr-1"></i>Có ghi chú</span>` : '';
+
                                 packagesHtml += `
                                     <div id="pkg_card_${pkgKey}" class="bg-white dark:bg-gray-800 rounded-xl border ${borderColor} ${isOverviewExpanded ? 'border-l-4 border-l-blue-600 dark:border-l-blue-400 shadow-md ring-1 ring-blue-500/20' : 'shadow-sm'} overflow-hidden mb-3 hover:shadow transition-all">
                                         <!-- BƯỚC 1: CHỈ HIỆN TÊN GÓI THẦU & TRẠNG THÁI (ĐANG THỰC HIỆN / CHẬM TIẾN ĐỘ / ĐÃ XONG) -->
@@ -3871,8 +3899,9 @@ const LUNAR_HOLIDAYS = [
                                                     <span>${pkgNameSafe}</span>
                                                 </h4>
                                             </div>
-                                            <div class="flex items-center gap-2 shrink-0">
+                                            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                                 ${pkg.archived ? '<span class="text-[11px] text-red-500 font-medium">(Đã lưu trữ)</span>' : ''}
+                                                ${pkgNoteBadge}
                                                 ${pkgStatusBadgeHtml}
                                             </div>
                                         </div>
@@ -3899,11 +3928,13 @@ const LUNAR_HOLIDAYS = [
                                                             <span class="inline-flex items-center gap-1 shrink-0"><i class="far fa-calendar-check text-indigo-500"></i>Ký HĐ dự kiến: <strong class="text-gray-800 dark:text-gray-200">${finalDate}</strong></span>
                                                             <span class="inline-flex items-center gap-1 shrink-0"><i class="far fa-user text-purple-500"></i>Chuyên viên: <strong class="text-gray-800 dark:text-gray-200">${escapeHtml(pkg.owner)}</strong></span>
                                                         </div>
+                                                        ${pkgNoteHtml}
                                                     </div>
 
                                                     <!-- CÁC NÚT THAO TÁC CƠ BẢN & NÚT XEM CÁC BƯỚC CHI TIẾT -->
                                                     <div class="flex items-center justify-between sm:justify-end gap-1.5 flex-wrap w-full lg:w-auto mt-2 lg:mt-0 pt-2 lg:pt-0 border-t border-blue-100/60 dark:border-gray-700/60 lg:border-t-0">
                                                         <div class="flex items-center gap-1.5 flex-wrap">
+                                                            ${btnNotePkg}
                                                             ${archiveBtn}
                                                             ${canEditPkg && totalStepsCount > 1 ? `
                                                                 <button onclick="window.toggleReorderMode(${mIndex}, ${pkgIndex})" class="${isReorderActive ? 'bg-amber-500 hover:bg-amber-600 text-white font-bold animate-pulse border-amber-600' : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800'} px-2 py-1.5 rounded border text-xs font-medium shadow-sm transition inline-flex items-center gap-1" title="${isReorderActive ? 'Bấm để hoàn tất việc đổi thứ tự' : 'Bật chế độ đổi thứ tự các bước'}">
@@ -3965,9 +3996,8 @@ const LUNAR_HOLIDAYS = [
                                                         <tr>
                                                             <th colspan="7" class="py-1.5 px-3.5 font-semibold">
                                                                 <div class="flex items-center justify-between gap-4 w-full">
-                                                                    <div class="flex-1 min-w-0">Chi tiết công việc & Thời hạn</div>
-                                                                    <div class="w-72 xl:w-80 shrink-0">Ghi chú & Trao đổi</div>
-                                                                    <div class="w-64 shrink-0 text-right">Thao tác, Đính kèm & Hoàn thành</div>
+                                                                    <div class="flex-1 min-w-0">Chi tiết công việc, Đính kèm & Thời hạn</div>
+                                                                    <div class="w-auto shrink-0 text-right">Thao tác & Hoàn thành</div>
                                                                 </div>
                                                             </th>
                                                         </tr>
@@ -4214,6 +4244,97 @@ const LUNAR_HOLIDAYS = [
             window.closeEditPackageModal(); 
             window.renderMissions(); 
             window.saveDataToGAS(false);
+        };
+
+        window.openPackageNoteModal = function(mIndex, pIndex) {
+            const m = db.missions[mIndex];
+            const pkg = m ? m.packages[pIndex] : null;
+            if (!pkg) return;
+            if (!window.canEditPackage(m, pkg, currentUser)) {
+                return Swal.fire('Thông báo', 'Bạn không có quyền chỉnh sửa ghi chú của gói thầu này!', 'warning');
+            }
+            const currentNote = pkg.note || '';
+            Swal.fire({
+                title: `<div class="text-base font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 justify-center"><i class="fas fa-sticky-note text-amber-500"></i> Ghi chú gói thầu</div>`,
+                html: `
+                    <div class="text-left mb-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-2">Gói thầu: <span class="text-blue-600 dark:text-blue-400">${escapeHtml(pkg.name || '')}</span></p>
+                        <textarea id="swalPackageNoteInput" rows="5" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Nhập nội dung lưu ý, ghi chú quan trọng cho gói thầu này...">${escapeHtml(currentNote)}</textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save mr-1"></i> Lưu ghi chú',
+                cancelButtonText: 'Đóng',
+                confirmButtonColor: '#d97706',
+                cancelButtonColor: '#6b7280',
+                focusConfirm: false,
+                didOpen: () => {
+                    const textarea = document.getElementById('swalPackageNoteInput');
+                    if (textarea) {
+                        textarea.focus();
+                        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+                    }
+                },
+                preConfirm: () => {
+                    const noteInput = document.getElementById('swalPackageNoteInput');
+                    return noteInput ? noteInput.value.trim() : '';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const newNote = result.value || '';
+                    if (newNote) {
+                        pkg.note = newNote;
+                        window.logActivity(mIndex, pIndex, `Cập nhật ghi chú gói thầu: ${newNote.substring(0, 60)}`);
+                    } else {
+                        delete pkg.note;
+                        window.logActivity(mIndex, pIndex, `Xóa ghi chú gói thầu`);
+                    }
+                    window.renderMissions();
+                    window.saveDataToGAS(false);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: newNote ? 'Đã lưu ghi chú gói thầu!' : 'Đã xóa ghi chú!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            });
+        };
+
+        window.deletePackageNote = function(mIndex, pIndex) {
+            const m = db.missions[mIndex];
+            const pkg = m ? m.packages[pIndex] : null;
+            if (!pkg) return;
+            if (!window.canEditPackage(m, pkg, currentUser)) {
+                return Swal.fire('Thông báo', 'Bạn không có quyền chỉnh sửa ghi chú của gói thầu này!', 'warning');
+            }
+            Swal.fire({
+                title: 'Xóa ghi chú gói thầu?',
+                text: 'Bạn có chắc chắn muốn xóa nội dung ghi chú của gói thầu này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Xóa ghi chú',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    delete pkg.note;
+                    window.logActivity(mIndex, pIndex, 'Xóa ghi chú gói thầu');
+                    window.renderMissions();
+                    window.saveDataToGAS(false);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Đã xóa ghi chú!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            });
         };
 
         window.openEditStepModal = function(mIndex, pIndex, sIndex) {
@@ -5453,9 +5574,12 @@ window.updateDoc = function(i, f, v) {
                     [`NHIỆM VỤ: ${(mission.name || '').toUpperCase()}`],
                     [`GÓI THẦU: ${pkg.name || ''}`],
                     [`Quy trình áp dụng: ${processLabel} | Phụ trách: ${pkg.owner || mission.owner}${pkgDept ? ' (' + pkgDept + ')' : ''}`],
-                    [`Ngày xuất dữ liệu: ${window.formatDate(new Date().toISOString())}`],
-                    []
+                    [`Ngày xuất dữ liệu: ${window.formatDate(new Date().toISOString())}`]
                 ];
+                if (pkg.note) {
+                    aoa.push([`Ghi chú gói thầu: ${pkg.note}`]);
+                }
+                aoa.push([]);
 
                 if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
                     const docsStr = db.regulatoryDocs.map(d => `${d.number}: ${d.title}`).join("; ");
@@ -5801,6 +5925,9 @@ window.updateDoc = function(i, f, v) {
                 const pDept = window.getPackageDepartment(mission, pkg);
                 let html = `<html><head><title>In Tiến độ - ${escapeHtml(pkg.name)}</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; } h1 { text-align: center; font-size: 18px; text-transform: uppercase; margin-bottom: 5px; } h2 { text-align: center; font-size: 16px; margin-top: 5px; margin-bottom: 5px; } h3 { text-align: center; font-size: 14px; font-weight: normal; margin-top: 0; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; } th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; } th { background-color: #f2f2f2; font-weight: bold; text-align: center; } .text-center { text-align: center; } .status-done { font-weight: bold; color: #000; } .docs-section { margin-bottom: 15px; font-size: 12px; border-left: 3px solid #666; padding-left: 10px; } .docs-section ul { margin: 5px 0 0 0; padding-left: 20px; }</style></head><body>`;
                 html += `<h1>NHIỆM VỤ: ${escapeHtml(mission.name)}</h1><h2>GÓI THẦU: ${escapeHtml(pkg.name)}</h2><h3>Loại: ${escapeHtml(processLabel)} | Phụ trách: ${escapeHtml(pkg.owner || mission.owner)}${pDept ? ' (' + escapeHtml(pDept) + ')' : ''}</h3>`;
+                if (pkg.note) {
+                    html += `<div style="margin-bottom: 12px; font-size: 13px; background: #fffbeb; border: 1px solid #fde68a; padding: 8px 12px; border-radius: 6px;"><b>Ghi chú gói thầu:</b> ${escapeHtml(pkg.note)}</div>`;
+                }
                 
                 if (db.regulatoryDocs && db.regulatoryDocs.length > 0) {
                     html += `<div class="docs-section"><b>Căn cứ triển khai chung:</b><ul style="margin:5px 0 0; padding-left:20px">`;
