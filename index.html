@@ -81,9 +81,37 @@
     #tab-dashboard { display: flex; flex-direction: column; }
     #tab-dashboard > div:nth-child(3) { order: -1; margin-bottom: 15px; }
 
-    /* 2. Biến danh sách công việc (Table) thành Thẻ Mobile (Card View) */
-    table thead { display: none !important; } /* Ẩn tiêu đề cột */
+    /* 2. Chống tràn ngang tuyệt đối cho container các bước */
+    div[id^="steps_container_"] {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 3. Biến bảng thành Card Block 100% vừa khít màn hình di động */
+    table thead { display: none !important; }
     
+    div[id^="steps_container_"] table,
+    table.step-table {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+    }
+
+    div[id^="steps_container_"] tbody,
+    tbody.step-list-tbody {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     table tbody tr {
         display: block;
         background-color: #ffffff; 
@@ -93,6 +121,9 @@
         margin-bottom: 12px;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         position: relative;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     .dark table tbody tr { background-color: #1e293b; border-color: #334155; }
     
@@ -102,6 +133,8 @@
         border: none !important;
         text-align: left !important;
         width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Thu gọn nút bấm thao tác thành thanh công cụ Icon ở dưới đáy cho các bảng quản trị khác */
@@ -116,14 +149,24 @@
     }
     .dark table tbody:not(.step-list-tbody) td:last-child { border-color: #334155 !important; }
 
-    /* Riêng thẻ bước công việc gói thầu (.step-list-tbody): gọn gàng, không lồng khung con */
+    /* Riêng thẻ bước công việc gói thầu (.step-list-tbody): chuẩn Card Mobile, phẳng đẹp 100% */
     .step-list-tbody tr.step-row {
-        padding: 10px 12px !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 10px 10px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
         margin-bottom: 8px !important;
         border-radius: 10px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }
     .step-list-tbody tr.step-row td {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         padding: 0 !important;
         margin: 0 !important;
         border: none !important;
@@ -132,7 +175,19 @@
     }
     
     /* Làm đẹp thẻ Thêm việc phát sinh */
-    table tbody tr:last-child td { border-top: none !important; margin-top: 0 !important; justify-content: center !important; }
+    table tbody tr:last-child {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    table tbody tr:last-child td {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border-top: none !important;
+        margin-top: 0 !important;
+        justify-content: center !important;
+    }
 }
 </style>
 
@@ -3862,7 +3917,7 @@ const LUNAR_HOLIDAYS = [
                                                         </div>
                                                         
                                                         <!-- NÚT CLICK TIẾP ĐỂ MỞ BƯỚC 3 (CHI TIẾT CÁC BƯỚC) -->
-                                                        <button id="btn_expand_${pkgKey}" onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${isExpanded ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'}">
+                                                        <button id="btn_expand_${pkgKey}" onclick="window.togglePackageExpand(${mIndex}, ${pkgIndex})" class="w-full sm:w-auto justify-center shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm mt-1 sm:mt-0 ${isExpanded ? 'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'}">
                                                             <span id="btn_expand_text_${pkgKey}" data-count="${totalStepsCount}">${isExpanded ? 'Thu gọn chi tiết' : `Xem các bước chi tiết (${totalStepsCount} bước)`}</span>
                                                             <i id="btn_expand_icon_${pkgKey}" class="fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-[11px]"></i>
                                                         </button>
@@ -3893,7 +3948,7 @@ const LUNAR_HOLIDAYS = [
                                             </div>
 
                                             <!-- BƯỚC 3: BẢNG CHI TIẾT CÁC BƯỚC THỰC HIỆN (HIỆN RA KHI CLICK TIẾP XEM CÁC BƯỚC CHI TIẾT) -->
-                                            <div id="steps_container_${pkgKey}" class="overflow-x-auto overflow-y-visible border-t border-gray-100 dark:border-gray-800 ${isExpanded ? '' : 'hidden'}">
+                                            <div id="steps_container_${pkgKey}" class="overflow-x-hidden sm:overflow-x-auto overflow-y-visible border-t border-gray-100 dark:border-gray-800 ${isExpanded ? '' : 'hidden'}">
                                                 ${isReorderActive ? `
                                                     <div class="mx-2.5 sm:mx-3 mt-2.5 mb-1 px-3 py-2 rounded-lg bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200 text-xs flex items-center justify-between gap-2 shadow-xs">
                                                         <div class="flex items-center gap-2">
@@ -3905,7 +3960,7 @@ const LUNAR_HOLIDAYS = [
                                                         </button>
                                                     </div>
                                                 ` : ''}
-                                                <table class="w-full text-left border-separate border-spacing-y-2 text-sm px-2.5 sm:px-3">
+                                                <table class="step-table w-full text-left border-separate border-spacing-y-2 text-sm px-1.5 sm:px-3">
                                                     <thead class="hidden lg:table-header-group text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider">
                                                         <tr>
                                                             <th colspan="7" class="py-1.5 px-3.5 font-semibold">
