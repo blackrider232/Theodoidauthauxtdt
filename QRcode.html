@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Phần mềm tạo QR Code</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        input { padding: 10px; width: 300px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #qrcode { margin-top: 20px; display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <h2>Trình tạo mã QR của Hoàng</h2>
+    <input type="text" id="linkInput" placeholder="Dán đường link vào đây..." value="https://docs.google.com/forms/d/e/1FAIpQLScwL5AhVwgAk065vQMAqMvY-Uu-ASdwLDY4kCLKixbFoCu8Qg/viewform">
+    <button onclick="generateQR()">Tạo mã QR</button>
+    <div id="qrcode"></div>
+
+    <script>
+        function generateQR() {
+            var qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = ""; // Xóa mã QR cũ nếu có
+            var link = document.getElementById("linkInput").value;
+            if(link) {
+                new QRCode(qrContainer, link);
+            }
+        }
+        // Tự động tạo QR cho link có sẵn khi vừa mở file
+        generateQR();
+    </script>
+</body>
+</html>
