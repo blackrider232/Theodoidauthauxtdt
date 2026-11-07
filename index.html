@@ -860,30 +860,17 @@
                         </div>
                     </div>
 
-                    <!-- HAI NÚT HÀNH ĐỘNG DÀNH CHO CÁN BỘ -->
-                    <div class="pt-2.5 border-t border-teal-200/70 dark:border-teal-800/70 space-y-2">
-                        <!-- NÚT TẢI VỀ MÁY -->
-                        <a id="stepTemplateDownloadBtn" href="#" download target="_blank" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs sm:text-sm">
-                            <i class="fas fa-download"></i>
-                            <span>Tải biểu mẫu về máy để chỉnh sửa (.docx / .xlsx)</span>
+                    <!-- NÚT TẢI BIỂU MẪU VỀ MÁY DUY NHẤT DÀNH CHO CÁN BỘ -->
+                    <div class="pt-2.5 border-t border-teal-200/70 dark:border-teal-800/70">
+                        <a id="stepTemplateDownloadBtn" href="#" download target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs sm:text-sm">
+                            <i class="fas fa-download" aria-hidden="true"></i>
+                            <span>Tải biểu mẫu về máy</span>
                         </a>
-
-                        <!-- NÚT MỞ / CHỈNH SỬA TRỰC TUYẾN -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <a id="stepTemplateOnlineBtn" href="#" target="_blank" class="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg shadow-xs transition text-xs">
-                                <i class="fas fa-external-link-alt"></i>
-                                <span id="stepTemplateOnlineBtnText">Mở xem trực tuyến</span>
-                            </a>
-                            <a id="stepTemplateCopyBtn" href="#" target="_blank" class="hidden flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium py-2 px-3 rounded-lg border border-indigo-200 dark:border-indigo-800 transition text-xs">
-                                <i class="fas fa-copy"></i>
-                                <span>Tạo bản sao Google Docs</span>
-                            </a>
-                        </div>
                     </div>
 
                     <div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-teal-100 dark:border-gray-700 leading-relaxed">
-                        <i class="fas fa-lightbulb text-amber-500 mr-1"></i>
-                        <strong>Hướng dẫn cán bộ:</strong> Tải biểu mẫu về hoặc mở trực tuyến để soạn thảo. Sau khi dự thảo xong, sử dụng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc để đính kèm văn bản đã hoàn thiện.
+                        <i class="fas fa-lightbulb text-amber-500 mr-1" aria-hidden="true"></i>
+                        <strong>Hướng dẫn cán bộ:</strong> Bấm nút trên để tải biểu mẫu chuẩn về máy và soạn thảo. Sau khi hoàn thiện văn bản, sử dụng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc để đính kèm kết quả.
                     </div>
                 </div>
 
@@ -4143,17 +4130,10 @@ const LUNAR_HOLIDAYS = [
 
                                             templateFormHtml = `
                                                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                                                    <button type="button" onclick="window.openStepTemplateModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/70 text-teal-800 dark:text-teal-200 border border-teal-300 dark:border-teal-700/80 px-2.5 py-1 rounded-md text-[11.5px] font-bold shadow-xs transition select-none" title="Bấm để xem, chỉnh sửa hoặc tải biểu mẫu công đoạn">
-                                                        <i class="fas ${tfIcon}"></i>
+                                                    <button type="button" onclick="window.openStepTemplateModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/70 text-teal-800 dark:text-teal-200 border border-teal-300 dark:border-teal-700/80 px-2.5 py-1 rounded-md text-[11.5px] font-bold shadow-xs transition select-none" title="Bấm để tải biểu mẫu chuẩn của công đoạn này về máy">
+                                                        <i class="fas ${tfIcon}" aria-hidden="true"></i>
                                                         <span class="truncate max-w-[200px] sm:max-w-[280px]">Biểu mẫu: ${escapeHtml(tf.name)}</span>
-                                                        <i class="fas fa-external-link-alt text-[9px] text-teal-500 ml-0.5"></i>
-                                                    </button>
-                                                </div>`;
-                                        } else if (isAdmin) {
-                                            templateFormHtml = `
-                                                <div class="flex items-center gap-1 mt-1.5 flex-wrap">
-                                                    <button type="button" onclick="window.openStepTemplateModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-dashed border-gray-300 dark:border-gray-600 px-2 py-0.5 rounded transition select-none" title="Quản trị viên: Gán biểu mẫu chuẩn cho công đoạn này">
-                                                        <i class="fas fa-file-circle-plus text-teal-500"></i> + Biểu mẫu
+                                                        <i class="fas fa-download text-[10px] text-teal-600 dark:text-teal-400 ml-0.5" aria-hidden="true"></i>
                                                     </button>
                                                 </div>`;
                                         }
@@ -4864,9 +4844,9 @@ const LUNAR_HOLIDAYS = [
             const m = db.missions[mIndex];
             const pkg = m ? m.packages[pkgIndex] : null;
             const step = pkg && pkg.steps ? pkg.steps[sIndex] : null;
-            if (!step) return;
+            if (!step || !(step.templateForm && step.templateForm.url)) return;
             currentTemplateTarget = { type: 'package_step', mIndex: mIndex, pkgIndex: pkgIndex, sIndex: sIndex };
-            const canManage = (currentUser.role === 'admin' || window.canEditPackage(m, pkg, currentUser));
+            const canManage = window.isAdminUser();
             window.renderStepTemplateModalContent(step, `${pkg.name} > ${step.name}`, canManage);
             document.getElementById('stepTemplateModal').classList.remove('hidden');
         };
@@ -4883,6 +4863,33 @@ const LUNAR_HOLIDAYS = [
         window.closeStepTemplateModal = function() {
             document.getElementById('stepTemplateModal').classList.add('hidden');
             currentTemplateTarget = null;
+        };
+
+        window.buildTemplateDownloadUrl = function(tf) {
+            if (!tf || !tf.url) return '#';
+            const rawUrl = String(tf.url).trim();
+            if (rawUrl.includes('docs.google.com/document/d/')) {
+                const m = rawUrl.match(/\/document\/d\/([a-zA-Z0-9-_]+)/);
+                if (m) return 'https://docs.google.com/document/d/' + m[1] + '/export?format=docx';
+            }
+            if (rawUrl.includes('docs.google.com/spreadsheets/d/')) {
+                const m = rawUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+                if (m) return 'https://docs.google.com/spreadsheets/d/' + m[1] + '/export?format=xlsx';
+            }
+            if (rawUrl.includes('docs.google.com/presentation/d/')) {
+                const m = rawUrl.match(/\/presentation\/d\/([a-zA-Z0-9-_]+)/);
+                if (m) return 'https://docs.google.com/presentation/d/' + m[1] + '/export/pptx';
+            }
+            if (rawUrl.includes('drive.google.com/file/d/')) {
+                const m = rawUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+                if (m) return 'https://drive.google.com/uc?export=download&id=' + m[1];
+            }
+            if (rawUrl.includes('/storage/v1/object/public/')) {
+                const sep = rawUrl.includes('?') ? '&' : '?';
+                const fileName = tf.name ? encodeURIComponent(tf.name) : '';
+                return rawUrl + sep + 'download=' + fileName;
+            }
+            return rawUrl;
         };
 
         window.renderStepTemplateModalContent = function(step, titleText, canManage) {
@@ -4920,35 +4927,11 @@ const LUNAR_HOLIDAYS = [
                 if (tf.updatedAt) metaTxt += ` • ${window.formatDate(tf.updatedAt)}`;
                 document.getElementById('stepTemplateMeta').innerText = metaTxt;
 
-                // Cấu hình nút Tải về
+                // Cấu hình duy nhất nút Tải biểu mẫu về máy (chuyển mọi link Docs/Sheets/Slides/Drive/Supabase sang link download trực tiếp)
                 const dlBtn = document.getElementById('stepTemplateDownloadBtn');
-                let downloadUrl = tf.url;
-                const isGDocs = tf.url.includes('docs.google.com/document/d/');
-                if (isGDocs) {
-                    const docIdMatch = tf.url.match(/\/document\/d\/([a-zA-Z0-9-_]+)/);
-                    if (docIdMatch) {
-                        downloadUrl = `https://docs.google.com/document/d/${docIdMatch[1]}/export?format=docx`;
-                    }
-                }
-                dlBtn.href = downloadUrl;
-                dlBtn.setAttribute('download', tf.name || 'Bieu_mau.docx');
-
-                // Cấu hình nút Mở trực tuyến
-                const onlineBtn = document.getElementById('stepTemplateOnlineBtn');
-                const onlineText = document.getElementById('stepTemplateOnlineBtnText');
-                const copyBtn = document.getElementById('stepTemplateCopyBtn');
-
-                if (isGDocs) {
-                    onlineBtn.href = tf.url;
-                    onlineText.innerText = "Mở trong Google Docs";
-                    copyBtn.classList.remove('hidden');
-                    let copyUrl = tf.url.replace(/\/edit.*$/, '/copy');
-                    if (copyUrl === tf.url) copyUrl = tf.url + '/copy';
-                    copyBtn.href = copyUrl;
-                } else {
-                    onlineBtn.href = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(tf.url)}`;
-                    onlineText.innerText = "Mở xem trực tuyến (Office Web)";
-                    copyBtn.classList.add('hidden');
+                if (dlBtn) {
+                    dlBtn.href = window.buildTemplateDownloadUrl(tf);
+                    dlBtn.setAttribute('download', tf.name || 'Bieu_mau_cong_doan');
                 }
 
                 if (canManage) deleteBtn.classList.remove('hidden');
@@ -4967,6 +4950,10 @@ const LUNAR_HOLIDAYS = [
         };
 
         window.handleUploadStepTemplateFile = async function(inputElem) {
+            if (!window.isAdminUser()) {
+                if (inputElem) inputElem.value = '';
+                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền tải biểu mẫu chuẩn lên hệ thống!', 'warning');
+            }
             if (!inputElem.files || inputElem.files.length === 0) return;
             const file = inputElem.files[0];
             if (file.size > 25 * 1024 * 1024) {
@@ -5001,6 +4988,9 @@ const LUNAR_HOLIDAYS = [
         };
 
         window.saveStepTemplateLink = function() {
+            if (!window.isAdminUser()) {
+                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền cập nhật biểu mẫu chuẩn!', 'warning');
+            }
             const name = document.getElementById('stepTemplateCustomName').value.trim();
             let url = document.getElementById('stepTemplateCustomUrl').value.trim();
             if (!url) return Swal.fire('Cảnh báo', 'Vui lòng nhập đường dẫn (URL) biểu mẫu!', 'warning');
@@ -5018,6 +5008,9 @@ const LUNAR_HOLIDAYS = [
 
         window.saveCurrentStepTemplateData = function(templateForm) {
             if (!currentTemplateTarget) return;
+            if (!window.isAdminUser()) {
+                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền cập nhật biểu mẫu công đoạn!', 'warning');
+            }
 
             if (currentTemplateTarget.type === 'package_step') {
                 const { mIndex, pkgIndex, sIndex } = currentTemplateTarget;
@@ -5108,16 +5101,8 @@ const LUNAR_HOLIDAYS = [
 
         window.deleteStepTemplateForm = function() {
             if (!currentTemplateTarget) return;
-            if (currentTemplateTarget.type === 'config_step' && !window.isAdminUser()) {
-                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền xóa biểu mẫu quy trình chuẩn!', 'warning');
-            }
-            if (currentTemplateTarget.type === 'package_step') {
-                const { mIndex, pkgIndex } = currentTemplateTarget;
-                const m = db.missions[mIndex];
-                const pkg = m ? m.packages[pkgIndex] : null;
-                if (!pkg || !(window.isAdminUser() || window.canEditPackage(m, pkg, currentUser))) {
-                    return Swal.fire('Cảnh báo', 'Bạn không có quyền gỡ biểu mẫu của nhiệm vụ cụ thể này!', 'warning');
-                }
+            if (!window.isAdminUser()) {
+                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền gỡ bỏ biểu mẫu công đoạn!', 'warning');
             }
             Swal.fire({
                 title: 'Xóa biểu mẫu công đoạn?',
@@ -5136,7 +5121,7 @@ const LUNAR_HOLIDAYS = [
                         window.logActivity(mIndex, pkgIndex, `Đã xóa biểu mẫu công việc: ${step.name}`);
                         window.renderMissions();
                         window.saveDataToGAS(false);
-                        window.openStepTemplateModal(mIndex, pkgIndex, sIndex);
+                        window.closeStepTemplateModal();
                     } else if (currentTemplateTarget.type === 'config_step') {
                         const { typeKey, sIndex } = currentTemplateTarget;
                         if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
