@@ -71,6 +71,15 @@
         max-width: 100%;
         overflow-x: hidden;
     }
+    dialog:modal {
+        overscroll-behavior: contain;
+    }
+    dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        overflow: hidden;
+        overscroll-behavior: contain;
+    }
     </style>
 <style id="mobile-ux">
 @media (max-width: 768px) {
@@ -585,28 +594,71 @@
             </div>
 
             <!-- 4. SETTINGS (PROCESS TEMPLATES) -->
-            <div id="view-settings" class="hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="mb-4 flex justify-between items-end"><div><h2 class="text-lg font-bold text-gray-800 dark:text-white">Quản lý Quy trình mẫu</h2><p class="text-xs text-gray-500 dark:text-gray-400">Tạo mới, chỉnh sửa, kéo thả sắp xếp quy trình chuẩn</p></div></div>
-                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded border border-gray-200 dark:border-gray-700 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <div class="flex w-full md:w-auto gap-2">
-                        <select id="configProcessSelector" onchange="window.renderConfig()" class="border border-gray-300 dark:border-gray-600 p-2 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-gray-800 font-bold text-blue-800 dark:text-blue-400 min-w-[250px]"></select>
-                        <button onclick="window.deleteProcessTemplate()" class="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-2 rounded text-sm transition" title="Xóa quy trình này"><i class="fas fa-trash-alt"></i></button>
+            <div id="view-settings" class="hidden bg-white dark:bg-gray-800 p-3.5 sm:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="mb-4 flex flex-wrap justify-between items-start sm:items-end gap-2">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white">Quản lý Quy trình mẫu</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Tạo mới, đổi tên, chỉnh sửa định mức ngày, gán biểu mẫu và sắp xếp thứ tự các bước chuẩn</p>
                     </div>
-                    <div class="flex w-full md:w-auto gap-2 md:border-l md:pl-4 border-gray-300 dark:border-gray-700">
-                        <input type="text" id="newProcessTitle" placeholder="Nhập tên quy trình mới..." class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-64 dark:text-white">
-                        <button onclick="window.addNewProcessTemplate()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition">Tạo mới</button>
+                    <button type="button" id="btnRestoreDefaultProcesses" onclick="window.restoreDefaultProcessTemplates()" class="hidden text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 transition inline-flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-amber-500 outline-none">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                        <span>Khôi phục quy trình gốc đã xóa</span>
+                    </button>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-3.5 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700 mb-4 grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-end">
+                    <div class="lg:col-span-7 min-w-0">
+                        <label for="configProcessSelector" class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">Quy trình đang chỉnh sửa</label>
+                        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                            <select id="configProcessSelector" onchange="window.renderConfig()" class="flex-1 min-w-0 w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-blue-500 outline-none bg-white dark:bg-gray-800 font-bold text-blue-800 dark:text-blue-400 truncate"></select>
+                            <button type="button" id="btnRenameProcess" onclick="window.renameProcessTemplate()" class="shrink-0 bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2.5 sm:px-3 py-2 rounded-lg text-sm transition focus-visible:ring-2 focus-visible:ring-blue-500 outline-none min-h-[38px] inline-flex items-center gap-1.5" aria-label="Đổi tên quy trình đang chọn" title="Đổi tên quy trình này">
+                                <i class="fas fa-pen text-xs" aria-hidden="true"></i>
+                                <span class="hidden sm:inline text-xs font-semibold">Đổi tên</span>
+                            </button>
+                            <button type="button" id="btnDeleteProcess" onclick="window.deleteProcessTemplate()" class="shrink-0 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2.5 sm:px-3 py-2 rounded-lg text-sm transition focus-visible:ring-2 focus-visible:ring-red-500 outline-none min-h-[38px] inline-flex items-center gap-1.5" aria-label="Xóa quy trình đang chọn" title="Xóa quy trình này">
+                                <i class="fas fa-trash-alt text-xs" aria-hidden="true"></i>
+                                <span class="hidden sm:inline text-xs font-semibold">Xóa</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 lg:border-l lg:pl-4 border-gray-300 dark:border-gray-700 min-w-0">
+                        <label for="newProcessTitle" class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1">Tạo quy trình mẫu mới</label>
+                        <div class="flex items-center gap-2 min-w-0">
+                            <input type="text" id="newProcessTitle" placeholder="Nhập tên quy trình mới..." class="flex-1 min-w-0 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none dark:text-white">
+                            <button type="button" onclick="window.addNewProcessTemplate()" class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none min-h-[38px]">Tạo mới</button>
+                        </div>
                     </div>
                 </div>
-                <div id="configSteps" class="space-y-2 mb-4"></div>
-                <div class="flex flex-col md:flex-row gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900 mt-6">
-                    <input type="text" id="newStepName" placeholder="Tên bước mới..." class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm flex-1 outline-none dark:text-white">
-                    <div class="flex gap-2">
-                        <input type="number" id="newStepDays" placeholder="Số ngày" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm w-full md:w-24 text-center outline-none dark:text-white flex-1">
-                        <select id="newStepDayType" class="border border-white dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded text-sm outline-none w-full md:w-36 dark:text-white flex-[2]">
-                            <option value="calendar">Ngày lịch</option>
-                            <option value="workday">Ngày làm việc</option>
-                        </select>
-                        <button onclick="window.addConfigStep()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium w-full md:w-auto">Thêm</button>
+                <div id="configSummaryBar" class="mb-3"></div>
+                <div id="configSteps" class="space-y-2.5 mb-4"></div>
+                <div id="configAddStepBox" class="p-3.5 bg-blue-50/80 dark:bg-blue-900/20 rounded-xl border border-blue-200/80 dark:border-blue-800/80 mt-5">
+                    <div class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-1.5">
+                        <i class="fas fa-plus-circle" aria-hidden="true"></i>
+                        <span>Thêm bước công việc vào cuối quy trình đang chọn</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end">
+                        <div class="md:col-span-6 min-w-0">
+                            <label for="newStepName" class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Tên bước công việc</label>
+                            <input type="text" id="newStepName" placeholder="VD: Lập và thẩm định E-HSMT..." class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-blue-500 outline-none dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:col-span-6 gap-2 items-end">
+                            <div>
+                                <label for="newStepDays" class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Số ngày (≥ 0)</label>
+                                <input type="number" id="newStepDays" min="0" max="3650" step="1" inputmode="numeric" placeholder="VD: 1" class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded-lg text-sm text-center focus-visible:ring-2 focus-visible:ring-blue-500 outline-none dark:text-white">
+                            </div>
+                            <div>
+                                <label for="newStepDayType" class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1">Loại ngày tính hạn</label>
+                                <select id="newStepDayType" class="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-blue-500 outline-none dark:text-white">
+                                    <option value="workday">Ngày làm việc</option>
+                                    <option value="calendar">Ngày lịch</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <button type="button" onclick="window.addConfigStep()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-blue-500 outline-none min-h-[38px] inline-flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-plus text-xs" aria-hidden="true"></i>
+                                    <span>Thêm bước</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -890,6 +942,78 @@
             </div>
         </div>
     </div>
+
+    <!-- Hộp thoại Đồng bộ Quy trình mẫu sang Gói thầu đang thực hiện (Native <dialog>) -->
+    <dialog id="syncProcessDialog" aria-labelledby="syncProcessDialogTitle" closedby="any" class="m-auto p-0 rounded-2xl shadow-2xl w-[calc(100%-1.5rem)] max-w-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-t-4 border-indigo-600">
+        <div class="flex flex-col max-h-[88vh] p-4 sm:p-5">
+            <div class="flex justify-between items-start gap-2 pb-3 border-b dark:border-gray-700">
+                <div class="min-w-0">
+                    <h2 id="syncProcessDialogTitle" class="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-arrows-rotate text-indigo-600 dark:text-indigo-400 shrink-0" aria-hidden="true"></i>
+                        <span>Đồng bộ quy trình sang gói đang chạy</span>
+                    </h2>
+                    <p id="syncProcessDialogProcTitle" class="text-xs text-indigo-700 dark:text-indigo-300 font-semibold mt-0.5 break-words"></p>
+                </div>
+                <button type="button" onclick="window.closeSyncProcessModal()" aria-label="Đóng hộp thoại đồng bộ" class="text-gray-400 hover:text-red-500 p-1 rounded-lg transition shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
+                    <i class="fas fa-times text-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-3 space-y-3.5 pr-0.5">
+                <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-start gap-2">
+                    <i class="fas fa-shield-halved text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
+                    <div>
+                        <b>Bảo toàn tiến độ thực tế:</b> Mọi bước <b>Đã hoàn thành</b> (cùng hạn chót thực tế, người hoàn thành, tài liệu đính kèm, việc nhỏ) luôn được giữ nguyên 100%. Có thể nhấn <b>Ctrl+Z</b> để hoàn tác nếu cần.
+                    </div>
+                </div>
+
+                <!-- Phạm vi cập nhật -->
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-gray-900/70 border border-slate-200 dark:border-gray-700 space-y-2">
+                    <p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">1. Tuỳ chọn nội dung đồng bộ</p>
+                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input type="checkbox" id="syncOptUpdate" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
+                        <span>Cập nhật <b>tên bước, định mức ngày, loại ngày & biểu mẫu</b> cho các bước <i>chưa hoàn thành</i></span>
+                    </label>
+                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input type="checkbox" id="syncOptAdd" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
+                        <span>Bổ sung các <b>bước công việc mới thêm</b> trong quy trình mẫu vào gói thầu</span>
+                    </label>
+                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input type="checkbox" id="syncOptReorder" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
+                        <span>Sắp xếp lại thứ tự bước theo quy trình mẫu & tự động tính lại hạn chót nối tiếp</span>
+                    </label>
+                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
+                        <input type="checkbox" id="syncOptRemoveExtra" class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
+                        <span>Gỡ bước cũ đã xóa khỏi quy trình mẫu <span class="text-[11px] text-gray-500 dark:text-gray-400">(chỉ gỡ bước chưa xong, chưa có tài liệu/ghi chú; giữ nguyên việc phát sinh)</span></span>
+                    </label>
+                </div>
+
+                <!-- Danh sách gói thầu đang thực hiện -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">2. Chọn gói thầu đang chạy để áp dụng</p>
+                        <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 cursor-pointer">
+                            <input type="checkbox" id="syncSelectAllPkgs" checked onchange="window.toggleAllSyncPackages(this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Chọn tất cả (<span id="syncSelectedPkgCount">0</span>)</span>
+                        </label>
+                    </div>
+                    <div id="syncProcessPackageList" class="space-y-1.5 max-h-52 overflow-y-auto pr-0.5"></div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t dark:border-gray-700 flex flex-wrap sm:flex-nowrap justify-end gap-2">
+                <form method="dialog" class="w-full sm:w-auto">
+                    <button type="submit" value="only_new" autofocus class="w-full sm:w-auto px-3.5 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-gray-400 outline-none">
+                        Chỉ áp dụng gói tạo mới
+                    </button>
+                </form>
+                <button type="button" id="btnConfirmSyncProcess" onclick="window.executeSyncProcessToPackages()" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition inline-flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
+                    <i class="fas fa-check-double" aria-hidden="true"></i>
+                    <span>Đồng bộ các gói đã chọn</span>
+                </button>
+            </div>
+        </div>
+    </dialog>
 
     <!-- Modal Bình luận -->
     <div id="commentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] px-4">
@@ -2130,8 +2254,13 @@ const LUNAR_HOLIDAYS = [
                 db = JSON.parse(prevStateStr);
                 lastCommittedState = prevStateStr;
                 applyDefaultsIfMissing();
+                if (window.unsyncedProcessChanges) window.unsyncedProcessChanges.clear();
                 window.renderMissions();
                 window.populateProcessDropdowns();
+                const vSettingsUndo = document.getElementById('view-settings');
+                if (vSettingsUndo && !vSettingsUndo.classList.contains('hidden')) window.renderConfig();
+                const vDocsUndo = document.getElementById('view-docs');
+                if (vDocsUndo && !vDocsUndo.classList.contains('hidden')) window.renderDocs();
                 window.updateUndoRedoUI();
                 await window.saveDataToGAS(false);
                 window.toast.fire({ icon: 'info', title: 'Đã hoàn tác (Ctrl+Z)' });
@@ -2155,8 +2284,13 @@ const LUNAR_HOLIDAYS = [
                 db = JSON.parse(nextStateStr);
                 lastCommittedState = nextStateStr;
                 applyDefaultsIfMissing();
+                if (window.unsyncedProcessChanges) window.unsyncedProcessChanges.clear();
                 window.renderMissions();
                 window.populateProcessDropdowns();
+                const vSettingsRedo = document.getElementById('view-settings');
+                if (vSettingsRedo && !vSettingsRedo.classList.contains('hidden')) window.renderConfig();
+                const vDocsRedo = document.getElementById('view-docs');
+                if (vDocsRedo && !vDocsRedo.classList.contains('hidden')) window.renderDocs();
                 window.updateUndoRedoUI();
                 await window.saveDataToGAS(false);
                 window.toast.fire({ icon: 'info', title: 'Đã làm lại (Ctrl+Y)' });
@@ -2235,17 +2369,43 @@ const LUNAR_HOLIDAYS = [
             }));
         }
 
+        window.isAdminUser = function(user) {
+            const u = user || currentUser;
+            return Boolean(u && window.normalizeRole(u.role) === 'admin');
+        };
+
         function applyDefaultsIfMissing() {
             if (!db) db = {};
-            if (!db.processTemplates || Object.keys(db.processTemplates).length === 0) {
-                db.processTemplates = JSON.parse(JSON.stringify(defaultTemplates));
-            } else {
-                // Đảm bảo cả 4 quy trình mẫu từ V1 luôn có mặt nếu chưa có
-                for (const [k, v] of Object.entries(defaultTemplates)) {
-                    if (!db.processTemplates[k]) {
-                        db.processTemplates[k] = JSON.parse(JSON.stringify(v));
-                    }
+            if (!Array.isArray(db.deletedDefaultTemplates)) {
+                db.deletedDefaultTemplates = [];
+            }
+            const deletedSet = new Set(db.deletedDefaultTemplates);
+            if (!db.processTemplates || typeof db.processTemplates !== 'object' || Array.isArray(db.processTemplates)) {
+                db.processTemplates = {};
+            }
+            // Đảm bảo quy trình mẫu gốc luôn có mặt nếu chưa từng bị Admin chủ động xóa
+            for (const [k, v] of Object.entries(defaultTemplates)) {
+                if (!db.processTemplates[k] && !deletedSet.has(k)) {
+                    db.processTemplates[k] = JSON.parse(JSON.stringify(v));
                 }
+            }
+            // Chuẩn hóa dữ liệu từng quy trình để chống dữ liệu hỏng (null steps, days âm/chuỗi)
+            for (const [k, proc] of Object.entries(db.processTemplates)) {
+                if (!proc || typeof proc !== 'object') {
+                    delete db.processTemplates[k];
+                    continue;
+                }
+                proc.title = String(proc.title || 'Quy trình chưa đặt tên').trim() || 'Quy trình chưa đặt tên';
+                if (!Array.isArray(proc.steps)) proc.steps = [];
+                proc.steps = proc.steps.map((st, idx) => {
+                    const parsedDays = parseInt(st && st.days, 10);
+                    const safeDays = (!isNaN(parsedDays) && parsedDays >= 0) ? Math.min(parsedDays, 3650) : 0;
+                    return Object.assign({}, st, {
+                        name: String((st && st.name) || ('Bước ' + (idx + 1))).trim() || ('Bước ' + (idx + 1)),
+                        days: safeDays,
+                        dayType: (st && st.dayType === 'workday') ? 'workday' : 'calendar'
+                    });
+                });
             }
             if (!db.users || db.users.length === 0) {
                 db.users = currentUser
@@ -2311,22 +2471,26 @@ const LUNAR_HOLIDAYS = [
         };
 
         // Tính ngày hạn chót theo ngày làm việc hoặc ngày lịch
-        window.addCustomDays = function(dObj, days, type) { 
-            let r = new Date(dObj); 
-            if (type === 'workday') { 
-                let a = 0; 
-                while (a < days) { 
-                    r.setDate(r.getDate() + 1); 
-                    let isWeekend = r.getDay() === 0 || r.getDay() === 6; 
-                    let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2); 
-        let fullDateStr = dateStr + '/' + r.getFullYear();
-        let isHoliday = VN_HOLIDAYS.includes(dateStr) || LUNAR_HOLIDAYS.includes(fullDateStr);
-                    if (!isWeekend && !isHoliday) a++; 
-                } 
-            } else { 
-                r.setDate(r.getDate() + days); 
-            } 
-            return r; 
+        window.addCustomDays = function(dObj, days, type) {
+            let r = new Date(dObj);
+            if (isNaN(r.getTime())) r = new Date();
+            const parsedDays = parseInt(days, 10);
+            const safeDays = (!isNaN(parsedDays) && parsedDays > 0) ? Math.min(parsedDays, 3650) : 0;
+            if (safeDays === 0) return r;
+            if (type === 'workday') {
+                let a = 0;
+                while (a < safeDays) {
+                    r.setDate(r.getDate() + 1);
+                    let isWeekend = r.getDay() === 0 || r.getDay() === 6;
+                    let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2);
+                    let fullDateStr = dateStr + '/' + r.getFullYear();
+                    let isHoliday = VN_HOLIDAYS.includes(dateStr) || LUNAR_HOLIDAYS.includes(fullDateStr);
+                    if (!isWeekend && !isHoliday) a++;
+                }
+            } else {
+                r.setDate(r.getDate() + safeDays);
+            }
+            return r;
         };
 
         window.logActivity = function(mIndex, pkgIndex, msg) { 
@@ -2773,14 +2937,22 @@ const LUNAR_HOLIDAYS = [
                 if (error) throw error;
                 if (rows && rows.length > 0 && rows[0].data) {
                     const serverDb = rows[0].data;
-                    if (JSON.stringify(db.missions) !== JSON.stringify(serverDb.missions) ||
-                        JSON.stringify(db.processTemplates) !== JSON.stringify(serverDb.processTemplates)) {
+                    const missionsChanged = JSON.stringify(db.missions) !== JSON.stringify(serverDb.missions);
+                    const templatesChanged = JSON.stringify(db.processTemplates) !== JSON.stringify(serverDb.processTemplates) ||
+                        JSON.stringify(db.deletedDefaultTemplates || []) !== JSON.stringify(serverDb.deletedDefaultTemplates || []);
+                    if (missionsChanged || templatesChanged) {
                         db = serverDb;
                         applyDefaultsIfMissing();
                         autoCleanArchivedData();
                         const vProj = document.getElementById('view-projects');
                         if (vProj && !vProj.classList.contains('hidden')) window.renderMissions();
                         window.populateProcessDropdowns();
+                        const vSettings = document.getElementById('view-settings');
+                        const configStepsEl = document.getElementById('configSteps');
+                        const isEditingStep = Boolean(configStepsEl && document.activeElement && configStepsEl.contains(document.activeElement));
+                        if (templatesChanged && vSettings && !vSettings.classList.contains('hidden') && !isEditingStep) {
+                            window.renderConfig();
+                        }
                     }
                 }
                 if (syncIcon) syncIcon.className = "fas fa-cloud text-blue-300";
@@ -4481,12 +4653,34 @@ const LUNAR_HOLIDAYS = [
             document.getElementById('editPackageBudget').value = p.budget || "";
             document.getElementById('editPackageContractor').value = p.contractor || "";
             document.getElementById('editPackageWinningBid').value = p.winningBid || "";
-            let defaultStart = new Date();
-            if(p.steps && p.steps.length > 0 && p.steps[0].originalDays) { 
-                defaultStart = new Date(p.steps[0].deadline); 
-                defaultStart.setDate(defaultStart.getDate() - p.steps[0].originalDays); 
+            let initialStartStr = '';
+            if (p.startDate) {
+                initialStartStr = window.formatForDateInput(p.startDate);
+            } else if (p.steps && p.steps.length > 0 && p.steps[0].deadline) {
+                let d0 = new Date(p.steps[0].deadline);
+                const origDays = Math.max(0, parseInt(p.steps[0].originalDays, 10) || 0);
+                if (origDays > 0) {
+                    if (p.steps[0].originalDayType === 'workday') {
+                        let rem = origDays;
+                        while (rem > 0) {
+                            d0.setDate(d0.getDate() - 1);
+                            const isWknd = d0.getDay() === 0 || d0.getDay() === 6;
+                            const dStr = ("0" + d0.getDate()).slice(-2) + '/' + ("0" + (d0.getMonth() + 1)).slice(-2);
+                            const fullDStr = dStr + '/' + d0.getFullYear();
+                            const isHol = VN_HOLIDAYS.includes(dStr) || LUNAR_HOLIDAYS.includes(fullDStr);
+                            if (!isWknd && !isHol) rem--;
+                        }
+                    } else {
+                        d0.setDate(d0.getDate() - origDays);
+                    }
+                }
+                initialStartStr = window.formatForDateInput(d0);
+            } else {
+                initialStartStr = window.formatForDateInput(new Date());
             }
-            document.getElementById('editPackageStartDate').value = window.formatForDateInput(defaultStart);
+            const startInputEl = document.getElementById('editPackageStartDate');
+            startInputEl.value = initialStartStr;
+            startInputEl.dataset.initialDate = initialStartStr;
             const sel = document.getElementById('editPackageOwner'); 
             sel.innerHTML = ''; 
             const normRole = window.normalizeRole(currentUser.role);
@@ -4518,15 +4712,19 @@ const LUNAR_HOLIDAYS = [
             pkg.budget = document.getElementById('editPackageBudget').value.trim();
             pkg.contractor = document.getElementById('editPackageContractor').value.trim();
             pkg.winningBid = document.getElementById('editPackageWinningBid').value.trim();
-            if (sDate && pkg.steps && pkg.steps.length > 0) {
+            const startInputEl = document.getElementById('editPackageStartDate');
+            const prevStartStr = startInputEl ? (startInputEl.dataset.initialDate || '') : '';
+            if (sDate && sDate !== prevStartStr && pkg.steps && pkg.steps.length > 0) {
+                pkg.startDate = sDate;
                 let currentDt = new Date(sDate);
-                pkg.steps.forEach(st => { 
-                    currentDt = window.addCustomDays(currentDt, st.originalDays || 0, st.originalDayType || 'calendar'); 
-                    st.deadline = currentDt.toISOString(); 
+                pkg.steps.forEach(st => {
+                    currentDt = window.addCustomDays(currentDt, st.originalDays || 0, st.originalDayType || 'calendar');
+                    st.deadline = currentDt.toISOString();
                 });
-                window.logActivity(cEditM, cEditP, `Đổi tên/chủ trì và dời lịch dự án`);
-            } else { 
-                window.logActivity(cEditM, cEditP, `Sửa thông tin gói thầu`); 
+                window.logActivity(cEditM, cEditP, `Đổi tên/chủ trì và dời ngày bắt đầu sang ${window.formatDate(sDate)}`);
+            } else {
+                if (sDate && !pkg.startDate) pkg.startDate = sDate;
+                window.logActivity(cEditM, cEditP, `Sửa thông tin gói thầu`);
             }
             window.closeEditPackageModal(); 
             window.renderMissions(); 
@@ -4674,11 +4872,11 @@ const LUNAR_HOLIDAYS = [
         };
 
         window.openConfigStepTemplateModal = function(typeKey, sIndex) {
-            if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
+            if (!db.processTemplates || !db.processTemplates[typeKey] || !Array.isArray(db.processTemplates[typeKey].steps) || !db.processTemplates[typeKey].steps[sIndex]) return;
             currentTemplateTarget = { type: 'config_step', typeKey: typeKey, sIndex: sIndex };
             const step = db.processTemplates[typeKey].steps[sIndex];
             const procTitle = db.processTemplates[typeKey].title;
-            window.renderStepTemplateModalContent(step, `${procTitle} > ${step.name}`, currentUser.role === 'admin');
+            window.renderStepTemplateModalContent(step, `${procTitle} > ${step.name}`, window.isAdminUser());
             document.getElementById('stepTemplateModal').classList.remove('hidden');
         };
 
@@ -4838,7 +5036,11 @@ const LUNAR_HOLIDAYS = [
                     timer: 2000
                 });
             } else if (currentTemplateTarget.type === 'config_step') {
+                if (!window.isAdminUser()) {
+                    return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền cập nhật biểu mẫu chuẩn của quy trình!', 'warning');
+                }
                 const { typeKey, sIndex } = currentTemplateTarget;
+                if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
                 const step = db.processTemplates[typeKey].steps[sIndex];
                 step.templateForm = templateForm;
                 window.renderConfig();
@@ -4857,13 +5059,21 @@ const LUNAR_HOLIDAYS = [
                 }).then((res) => {
                     if (res.isConfirmed) {
                         let count = 0;
-                        const procTitle = db.processTemplates[typeKey].title;
-                        db.missions.forEach((m, mIdx) => {
+                        const procTitle = db.processTemplates[typeKey] ? db.processTemplates[typeKey].title : '';
+                        const targetStepNorm = String(step.name || '').trim().toLowerCase();
+                        (db.missions || []).forEach((m) => {
                             if (m.packages) {
-                                m.packages.forEach((p, pIdx) => {
-                                    if (!p.completed && !p.archived && p.processTitle === procTitle && p.steps) {
-                                        if (p.steps[sIndex] && p.steps[sIndex].name === step.name) {
-                                            p.steps[sIndex].templateForm = JSON.parse(JSON.stringify(templateForm));
+                                m.packages.forEach((p) => {
+                                    const sameProc = (p.processType && p.processType === typeKey) || (procTitle && p.processTitle === procTitle);
+                                    if (!p.completed && !p.archived && sameProc && Array.isArray(p.steps)) {
+                                        let matchedStep = null;
+                                        if (p.steps[sIndex] && String(p.steps[sIndex].name || '').trim().toLowerCase() === targetStepNorm) {
+                                            matchedStep = p.steps[sIndex];
+                                        } else {
+                                            matchedStep = p.steps.find(st => String(st.name || '').trim().toLowerCase() === targetStepNorm);
+                                        }
+                                        if (matchedStep) {
+                                            matchedStep.templateForm = JSON.parse(JSON.stringify(templateForm));
                                             count++;
                                         }
                                     }
@@ -4881,6 +5091,15 @@ const LUNAR_HOLIDAYS = [
                                 showConfirmButton: false,
                                 timer: 2500
                             });
+                        } else {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'info',
+                                title: 'Đã lưu vào quy trình mẫu (hiện chưa có gói thầu đang chạy nào khớp bước này).',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
                         }
                     }
                 });
@@ -4889,6 +5108,17 @@ const LUNAR_HOLIDAYS = [
 
         window.deleteStepTemplateForm = function() {
             if (!currentTemplateTarget) return;
+            if (currentTemplateTarget.type === 'config_step' && !window.isAdminUser()) {
+                return Swal.fire('Cảnh báo', 'Chỉ Quản trị viên mới có quyền xóa biểu mẫu quy trình chuẩn!', 'warning');
+            }
+            if (currentTemplateTarget.type === 'package_step') {
+                const { mIndex, pkgIndex } = currentTemplateTarget;
+                const m = db.missions[mIndex];
+                const pkg = m ? m.packages[pkgIndex] : null;
+                if (!pkg || !(window.isAdminUser() || window.canEditPackage(m, pkg, currentUser))) {
+                    return Swal.fire('Cảnh báo', 'Bạn không có quyền gỡ biểu mẫu của nhiệm vụ cụ thể này!', 'warning');
+                }
+            }
             Swal.fire({
                 title: 'Xóa biểu mẫu công đoạn?',
                 text: 'Bạn có chắc chắn muốn gỡ bỏ biểu mẫu chuẩn của công đoạn này?',
@@ -4909,8 +5139,10 @@ const LUNAR_HOLIDAYS = [
                         window.openStepTemplateModal(mIndex, pkgIndex, sIndex);
                     } else if (currentTemplateTarget.type === 'config_step') {
                         const { typeKey, sIndex } = currentTemplateTarget;
+                        if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
                         const step = db.processTemplates[typeKey].steps[sIndex];
                         delete step.templateForm;
+                        if (window.markProcessUnsynced) window.markProcessUnsynced(typeKey);
                         window.renderConfig();
                         window.saveDataToGAS(false);
                         window.openConfigStepTemplateModal(typeKey, sIndex);
@@ -5142,33 +5374,661 @@ const LUNAR_HOLIDAYS = [
             }); 
         };
 
-        // Hàm xóa quy trình duy nhất (đã loại bỏ trùng lặp)
-        window.deleteProcessTemplate = function() { 
-            if (currentUser.role !== 'admin') return; 
-            const type = document.getElementById('configProcessSelector').value; 
-            if (!type) return; 
-            Swal.fire({
-                title: 'Xóa quy trình mẫu?', 
-                text: 'Hành động này sẽ xóa quy trình khỏi danh sách mẫu sẵn có.',
-                icon: 'warning', 
-                showCancelButton: true, 
-                confirmButtonColor: '#d33', 
-                confirmButtonText: 'Xóa'
-            }).then((r) => { 
-                if(r.isConfirmed){ 
-                    delete db.processTemplates[type]; 
-                    window.populateProcessDropdowns(); 
-                    window.renderConfig(); 
-                    window.saveDataToGAS(false); 
-                } 
-            }); 
+        window.countPackagesUsingProcess = function(typeKey) {
+            if (!typeKey || !db.processTemplates || !db.processTemplates[typeKey]) return 0;
+            const procTitle = db.processTemplates[typeKey].title;
+            let count = 0;
+            (db.missions || []).forEach(m => {
+                (m.packages || []).forEach(p => {
+                    if ((p.processType && p.processType === typeKey) || (procTitle && p.processTitle === procTitle)) {
+                        count++;
+                    }
+                });
+            });
+            return count;
         };
 
-        window.removeConfigStep = function(typeKey, index) { 
-            if (currentUser.role !== 'admin') return; 
-            db.processTemplates[typeKey].steps.splice(index, 1); 
-            window.renderConfig(); 
-            window.saveDataToGAS(false); 
+        // Theo dõi các quy trình mẫu vừa chỉnh sửa nhưng chưa đồng bộ sang gói đang chạy
+        window.unsyncedProcessChanges = new Set();
+        let currentSyncProcessType = '';
+
+        window.getActivePackagesUsingProcess = function(typeKey) {
+            if (!typeKey || !db.processTemplates || !db.processTemplates[typeKey]) return [];
+            const procTitle = db.processTemplates[typeKey].title;
+            const results = [];
+            (db.missions || []).forEach((m, mIndex) => {
+                if (!m || m.archived) return;
+                (m.packages || []).forEach((p, pkgIndex) => {
+                    if (!p || p.completed || p.archived) return;
+                    const sameProc = (p.processType && p.processType === typeKey) || (procTitle && p.processTitle === procTitle);
+                    if (sameProc) {
+                        results.push({ mIndex, pkgIndex, mission: m, pkg: p });
+                    }
+                });
+            });
+            return results;
+        };
+
+        window.markProcessUnsynced = function(typeKey) {
+            if (!typeKey) return;
+            const active = window.getActivePackagesUsingProcess(typeKey);
+            if (active.length > 0) {
+                window.unsyncedProcessChanges.add(typeKey);
+            } else {
+                window.unsyncedProcessChanges.delete(typeKey);
+            }
+        };
+
+        window.dismissUnsyncedProcessBanner = function(typeKey, showToastNotice) {
+            if (typeKey) window.unsyncedProcessChanges.delete(typeKey);
+            window.renderConfigSummary(typeKey);
+            if (showToastNotice && window.toast) {
+                window.toast.fire({ icon: 'info', title: 'Chỉ áp dụng thay đổi cho gói thầu tạo mới' });
+            }
+        };
+
+        window.inferPackageStartDate = function(p) {
+            if (!p) return window.formatForDateInput(new Date());
+            if (p.startDate) return window.formatForDateInput(p.startDate);
+            if (Array.isArray(p.steps) && p.steps.length > 0 && p.steps[0].deadline) {
+                const d0 = new Date(p.steps[0].deadline);
+                if (!isNaN(d0.getTime())) {
+                    const origDays = Math.max(0, parseInt(p.steps[0].originalDays, 10) || 0);
+                    if (origDays > 0) {
+                        if (p.steps[0].originalDayType === 'workday') {
+                            let rem = origDays;
+                            while (rem > 0) {
+                                d0.setDate(d0.getDate() - 1);
+                                const isWknd = d0.getDay() === 0 || d0.getDay() === 6;
+                                const dStr = ("0" + d0.getDate()).slice(-2) + '/' + ("0" + (d0.getMonth() + 1)).slice(-2);
+                                const fullDStr = dStr + '/' + d0.getFullYear();
+                                const isHol = VN_HOLIDAYS.includes(dStr) || LUNAR_HOLIDAYS.includes(fullDStr);
+                                if (!isWknd && !isHol) rem--;
+                            }
+                        } else {
+                            d0.setDate(d0.getDate() - origDays);
+                        }
+                    }
+                    return window.formatForDateInput(d0);
+                }
+            }
+            return window.formatForDateInput(new Date());
+        };
+
+        window.updateSyncSelectedCountUI = function() {
+            const listEl = document.getElementById('syncProcessPackageList');
+            const countEl = document.getElementById('syncSelectedPkgCount');
+            const selectAllEl = document.getElementById('syncSelectAllPkgs');
+            const confirmBtn = document.getElementById('btnConfirmSyncProcess');
+            if (!listEl) return;
+            const boxes = Array.from(listEl.querySelectorAll('.sync-pkg-checkbox'));
+            const checkedCount = boxes.filter(b => b.checked).length;
+            if (countEl) countEl.textContent = checkedCount + '/' + boxes.length;
+            if (selectAllEl && boxes.length > 0) {
+                selectAllEl.checked = checkedCount === boxes.length;
+                selectAllEl.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+            }
+            if (confirmBtn) confirmBtn.disabled = checkedCount === 0;
+        };
+
+        window.toggleAllSyncPackages = function(checked) {
+            const listEl = document.getElementById('syncProcessPackageList');
+            if (!listEl) return;
+            listEl.querySelectorAll('.sync-pkg-checkbox').forEach(cb => {
+                cb.checked = Boolean(checked);
+            });
+            window.updateSyncSelectedCountUI();
+        };
+
+        window.openSyncProcessModal = function(typeKey) {
+            if (!window.isAdminUser()) return;
+            const sel = document.getElementById('configProcessSelector');
+            const type = typeKey || (sel ? sel.value : '');
+            if (!type || !db.processTemplates || !db.processTemplates[type]) {
+                return Swal.fire('Thông báo', 'Vui lòng chọn một quy trình mẫu hợp lệ!', 'info');
+            }
+            const activePkgs = window.getActivePackagesUsingProcess(type);
+            if (activePkgs.length === 0) {
+                window.unsyncedProcessChanges.delete(type);
+                window.renderConfigSummary(type);
+                return Swal.fire('Thông báo', 'Hiện không có gói thầu nào đang chạy áp dụng quy trình này (các gói tạo mới sẽ tự động nhận quy trình mới nhất).', 'info');
+            }
+
+            currentSyncProcessType = type;
+            const proc = db.processTemplates[type];
+            const stepLen = Array.isArray(proc.steps) ? proc.steps.length : 0;
+
+            const titleEl = document.getElementById('syncProcessDialogProcTitle');
+            if (titleEl) titleEl.textContent = proc.title + ' (' + stepLen + ' bước chuẩn)';
+
+            const optUpdate = document.getElementById('syncOptUpdate');
+            const optAdd = document.getElementById('syncOptAdd');
+            const optReorder = document.getElementById('syncOptReorder');
+            const optRemoveExtra = document.getElementById('syncOptRemoveExtra');
+            if (optUpdate) optUpdate.checked = true;
+            if (optAdd) optAdd.checked = true;
+            if (optReorder) optReorder.checked = true;
+            if (optRemoveExtra) optRemoveExtra.checked = false;
+
+            const listEl = document.getElementById('syncProcessPackageList');
+            if (listEl) {
+                listEl.innerHTML = activePkgs.map((item) => {
+                    const stepsArr = Array.isArray(item.pkg.steps) ? item.pkg.steps : [];
+                    const doneSteps = stepsArr.filter(s => s && s.completed).length;
+                    const badgeCls = doneSteps > 0
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
+                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+                    const ownerHtml = item.pkg.owner ? (' • Phụ trách: <b>' + escapeHtml(item.pkg.owner) + '</b>') : '';
+                    return '<label class="flex items-start gap-2.5 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/90 hover:border-indigo-300 dark:hover:border-indigo-600 cursor-pointer transition">'
+                        + '<input type="checkbox" class="sync-pkg-checkbox mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0" data-m-index="' + item.mIndex + '" data-pkg-index="' + item.pkgIndex + '" checked onchange="window.updateSyncSelectedCountUI()">'
+                        + '<div class="flex-1 min-w-0">'
+                        + '<div class="flex flex-wrap items-center justify-between gap-1">'
+                        + '<span class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-100 break-words">' + escapeHtml(item.pkg.name) + '</span>'
+                        + '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ' + badgeCls + '">Đã xong ' + doneSteps + '/' + stepsArr.length + ' bước</span>'
+                        + '</div>'
+                        + '<div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 break-words">'
+                        + '<span>Nhiệm vụ: <b>' + escapeHtml(item.mission.name || '') + '</b></span>' + ownerHtml
+                        + '</div></div></label>';
+                }).join('');
+            }
+            window.updateSyncSelectedCountUI();
+
+            const dlg = document.getElementById('syncProcessDialog');
+            if (dlg && typeof dlg.showModal === 'function') {
+                if (!dlg.open) dlg.showModal();
+            }
+        };
+
+        window.closeSyncProcessModal = function() {
+            const dlg = document.getElementById('syncProcessDialog');
+            if (dlg && typeof dlg.close === 'function' && dlg.open) {
+                dlg.returnValue = '';
+                dlg.close();
+            }
+        };
+
+        window.executeSyncProcessToPackages = function(explicitTargets) {
+            if (!window.isAdminUser()) return;
+            const typeKey = currentSyncProcessType || (document.getElementById('configProcessSelector') ? document.getElementById('configProcessSelector').value : '');
+            if (!typeKey || !db.processTemplates || !db.processTemplates[typeKey]) return;
+
+            const optUpdate = document.getElementById('syncOptUpdate') ? document.getElementById('syncOptUpdate').checked : true;
+            const optAdd = document.getElementById('syncOptAdd') ? document.getElementById('syncOptAdd').checked : true;
+            const optReorder = document.getElementById('syncOptReorder') ? document.getElementById('syncOptReorder').checked : true;
+            const optRemoveExtra = document.getElementById('syncOptRemoveExtra') ? document.getElementById('syncOptRemoveExtra').checked : false;
+
+            if (!optUpdate && !optAdd && !optReorder && !optRemoveExtra) {
+                return Swal.fire('Chưa chọn nội dung', 'Vui lòng tích chọn ít nhất 1 tuỳ chọn nội dung đồng bộ!', 'warning');
+            }
+
+            let targets = [];
+            if (Array.isArray(explicitTargets)) {
+                targets = explicitTargets;
+            } else {
+                const listEl = document.getElementById('syncProcessPackageList');
+                if (listEl) {
+                    listEl.querySelectorAll('.sync-pkg-checkbox:checked').forEach(cb => {
+                        const mIdx = parseInt(cb.getAttribute('data-m-index'), 10);
+                        const pIdx = parseInt(cb.getAttribute('data-pkg-index'), 10);
+                        if (!isNaN(mIdx) && !isNaN(pIdx)) {
+                            targets.push({ mIndex: mIdx, pkgIndex: pIdx });
+                        }
+                    });
+                }
+            }
+
+            if (targets.length === 0) {
+                return Swal.fire('Chưa chọn gói thầu', 'Vui lòng chọn ít nhất 1 gói thầu đang chạy để đồng bộ!', 'warning');
+            }
+
+            const proc = db.processTemplates[typeKey];
+            const templateSteps = Array.isArray(proc.steps) ? proc.steps : [];
+            const norm = (str) => String(str || '').trim().toLowerCase();
+
+            // Đảm bảo mỗi bước trong quy trình mẫu có định danh ổn định để khớp chính xác các lần sửa sau
+            templateSteps.forEach((ts, idx) => {
+                if (!ts.stepUid) {
+                    ts.stepUid = 'st_' + Date.now().toString(36) + '_' + idx + '_' + Math.random().toString(36).slice(2, 6);
+                }
+            });
+
+            let syncedPkgCount = 0;
+            let totalUpdatedSteps = 0;
+            let totalAddedSteps = 0;
+            let totalRemovedSteps = 0;
+
+            targets.forEach(({ mIndex, pkgIndex }) => {
+                const mission = db.missions ? db.missions[mIndex] : null;
+                const pkg = (mission && mission.packages) ? mission.packages[pkgIndex] : null;
+                if (!mission || mission.archived || !pkg || pkg.completed || pkg.archived) return;
+
+                const baseStartStr = window.inferPackageStartDate(pkg);
+                if (!pkg.startDate && baseStartStr) pkg.startDate = baseStartStr;
+
+                const oldSteps = Array.isArray(pkg.steps) ? pkg.steps : [];
+                const usedPkgIdx = new Set();
+                const tmplToPkgIdx = new Array(templateSteps.length).fill(-1);
+
+                // Tầng 1: Khớp theo stepUid ổn định
+                templateSteps.forEach((ts, ti) => {
+                    for (let pi = 0; pi < oldSteps.length; pi++) {
+                        if (usedPkgIdx.has(pi)) continue;
+                        if (oldSteps[pi].templateStepUid && ts.stepUid && oldSteps[pi].templateStepUid === ts.stepUid) {
+                            tmplToPkgIdx[ti] = pi;
+                            usedPkgIdx.add(pi);
+                            break;
+                        }
+                    }
+                });
+
+                // Tầng 2: Khớp theo tên bước hiện tại
+                templateSteps.forEach((ts, ti) => {
+                    if (tmplToPkgIdx[ti] !== -1) return;
+                    const tName = norm(ts.name);
+                    for (let pi = 0; pi < oldSteps.length; pi++) {
+                        if (usedPkgIdx.has(pi)) continue;
+                        if (norm(oldSteps[pi].name) === tName) {
+                            tmplToPkgIdx[ti] = pi;
+                            usedPkgIdx.add(pi);
+                            break;
+                        }
+                    }
+                });
+
+                // Tầng 3: Khớp theo lịch sử tên cũ (prevNames) khi Admin vừa đổi tên bước
+                templateSteps.forEach((ts, ti) => {
+                    if (tmplToPkgIdx[ti] !== -1 || !Array.isArray(ts.prevNames) || ts.prevNames.length === 0) return;
+                    const prevNorms = ts.prevNames.map(norm);
+                    for (let pi = 0; pi < oldSteps.length; pi++) {
+                        if (usedPkgIdx.has(pi)) continue;
+                        if (prevNorms.includes(norm(oldSteps[pi].name))) {
+                            tmplToPkgIdx[ti] = pi;
+                            usedPkgIdx.add(pi);
+                            break;
+                        }
+                    }
+                });
+
+                const pkgToTmplIdx = new Map();
+                tmplToPkgIdx.forEach((pi, ti) => {
+                    if (pi !== -1) pkgToTmplIdx.set(pi, ti);
+                });
+
+                // Phân loại các bước trong gói thầu không còn nằm trong quy trình mẫu
+                const keptUnmatchedIdxSet = new Set();
+                for (let pi = 0; pi < oldSteps.length; pi++) {
+                    if (pkgToTmplIdx.has(pi)) continue;
+                    const ps = oldSteps[pi];
+                    const hasLinks = Array.isArray(ps.links) && ps.links.length > 0;
+                    const hasNote = Boolean(String(ps.note || '').trim());
+                    const hasSubTasks = Array.isArray(ps.subTasks) && ps.subTasks.length > 0;
+                    const isAdhocStep = Boolean(ps.isCustomStep) || (!ps.templateStepUid && (parseInt(ps.originalDays, 10) || 0) === 0 && norm(ps.name) === 'công việc phát sinh');
+
+                    if (ps.completed || !optRemoveExtra || hasLinks || hasNote || hasSubTasks || isAdhocStep) {
+                        keptUnmatchedIdxSet.add(pi);
+                    } else {
+                        totalRemovedSteps++;
+                    }
+                }
+
+                const buildUpdatedStep = (ps, ts) => {
+                    const copy = JSON.parse(JSON.stringify(ps));
+                    copy.templateStepUid = ts.stepUid;
+                    if (copy.completed) {
+                        if (!copy.templateForm && ts.templateForm && ts.templateForm.url) {
+                            copy.templateForm = JSON.parse(JSON.stringify(ts.templateForm));
+                        }
+                        return copy;
+                    }
+                    if (optUpdate) {
+                        const nextDays = Math.max(0, parseInt(ts.days, 10) || 0);
+                        const nextDayType = ts.dayType === 'workday' ? 'workday' : 'calendar';
+                        const prevFormUrl = (copy.templateForm && copy.templateForm.url) ? copy.templateForm.url : '';
+                        const nextFormUrl = (ts.templateForm && ts.templateForm.url) ? ts.templateForm.url : '';
+                        if (
+                            copy.name !== ts.name ||
+                            (parseInt(copy.originalDays, 10) || 0) !== nextDays ||
+                            (copy.originalDayType || 'calendar') !== nextDayType ||
+                            prevFormUrl !== nextFormUrl
+                        ) {
+                            totalUpdatedSteps++;
+                        }
+                        copy.name = ts.name;
+                        copy.originalDays = nextDays;
+                        copy.originalDayType = nextDayType;
+                        if (ts.templateForm && ts.templateForm.url) {
+                            copy.templateForm = JSON.parse(JSON.stringify(ts.templateForm));
+                        } else {
+                            delete copy.templateForm;
+                        }
+                    }
+                    return copy;
+                };
+
+                const buildNewStep = (ts) => {
+                    totalAddedSteps++;
+                    return {
+                        name: ts.name,
+                        deadline: new Date().toISOString(),
+                        note: "",
+                        subTasks: [],
+                        completed: false,
+                        links: [],
+                        completedBy: "",
+                        originalDays: Math.max(0, parseInt(ts.days, 10) || 0),
+                        originalDayType: ts.dayType === 'workday' ? 'workday' : 'calendar',
+                        templateStepUid: ts.stepUid,
+                        templateForm: (ts.templateForm && ts.templateForm.url) ? JSON.parse(JSON.stringify(ts.templateForm)) : null
+                    };
+                };
+
+                let nextSteps = [];
+                if (optReorder) {
+                    // Neo các bước phát sinh/giữ lại ngay sau bước mẫu liền trước nó
+                    const anchoredBeforeAll = [];
+                    const anchoredAfterTmpl = new Map();
+                    for (let pi = 0; pi < oldSteps.length; pi++) {
+                        if (!keptUnmatchedIdxSet.has(pi)) continue;
+                        const customCopy = JSON.parse(JSON.stringify(oldSteps[pi]));
+                        customCopy._isUnmatchedCustom = true;
+                        let anchorTi = -1;
+                        for (let prevP = pi - 1; prevP >= 0; prevP--) {
+                            if (pkgToTmplIdx.has(prevP)) {
+                                anchorTi = pkgToTmplIdx.get(prevP);
+                                break;
+                            }
+                        }
+                        if (anchorTi === -1) {
+                            anchoredBeforeAll.push(customCopy);
+                        } else {
+                            if (!anchoredAfterTmpl.has(anchorTi)) anchoredAfterTmpl.set(anchorTi, []);
+                            anchoredAfterTmpl.get(anchorTi).push(customCopy);
+                        }
+                    }
+
+                    anchoredBeforeAll.forEach(s => nextSteps.push(s));
+                    for (let ti = 0; ti < templateSteps.length; ti++) {
+                        const matchedPi = tmplToPkgIdx[ti];
+                        if (matchedPi !== -1) {
+                            nextSteps.push(buildUpdatedStep(oldSteps[matchedPi], templateSteps[ti]));
+                        } else if (optAdd) {
+                            nextSteps.push(buildNewStep(templateSteps[ti]));
+                        }
+                        if (anchoredAfterTmpl.has(ti)) {
+                            anchoredAfterTmpl.get(ti).forEach(s => nextSteps.push(s));
+                        }
+                    }
+                } else {
+                    const stepObjByTi = new Map();
+                    for (let pi = 0; pi < oldSteps.length; pi++) {
+                        if (pkgToTmplIdx.has(pi)) {
+                            const ti = pkgToTmplIdx.get(pi);
+                            const stObj = buildUpdatedStep(oldSteps[pi], templateSteps[ti]);
+                            stepObjByTi.set(ti, stObj);
+                            nextSteps.push(stObj);
+                        } else if (keptUnmatchedIdxSet.has(pi)) {
+                            const customCopy = JSON.parse(JSON.stringify(oldSteps[pi]));
+                            customCopy._isUnmatchedCustom = true;
+                            nextSteps.push(customCopy);
+                        }
+                    }
+                    if (optAdd) {
+                        for (let ti = 0; ti < templateSteps.length; ti++) {
+                            if (tmplToPkgIdx[ti] !== -1) continue;
+                            const newSt = buildNewStep(templateSteps[ti]);
+                            let inserted = false;
+                            for (let prevTi = ti - 1; prevTi >= 0; prevTi--) {
+                                if (stepObjByTi.has(prevTi)) {
+                                    const pos = nextSteps.indexOf(stepObjByTi.get(prevTi));
+                                    if (pos !== -1) {
+                                        nextSteps.splice(pos + 1, 0, newSt);
+                                        inserted = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!inserted) {
+                                for (let nextTi = ti + 1; nextTi < templateSteps.length; nextTi++) {
+                                    if (stepObjByTi.has(nextTi)) {
+                                        const pos = nextSteps.indexOf(stepObjByTi.get(nextTi));
+                                        if (pos !== -1) {
+                                            nextSteps.splice(pos, 0, newSt);
+                                            inserted = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (!inserted) nextSteps.push(newSt);
+                            stepObjByTi.set(ti, newSt);
+                        }
+                    }
+                }
+
+                // Tính lại hạn chót nối tiếp (Anchor-Aware): giữ nguyên hạn chót thực tế của bước Đã hoàn thành làm mốc neo
+                let currentDt = baseStartStr ? new Date(baseStartStr) : new Date();
+                if (isNaN(currentDt.getTime())) currentDt = new Date();
+
+                nextSteps.forEach((s) => {
+                    if (s.completed) {
+                        const doneDt = s.deadline ? new Date(s.deadline) : null;
+                        if (doneDt && !isNaN(doneDt.getTime())) {
+                            currentDt = doneDt;
+                        }
+                    } else if (s._isUnmatchedCustom) {
+                        const customDays = Math.max(0, parseInt(s.originalDays, 10) || 0);
+                        if (customDays > 0) {
+                            currentDt = window.addCustomDays(currentDt, customDays, s.originalDayType || 'calendar');
+                            s.deadline = currentDt.toISOString();
+                        } else {
+                            const existingDt = s.deadline ? new Date(s.deadline) : null;
+                            if (existingDt && !isNaN(existingDt.getTime()) && existingDt.getTime() >= currentDt.getTime()) {
+                                currentDt = existingDt;
+                            } else {
+                                const shifted = new Date(currentDt);
+                                shifted.setDate(shifted.getDate() + 1);
+                                currentDt = shifted;
+                                s.deadline = currentDt.toISOString();
+                            }
+                        }
+                    } else {
+                        currentDt = window.addCustomDays(currentDt, s.originalDays || 0, s.originalDayType || 'calendar');
+                        s.deadline = currentDt.toISOString();
+                    }
+                    delete s._isUnmatchedCustom;
+                });
+
+                pkg.steps = nextSteps;
+                pkg.processType = typeKey;
+                pkg.processTitle = proc.title;
+                window.logActivity(mIndex, pkgIndex, 'Đồng bộ cập nhật quy trình mẫu "' + proc.title + '" (giữ nguyên các bước đã hoàn thành)');
+                syncedPkgCount++;
+            });
+
+            window.unsyncedProcessChanges.delete(typeKey);
+            window.closeSyncProcessModal();
+            window.renderConfigSummary(typeKey);
+            window.renderMissions();
+            window.saveDataToGAS(false);
+
+            const summaryParts = [];
+            if (totalUpdatedSteps > 0) summaryParts.push('cập nhật ' + totalUpdatedSteps + ' bước');
+            if (totalAddedSteps > 0) summaryParts.push('thêm ' + totalAddedSteps + ' bước mới');
+            if (totalRemovedSteps > 0) summaryParts.push('gỡ ' + totalRemovedSteps + ' bước cũ');
+            const detailSuffix = summaryParts.length > 0 ? (' (' + summaryParts.join(', ') + ')') : '';
+
+            window.toast.fire({
+                icon: 'success',
+                title: 'Đã đồng bộ ' + syncedPkgCount + ' gói thầu đang chạy' + detailSuffix + '!'
+            });
+        };
+
+        window.renameProcessTemplate = function() {
+            if (!window.isAdminUser()) return;
+            const sel = document.getElementById('configProcessSelector');
+            const type = sel ? sel.value : '';
+            if (!type || !db.processTemplates[type]) {
+                return Swal.fire('Thông báo', 'Hiện chưa có quy trình nào được chọn để đổi tên!', 'info');
+            }
+            const oldTitle = db.processTemplates[type].title || '';
+            Swal.fire({
+                title: 'Đổi tên quy trình mẫu',
+                input: 'text',
+                inputLabel: 'Tên hiển thị của quy trình đấu thầu',
+                inputValue: oldTitle,
+                showCancelButton: true,
+                confirmButtonText: 'Lưu tên mới',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#2563eb',
+                inputValidator: (val) => {
+                    const trimmed = String(val || '').trim();
+                    if (!trimmed) return 'Tên quy trình không được để trống!';
+                    const isDup = Object.entries(db.processTemplates).some(([k, p]) =>
+                        k !== type && p && String(p.title || '').trim().toLowerCase() === trimmed.toLowerCase()
+                    );
+                    if (isDup) return 'Tên quy trình này đã trùng với một quy trình khác!';
+                    return null;
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const newTitle = String(res.value || '').trim();
+                    if (!newTitle || newTitle === oldTitle) return;
+                    db.processTemplates[type].title = newTitle;
+                    // Đồng bộ tên quy trình mới cho các nhiệm vụ cụ thể đang gắn quy trình này
+                    let updatedPkgs = 0;
+                    (db.missions || []).forEach(m => {
+                        (m.packages || []).forEach(p => {
+                            if ((p.processType && p.processType === type) || p.processTitle === oldTitle) {
+                                p.processType = type;
+                                p.processTitle = newTitle;
+                                updatedPkgs++;
+                            }
+                        });
+                    });
+                    window.populateProcessDropdowns();
+                    if (sel) sel.value = type;
+                    window.renderConfig();
+                    if (updatedPkgs > 0) window.renderMissions();
+                    window.saveDataToGAS(false);
+                    window.toast.fire({
+                        icon: 'success',
+                        title: updatedPkgs > 0
+                            ? `Đã đổi tên quy trình và đồng bộ ${updatedPkgs} gói thầu!`
+                            : 'Đã đổi tên quy trình mẫu!'
+                    });
+                }
+            });
+        };
+
+        window.restoreDefaultProcessTemplates = function() {
+            if (!window.isAdminUser()) return;
+            const missingKeys = Object.keys(defaultTemplates).filter(k => !db.processTemplates || !db.processTemplates[k]);
+            if (missingKeys.length === 0) {
+                db.deletedDefaultTemplates = [];
+                window.populateProcessDropdowns();
+                return Swal.fire('Thông báo', 'Đủ 4 quy trình gốc hiện đã có sẵn trong danh sách!', 'info');
+            }
+            const missingNames = missingKeys.map(k => `• ${escapeHtml(defaultTemplates[k].title)}`).join('<br>');
+            Swal.fire({
+                title: 'Khôi phục quy trình gốc?',
+                html: `<div class="text-left text-sm space-y-2"><p>Hệ thống sẽ khôi phục lại <b>${missingKeys.length}</b> quy trình mặc định đã xóa (các quy trình bạn đang có sẽ được giữ nguyên):</p><div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium text-xs leading-relaxed">${missingNames}</div></div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d97706',
+                confirmButtonText: 'Khôi phục ngay',
+                cancelButtonText: 'Hủy'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    if (!db.processTemplates) db.processTemplates = {};
+                    missingKeys.forEach(k => {
+                        db.processTemplates[k] = JSON.parse(JSON.stringify(defaultTemplates[k]));
+                    });
+                    db.deletedDefaultTemplates = [];
+                    window.populateProcessDropdowns();
+                    const sel = document.getElementById('configProcessSelector');
+                    if (sel && missingKeys[0]) sel.value = missingKeys[0];
+                    window.renderConfig();
+                    window.saveDataToGAS(false);
+                    window.toast.fire({ icon: 'success', title: `Đã khôi phục ${missingKeys.length} quy trình gốc!` });
+                }
+            });
+        };
+
+        // Hàm xóa quy trình duy nhất (đã chống lỗi tự hồi sinh quy trình gốc & cảnh báo gói đang dùng)
+        window.deleteProcessTemplate = function() {
+            if (!window.isAdminUser()) return;
+            const sel = document.getElementById('configProcessSelector');
+            const type = sel ? sel.value : '';
+            if (!type || !db.processTemplates || !db.processTemplates[type]) {
+                return Swal.fire('Thông báo', 'Hiện chưa có quy trình mẫu nào được chọn để xóa!', 'info');
+            }
+            const proc = db.processTemplates[type];
+            const stepCount = Array.isArray(proc.steps) ? proc.steps.length : 0;
+            const usedCount = window.countPackagesUsingProcess(type);
+            const usedWarningHtml = usedCount > 0
+                ? `<div class="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs"><b>Lưu ý:</b> Hiện có <b>${usedCount}</b> nhiệm vụ cụ thể đã tạo từ quy trình này. Các nhiệm vụ cụ thể đã tạo vẫn giữ nguyên dữ liệu, chỉ xóa quy trình khỏi danh sách mẫu tạo mới.</div>`
+                : '';
+            Swal.fire({
+                title: 'Xóa quy trình mẫu?',
+                html: `<div class="text-left text-sm text-gray-600 space-y-1.5"><p>Bạn sắp xóa quy trình: <b class="text-red-600">${escapeHtml(proc.title)}</b> (${stepCount} bước công việc).</p>${usedWarningHtml}</div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Xóa quy trình',
+                cancelButtonText: 'Hủy'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    if (!Array.isArray(db.deletedDefaultTemplates)) db.deletedDefaultTemplates = [];
+                    if (defaultTemplates[type] && !db.deletedDefaultTemplates.includes(type)) {
+                        db.deletedDefaultTemplates.push(type);
+                    }
+                    delete db.processTemplates[type];
+                    if (window.unsyncedProcessChanges) window.unsyncedProcessChanges.delete(type);
+                    window.populateProcessDropdowns();
+                    window.renderConfig();
+                    window.saveDataToGAS(false);
+                    window.toast.fire({ icon: 'success', title: 'Đã xóa quy trình mẫu!' });
+                }
+            });
+        };
+
+        window.removeConfigStep = function(typeKey, index) {
+            if (!window.isAdminUser()) return;
+            if (!db.processTemplates || !db.processTemplates[typeKey] || !Array.isArray(db.processTemplates[typeKey].steps)) return;
+            const step = db.processTemplates[typeKey].steps[index];
+            if (!step) return;
+            const hasForm = Boolean(step.templateForm && step.templateForm.url);
+            Swal.fire({
+                title: `Xóa bước ${index + 1}?`,
+                html: `<div class="text-left text-sm text-gray-600 space-y-1.5"><p>Bước công việc: <b>${escapeHtml(step.name)}</b></p>${hasForm ? '<p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded">Bước này đang đính kèm biểu mẫu chuẩn <b>' + escapeHtml(step.templateForm.name || '') + '</b>.</p>' : ''}<p class="text-xs text-gray-400 italic">Mẹo: Nếu xóa nhầm, bạn có thể nhấn Ctrl+Z để hoàn tác.</p></div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Xóa bước này',
+                cancelButtonText: 'Giữ lại'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[index]) return;
+                    db.processTemplates[typeKey].steps.splice(index, 1);
+                    window.markProcessUnsynced(typeKey);
+                    window.renderConfig();
+                    window.saveDataToGAS(false);
+                    window.toast.fire({ icon: 'success', title: `Đã xóa bước ${index + 1}` });
+                }
+            });
+        };
+
+        window.moveConfigStep = function(typeKey, index, direction) {
+            if (!window.isAdminUser()) return;
+            const proc = db.processTemplates ? db.processTemplates[typeKey] : null;
+            if (!proc || !Array.isArray(proc.steps)) return;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= proc.steps.length) return;
+            const [moved] = proc.steps.splice(index, 1);
+            proc.steps.splice(targetIndex, 0, moved);
+            window.markProcessUnsynced(typeKey);
+            window.renderConfig();
+            window.saveDataToGAS(false);
         };
 
         window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { 
@@ -5259,7 +6119,8 @@ const LUNAR_HOLIDAYS = [
                 completed: false, 
                 links: [], 
                 completedBy: "", 
-                originalDays: 0, 
+                originalDays: 0,
+                isCustomStep: true, 
                 originalDayType: "calendar" 
             }); 
             window.logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); 
@@ -5516,140 +6377,436 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         window.closeCreatePackageModal = function() { 
             document.getElementById('createPackageModal').classList.add('hidden'); 
         };
-        window.createPackage = function() { 
+        window.createPackage = function() {
             if (window.isReadOnlySupervisor(currentUser)) return;
-            const mIndex = currentMissionIndexForNewPackage; 
-            const name = document.getElementById('projName').value.trim(); 
-            const startDateStr = document.getElementById('projStartDate').value; 
-            const typeKey = document.getElementById('projType').value; 
-            const owner = document.getElementById('pkgOwner').value; 
-            if (!name || !startDateStr) return Swal.fire('Lỗi', 'Vui lòng điền đủ thông tin nhiệm vụ cụ thể!', 'warning'); 
-            
-            let currentDt = new Date(startDateStr); 
+            const mIndex = currentMissionIndexForNewPackage;
+            if (mIndex < 0 || !db.missions || !db.missions[mIndex]) {
+                return Swal.fire('Lỗi', 'Không tìm thấy Nhiệm vụ chính để thêm gói thầu!', 'error');
+            }
+            const name = document.getElementById('projName').value.trim();
+            const startDateStr = document.getElementById('projStartDate').value;
+            const typeKey = document.getElementById('projType').value;
+            const owner = document.getElementById('pkgOwner').value;
+            if (!name || !startDateStr) return Swal.fire('Lỗi', 'Vui lòng điền đủ thông tin nhiệm vụ cụ thể!', 'warning');
+            if (!typeKey || !db.processTemplates || !db.processTemplates[typeKey]) {
+                return Swal.fire('Chưa có quy trình mẫu', 'Vui lòng chọn một quy trình áp dụng hợp lệ (hoặc tạo quy trình mẫu trong mục Quy trình)!', 'warning');
+            }
+
+            let currentDt = new Date(startDateStr);
             let steps = [];
-            if (db.processTemplates[typeKey] && db.processTemplates[typeKey].steps) { 
-                steps = db.processTemplates[typeKey].steps.map(tmpl => { 
-                    currentDt = window.addCustomDays(currentDt, tmpl.days, tmpl.dayType); 
-                    return { 
-                        name: tmpl.name, 
-                        deadline: currentDt.toISOString(), 
-                        note: "", 
-                        subTasks: [], 
-                        completed: false, 
-                        links: [], 
-                        completedBy: "", 
-                        originalDays: tmpl.days, 
+            if (Array.isArray(db.processTemplates[typeKey].steps)) {
+                steps = db.processTemplates[typeKey].steps.map(tmpl => {
+                    currentDt = window.addCustomDays(currentDt, tmpl.days, tmpl.dayType);
+                    return {
+                        name: tmpl.name,
+                        deadline: currentDt.toISOString(),
+                        note: "",
+                        subTasks: [],
+                        completed: false,
+                        links: [],
+                        completedBy: "",
+                        originalDays: tmpl.days,
                         originalDayType: tmpl.dayType,
-                        templateForm: tmpl.templateForm ? JSON.parse(JSON.stringify(tmpl.templateForm)) : null 
-                    }; 
-                }); 
+                        templateStepUid: tmpl.stepUid || null,
+                        templateForm: tmpl.templateForm ? JSON.parse(JSON.stringify(tmpl.templateForm)) : null
+                    };
+                });
             }
             const pkgDept = window.getUserDepartment(owner) || currentUser.department || '';
-            db.missions[mIndex].packages.push({ 
-                id: Date.now(), 
-                name: name, 
-                processTitle: db.processTemplates[typeKey].title, 
-                owner: owner, 
+            db.missions[mIndex].packages.push({
+                id: Date.now(),
+                name: name,
+                startDate: startDateStr,
+                processType: typeKey,
+                processTitle: db.processTemplates[typeKey].title,
+                owner: owner,
                 department: pkgDept,
-                archived: false, 
-                completed: false, 
-                logs: [`Khởi tạo nhiệm vụ cụ thể`], 
-                steps: steps 
-            }); 
-            window.closeCreatePackageModal(); 
-            document.getElementById('projName').value = ''; 
-            window.renderMissions(); 
-            window.saveDataToGAS(false); 
+                archived: false,
+                completed: false,
+                logs: [`Khởi tạo nhiệm vụ cụ thể theo quy trình: ${db.processTemplates[typeKey].title}`],
+                steps: steps
+            });
+            window.closeCreatePackageModal();
+            document.getElementById('projName').value = '';
+            window.renderMissions();
+            window.saveDataToGAS(false);
         };
 
-        window.populateProcessDropdowns = function() { 
-            document.getElementById('projType').innerHTML = ''; 
-            document.getElementById('configProcessSelector').innerHTML = ''; 
-            for (const key in db.processTemplates) { 
-                document.getElementById('projType').innerHTML += `<option value="${key}">${escapeHtml(db.processTemplates[key].title)}</option>`; 
-                document.getElementById('configProcessSelector').innerHTML += `<option value="${key}">${escapeHtml(db.processTemplates[key].title)}</option>`; 
-            } 
+        window.populateProcessDropdowns = function() {
+            const projSelect = document.getElementById('projType');
+            const configSelect = document.getElementById('configProcessSelector');
+            const prevProj = projSelect ? projSelect.value : '';
+            const prevConfig = configSelect ? configSelect.value : '';
+
+            if (projSelect) projSelect.innerHTML = '';
+            if (configSelect) configSelect.innerHTML = '';
+
+            const entries = Object.entries(db.processTemplates || {});
+            if (entries.length === 0) {
+                const emptyOpt = '<option value="">-- Chưa có quy trình mẫu nào --</option>';
+                if (projSelect) projSelect.innerHTML = emptyOpt;
+                if (configSelect) configSelect.innerHTML = emptyOpt;
+            } else {
+                let optsHtml = '';
+                entries.forEach(([key, proc]) => {
+                    const stepLen = Array.isArray(proc.steps) ? proc.steps.length : 0;
+                    optsHtml += `<option value="${escapeHtml(key)}">${escapeHtml(proc.title)} (${stepLen} bước)</option>`;
+                });
+                if (projSelect) {
+                    projSelect.innerHTML = optsHtml;
+                    if (prevProj && db.processTemplates[prevProj]) projSelect.value = prevProj;
+                }
+                if (configSelect) {
+                    configSelect.innerHTML = optsHtml;
+                    if (prevConfig && db.processTemplates[prevConfig]) configSelect.value = prevConfig;
+                }
+            }
+
+            const restoreBtn = document.getElementById('btnRestoreDefaultProcesses');
+            if (restoreBtn) {
+                const hasMissingDefaults = Object.keys(defaultTemplates).some(k => !db.processTemplates || !db.processTemplates[k]);
+                if (hasMissingDefaults) restoreBtn.classList.remove('hidden');
+                else restoreBtn.classList.add('hidden');
+            }
+
+            const hasActiveProcess = entries.length > 0;
+            const renameBtn = document.getElementById('btnRenameProcess');
+            const deleteBtn = document.getElementById('btnDeleteProcess');
+            if (renameBtn) renameBtn.disabled = !hasActiveProcess;
+            if (deleteBtn) deleteBtn.disabled = !hasActiveProcess;
         };
 
-        window.renderConfig = function() { 
-            const type = document.getElementById('configProcessSelector').value; 
-            const c = document.getElementById('configSteps'); 
-            c.innerHTML = ''; 
-            if (!type || !db.processTemplates[type]) return; 
-            if(db.processTemplates[type].steps) { 
-                db.processTemplates[type].steps.forEach((s, i) => { 
-                    c.innerHTML += `
-                        <div class="flex items-center gap-2 bg-white dark:bg-gray-800 p-2.5 rounded border border-gray-200 dark:border-gray-700 shadow-sm drag-item" data-index="${i}">
-                            <div class="cursor-move text-gray-400 hover:text-blue-500 px-1 drag-handle"><i class="fas fa-grip-vertical"></i></div>
-                            <span class="font-bold w-6 text-gray-400 text-sm">${i + 1}.</span>
-                            <input type="text" value="${escapeHtml(s.name)}" onchange="window.updateConfigStep('${type}', ${i}, 'name', this.value)" class="flex-1 border-b dark:border-gray-600 bg-transparent focus:border-blue-500 outline-none text-sm dark:text-white min-w-[140px]">
+        window.renderConfigSummary = function(typeKey) {
+            const summaryEl = document.getElementById('configSummaryBar');
+            if (!summaryEl) return;
+            const type = typeKey || (document.getElementById('configProcessSelector') ? document.getElementById('configProcessSelector').value : '');
+            if (!type || !db.processTemplates || !db.processTemplates[type]) {
+                summaryEl.innerHTML = '';
+                return;
+            }
+            const steps = Array.isArray(db.processTemplates[type].steps) ? db.processTemplates[type].steps : [];
+            let totalWorkdays = 0;
+            let totalCalendarDays = 0;
+            let totalForms = 0;
+            steps.forEach(s => {
+                const d = Math.max(0, parseInt(s.days, 10) || 0);
+                if (s.dayType === 'workday') totalWorkdays += d;
+                else totalCalendarDays += d;
+                if (s.templateForm && s.templateForm.url) totalForms++;
+            });
+            const usedPkgs = window.countPackagesUsingProcess(type);
+            const activePkgs = window.getActivePackagesUsingProcess ? window.getActivePackagesUsingProcess(type) : [];
+            const safeTypeJs = escapeHtml(String(type).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+            const hasUnsynced = Boolean(window.unsyncedProcessChanges && window.unsyncedProcessChanges.has(type) && activePkgs.length > 0);
+
+            const unsyncedBannerHtml = hasUnsynced ? `
+                <div class="mt-2 p-2.5 sm:px-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                    <div class="flex items-start sm:items-center gap-2 text-amber-900 dark:text-amber-200">
+                        <i class="fas fa-circle-exclamation text-amber-600 dark:text-amber-400 mt-0.5 sm:mt-0 shrink-0" aria-hidden="true"></i>
+                        <span>Quy trình mẫu vừa thay đổi. Bạn muốn cập nhật cho <b>${activePkgs.length} gói thầu đang thực hiện</b> (chỉ các bước chưa xong) hay chỉ áp dụng cho gói tạo mới?</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="window.openSyncProcessModal('${safeTypeJs}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-xs focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
+                            <i class="fas fa-arrows-rotate mr-1" aria-hidden="true"></i>Đồng bộ gói đang chạy
+                        </button>
+                        <button type="button" onclick="window.dismissUnsyncedProcessBanner('${safeTypeJs}', true)" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-amber-300 dark:border-gray-600 font-semibold transition focus-visible:ring-2 focus-visible:ring-amber-500 outline-none">
+                            Chỉ áp dụng gói tạo mới
+                        </button>
+                    </div>
+                </div>` : '';
+
+            summaryEl.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-gray-900/70 border border-slate-200 dark:border-gray-700 text-xs">
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 font-bold">
+                            <i class="fas fa-list-ol text-[10px]" aria-hidden="true"></i> ${steps.length} bước
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200/70 dark:border-indigo-800">
+                            <i class="fas fa-briefcase text-[10px]" aria-hidden="true"></i> ${totalWorkdays} ngày LV
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 font-semibold border border-sky-200/70 dark:border-sky-800">
+                            <i class="fas fa-calendar-day text-[10px]" aria-hidden="true"></i> ${totalCalendarDays} ngày lịch
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 font-semibold border border-teal-200/70 dark:border-teal-800">
+                            <i class="fas fa-file-contract text-[10px]" aria-hidden="true"></i> ${totalForms}/${steps.length} biểu mẫu
+                        </span>
+                        ${usedPkgs > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-medium border border-emerald-200/70 dark:border-emerald-800" title="Tổng số nhiệm vụ cụ thể gắn quy trình này"><i class="fas fa-box-open text-[10px]" aria-hidden="true"></i> ${usedPkgs} gói áp dụng</span>` : ''}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        ${activePkgs.length > 0 ? `<button type="button" onclick="window.openSyncProcessModal('${safeTypeJs}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none" title="Cập nhật quy trình mẫu sang các gói thầu đang thực hiện"><i class="fas fa-arrows-rotate text-[10px]" aria-hidden="true"></i><span>Đồng bộ gói đang chạy (${activePkgs.length})</span></button>` : ''}
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400"><i class="fas fa-arrows-up-down text-[10px] mr-1" aria-hidden="true"></i>Kéo thả <b>⋮⋮</b> hoặc bấm <b>▲/▼</b> để đổi thứ tự</span>
+                    </div>
+                </div>${unsyncedBannerHtml}`;
+        };
+
+        window.renderConfig = function() {
+            if (configSortableInstance) {
+                configSortableInstance.destroy();
+                configSortableInstance = null;
+            }
+            const sel = document.getElementById('configProcessSelector');
+            const type = sel ? sel.value : '';
+            const c = document.getElementById('configSteps');
+            const addBox = document.getElementById('configAddStepBox');
+            if (!c) return;
+            c.innerHTML = '';
+
+            if (!type || !db.processTemplates || !db.processTemplates[type]) {
+                window.renderConfigSummary('');
+                if (addBox) addBox.classList.add('opacity-50', 'pointer-events-none');
+                c.innerHTML = `
+                    <div class="text-center py-8 px-4 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                        <i class="fas fa-diagram-project text-3xl text-gray-400 mb-2" aria-hidden="true"></i>
+                        <p class="text-sm font-bold text-gray-700 dark:text-gray-200">Hiện chưa có quy trình mẫu nào</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Hãy nhập tên ở ô <b>"Tạo quy trình mẫu mới"</b> phía trên hoặc bấm <b>"Khôi phục quy trình gốc đã xóa"</b>.</p>
+                    </div>`;
+                return;
+            }
+
+            if (addBox) addBox.classList.remove('opacity-50', 'pointer-events-none');
+            window.renderConfigSummary(type);
+
+            const steps = Array.isArray(db.processTemplates[type].steps) ? db.processTemplates[type].steps : [];
+            if (steps.length === 0) {
+                c.innerHTML = `
+                    <div class="text-center py-7 px-4 bg-blue-50/40 dark:bg-gray-900/50 rounded-xl border border-dashed border-blue-200 dark:border-gray-700">
+                        <i class="fas fa-list-check text-2xl text-blue-400 mb-1.5" aria-hidden="true"></i>
+                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Quy trình "${escapeHtml(db.processTemplates[type].title)}" chưa có bước công việc nào</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Nhập <b>Tên bước công việc</b> và <b>Số ngày</b> ở khung bên dưới rồi nhấn <b>Enter</b> (hoặc bấm <b>Thêm bước</b>).</p>
+                    </div>`;
+                return;
+            }
+
+            const safeTypeJs = escapeHtml(String(type).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+            let rowsHtml = '';
+            steps.forEach((s, i) => {
+                const isFirst = i === 0;
+                const isLast = i === steps.length - 1;
+                const safeDays = Math.max(0, parseInt(s.days, 10) || 0);
+                rowsHtml += `
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 bg-white dark:bg-gray-800 p-2.5 sm:px-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 shadow-xs transition drag-item" data-index="${i}">
+                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <div class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-600 px-1 py-0.5 drag-handle shrink-0" title="Giữ chuột hoặc chạm kéo để đổi vị trí">
+                                <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+                            </div>
+                            <span class="font-bold min-w-[1.5rem] text-blue-700 dark:text-blue-400 text-xs sm:text-sm shrink-0">${i + 1}.</span>
+                            <input type="text" value="${escapeHtml(s.name)}" aria-label="Tên bước ${i + 1}" onchange="window.updateConfigStep('${safeTypeJs}', ${i}, 'name', this.value, this)" class="flex-1 min-w-0 w-full border-b border-gray-200 dark:border-gray-600 bg-transparent focus:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500 rounded-xs px-1 py-0.5 outline-none text-sm text-gray-800 dark:text-white font-medium">
+                            <button type="button" onclick="window.removeConfigStep('${safeTypeJs}', ${i})" aria-label="Xóa bước ${i + 1}" title="Xóa bước ${i + 1}" class="sm:hidden text-gray-400 hover:text-red-600 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition shrink-0">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-1.5 sm:gap-2 pl-6 sm:pl-0 shrink-0">
                             ${s.templateForm && s.templateForm.url ? `
-                                <button type="button" onclick="window.openConfigStepTemplateModal('${type}', ${i})" class="text-xs bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-200 border border-teal-300 dark:border-teal-700 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold truncate max-w-[140px] shrink-0" title="Biểu mẫu: ${escapeHtml(s.templateForm.name)}">
-                                    <i class="fas fa-file-alt text-teal-600"></i> ${escapeHtml(s.templateForm.name)}
+                                <button type="button" onclick="window.openConfigStepTemplateModal('${safeTypeJs}', ${i})" class="text-xs bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-200 border border-teal-300 dark:border-teal-700 px-2 py-1 rounded-md inline-flex items-center gap-1 font-semibold max-w-[145px] shrink-0 focus-visible:ring-2 focus-visible:ring-teal-500 outline-none" title="Biểu mẫu: ${escapeHtml(s.templateForm.name)}">
+                                    <i class="fas fa-file-alt text-teal-600 shrink-0" aria-hidden="true"></i>
+                                    <span class="truncate">${escapeHtml(s.templateForm.name)}</span>
                                 </button>
                             ` : `
-                                <button type="button" onclick="window.openConfigStepTemplateModal('${type}', ${i})" class="text-xs text-gray-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-dashed border-gray-300 dark:border-gray-600 px-2 py-1 rounded inline-flex items-center gap-1 transition shrink-0" title="Gán biểu mẫu chuẩn cho công đoạn này">
-                                    <i class="fas fa-plus"></i> Mẫu
+                                <button type="button" onclick="window.openConfigStepTemplateModal('${safeTypeJs}', ${i})" aria-label="Mẫu cho bước ${i + 1}" class="text-xs text-gray-500 dark:text-gray-400 hover:text-teal-700 dark:hover:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-dashed border-gray-300 dark:border-gray-600 px-2 py-1 rounded-md inline-flex items-center gap-1 transition shrink-0 focus-visible:ring-2 focus-visible:ring-teal-500 outline-none" title="Gán biểu mẫu chuẩn cho công đoạn này">
+                                    <i class="fas fa-plus text-[10px]" aria-hidden="true"></i>
+                                    <span>Mẫu</span>
                                 </button>
                             `}
-                            <input type="number" value="${s.days}" onchange="window.updateConfigStep('${type}', ${i}, 'days', this.value)" class="w-16 border dark:border-gray-600 bg-transparent rounded text-center outline-none text-sm dark:text-white">
-                            <select onchange="window.updateConfigStep('${type}', ${i}, 'dayType', this.value)" class="border-b dark:border-gray-600 bg-transparent outline-none text-sm p-1 dark:text-white">
-                                <option value="calendar" ${s.dayType !== 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày lịch</option>
-                                <option value="workday" ${s.dayType === 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày LV</option>
-                            </select>
-                            <button onclick="window.removeConfigStep('${type}', ${i})" class="text-gray-400 hover:text-red-500 px-2"><i class="fas fa-times"></i></button>
-                        </div>`; 
-                }); 
-            } 
-            if (configSortableInstance) configSortableInstance.destroy(); 
-            configSortableInstance = Sortable.create(c, { 
-                handle: '.drag-handle', 
-                onEnd: function(evt) { 
-                    if(evt.oldIndex !== evt.newIndex){ 
-                        const arr = db.processTemplates[type].steps; 
-                        arr.splice(evt.newIndex, 0, arr.splice(evt.oldIndex, 1)[0]); 
-                        window.renderConfig(); 
-                        window.saveDataToGAS(false); 
-                    } 
-                } 
-            }); 
+                            <div class="flex items-center gap-1.5 ml-auto sm:ml-0">
+                                <input type="number" min="0" max="3650" step="1" inputmode="numeric" value="${safeDays}" aria-label="Số ngày bước ${i + 1}" onchange="window.updateConfigStep('${safeTypeJs}', ${i}, 'days', this.value, this)" class="w-14 sm:w-16 border border-gray-300 dark:border-gray-600 bg-gray-50/70 dark:bg-gray-900/60 rounded-md py-1 px-1 text-center focus-visible:ring-2 focus-visible:ring-blue-500 outline-none text-xs sm:text-sm font-semibold dark:text-white">
+                                <select aria-label="Loại ngày bước ${i + 1}" onchange="window.updateConfigStep('${safeTypeJs}', ${i}, 'dayType', this.value, this)" class="border border-gray-300 dark:border-gray-600 bg-gray-50/70 dark:bg-gray-900/60 rounded-md outline-none text-xs sm:text-sm py-1 px-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-white">
+                                    <option value="calendar" ${s.dayType !== 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày lịch</option>
+                                    <option value="workday" ${s.dayType === 'workday' ? 'selected' : ''} class="dark:bg-gray-800">Ngày LV</option>
+                                </select>
+                                <div class="inline-flex items-center border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden bg-gray-50 dark:bg-gray-900/50">
+                                    <button type="button" onclick="window.moveConfigStep('${safeTypeJs}', ${i}, -1)" ${isFirst ? 'disabled' : ''} aria-label="Chuyển bước ${i + 1} lên trên" title="Chuyển lên" class="px-1.5 py-1 text-[11px] text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-30 disabled:pointer-events-none transition focus-visible:ring-1 focus-visible:ring-blue-500 outline-none">
+                                        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" onclick="window.moveConfigStep('${safeTypeJs}', ${i}, 1)" ${isLast ? 'disabled' : ''} aria-label="Chuyển bước ${i + 1} xuống dưới" title="Chuyển xuống" class="px-1.5 py-1 text-[11px] text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-30 disabled:pointer-events-none border-l border-gray-200 dark:border-gray-700 transition focus-visible:ring-1 focus-visible:ring-blue-500 outline-none">
+                                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <button type="button" onclick="window.removeConfigStep('${safeTypeJs}', ${i})" aria-label="Xóa bước ${i + 1}" title="Xóa bước ${i + 1}" class="hidden sm:inline-flex items-center justify-center text-gray-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition focus-visible:ring-2 focus-visible:ring-red-500 outline-none">
+                                    <i class="fas fa-times" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            c.innerHTML = rowsHtml;
+
+            configSortableInstance = Sortable.create(c, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'opacity-50',
+                onEnd: function(evt) {
+                    if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+                        const arr = db.processTemplates[type] ? db.processTemplates[type].steps : null;
+                        if (!Array.isArray(arr)) return;
+                        const [movedItem] = arr.splice(evt.oldIndex, 1);
+                        arr.splice(evt.newIndex, 0, movedItem);
+                        window.markProcessUnsynced(type);
+                        window.renderConfig();
+                        window.saveDataToGAS(false);
+                    }
+                }
+            });
         };
 
-        window.addNewProcessTemplate = function() { 
-            if(currentUser.role !== 'admin') return; 
-            const t = document.getElementById('newProcessTitle').value.trim(); 
-            if(t){ 
-                const id = 'proc_' + Date.now(); 
-                db.processTemplates[id] = { title: t, steps: [] }; 
-                document.getElementById('newProcessTitle').value = ''; 
-                window.populateProcessDropdowns(); 
-                document.getElementById('configProcessSelector').value = id; 
-                window.renderConfig(); 
-                window.saveDataToGAS(false); 
-            } 
-        };
-
-        window.updateConfigStep = function(k, i, f, v) { 
-            if(currentUser.role !== 'admin') return; 
-            db.processTemplates[k].steps[i][f] = (f === 'days') ? (parseInt(v) || 0) : v; 
-            window.saveDataToGAS(false); 
-        };
-
-        window.addConfigStep = function() { 
-            if(currentUser.role !== 'admin') return; 
-            const type = document.getElementById('configProcessSelector').value; 
-            const n = document.getElementById('newStepName').value.trim(); 
-            const d = parseInt(document.getElementById('newStepDays').value); 
-            if(n && !isNaN(d)){ 
-                db.processTemplates[type].steps.push({ name: n, days: d, dayType: document.getElementById('newStepDayType').value }); 
-                document.getElementById('newStepName').value = ''; 
-                document.getElementById('newStepDays').value = ''; 
-                window.renderConfig(); 
-                window.saveDataToGAS(false); 
-            } else {
-                Swal.fire('Lỗi','Nhập đủ tên bước và số ngày!','warning'); 
+        window.addNewProcessTemplate = function() {
+            if (!window.isAdminUser()) return;
+            const titleInput = document.getElementById('newProcessTitle');
+            const t = titleInput ? titleInput.value.trim() : '';
+            if (!t) {
+                return Swal.fire('Thiếu tên quy trình', 'Vui lòng nhập tên quy trình mẫu mới trước khi bấm Tạo mới!', 'warning').then(() => {
+                    if (titleInput) titleInput.focus();
+                });
             }
+            if (!db.processTemplates) db.processTemplates = {};
+            const isDuplicate = Object.values(db.processTemplates).some(p =>
+                p && String(p.title || '').trim().toLowerCase() === t.toLowerCase()
+            );
+            if (isDuplicate) {
+                return Swal.fire('Trùng tên quy trình', 'Tên quy trình này đã tồn tại trong danh sách! Vui lòng đặt tên khác để tránh nhầm lẫn khi tạo gói thầu.', 'warning').then(() => {
+                    if (titleInput) titleInput.focus();
+                });
+            }
+            let id = 'proc_' + Date.now();
+            while (db.processTemplates[id]) {
+                id = 'proc_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            }
+            db.processTemplates[id] = { title: t, steps: [] };
+            if (titleInput) titleInput.value = '';
+            window.populateProcessDropdowns();
+            const sel = document.getElementById('configProcessSelector');
+            if (sel) sel.value = id;
+            window.renderConfig();
+            window.saveDataToGAS(false);
+            const stepInput = document.getElementById('newStepName');
+            if (stepInput) stepInput.focus();
+            window.toast.fire({ icon: 'success', title: 'Đã tạo quy trình mới! Hãy thêm các bước bên dưới.' });
         };
+
+        window.updateConfigStep = function(k, i, f, v, inputEl) {
+            if (!window.isAdminUser()) return;
+            if (!db.processTemplates || !db.processTemplates[k] || !Array.isArray(db.processTemplates[k].steps) || !db.processTemplates[k].steps[i]) return;
+            const step = db.processTemplates[k].steps[i];
+            if (!step.stepUid) {
+                step.stepUid = 'st_' + Date.now().toString(36) + '_' + i + '_' + Math.random().toString(36).slice(2, 6);
+            }
+
+            if (f === 'name') {
+                const trimmed = String(v || '').trim();
+                if (!trimmed) {
+                    if (inputEl) inputEl.value = step.name;
+                    return Swal.fire('Cảnh báo', 'Tên bước công việc không được để trống!', 'warning');
+                }
+                if (trimmed !== step.name) {
+                    if (!Array.isArray(step.prevNames)) step.prevNames = [];
+                    if (step.name && !step.prevNames.includes(step.name)) {
+                        step.prevNames.push(step.name);
+                        if (step.prevNames.length > 10) step.prevNames.shift();
+                    }
+                }
+                step.name = trimmed;
+                if (inputEl) inputEl.value = trimmed;
+            } else if (f === 'days') {
+                const raw = String(v !== undefined && v !== null ? v : '').trim();
+                const num = Number(raw);
+                if (raw === '' || isNaN(num) || !Number.isInteger(num) || num < 0 || num > 3650) {
+                    if (inputEl) inputEl.value = step.days;
+                    return Swal.fire('Số ngày không hợp lệ', 'Định mức ngày phải là số nguyên không âm (từ 0 đến 3650 ngày)!', 'warning');
+                }
+                step.days = num;
+                if (inputEl) inputEl.value = num;
+            } else if (f === 'dayType') {
+                step.dayType = (v === 'workday') ? 'workday' : 'calendar';
+            } else {
+                step[f] = v;
+            }
+            window.markProcessUnsynced(k);
+            window.renderConfigSummary(k);
+            // Cập nhật số lượng bước trên dropdown nếu cần và lưu dữ liệu
+            window.saveDataToGAS(false);
+        };
+
+        window.addConfigStep = function() {
+            if (!window.isAdminUser()) return;
+            const sel = document.getElementById('configProcessSelector');
+            const type = sel ? sel.value : '';
+            if (!type || !db.processTemplates || !db.processTemplates[type]) {
+                return Swal.fire('Chưa chọn quy trình', 'Vui lòng chọn hoặc tạo mới một quy trình trước khi thêm bước công việc!', 'warning');
+            }
+            const nameInput = document.getElementById('newStepName');
+            const daysInput = document.getElementById('newStepDays');
+            const dayTypeSelect = document.getElementById('newStepDayType');
+            const n = nameInput ? nameInput.value.trim() : '';
+            const rawDays = daysInput ? daysInput.value.trim() : '';
+
+            if (!n) {
+                return Swal.fire('Thiếu tên bước', 'Vui lòng nhập tên bước công việc mới!', 'warning').then(() => {
+                    if (nameInput) nameInput.focus();
+                });
+            }
+            const d = Number(rawDays);
+            if (rawDays === '' || isNaN(d) || !Number.isInteger(d) || d < 0 || d > 3650) {
+                return Swal.fire('Số ngày không hợp lệ', 'Vui lòng nhập Số ngày định mức là số nguyên từ 0 đến 3650 (nhập 0 nếu thực hiện ngay trong ngày)!', 'warning').then(() => {
+                    if (daysInput) daysInput.focus();
+                });
+            }
+
+            if (!Array.isArray(db.processTemplates[type].steps)) db.processTemplates[type].steps = [];
+            const dayType = (dayTypeSelect && dayTypeSelect.value === 'workday') ? 'workday' : 'calendar';
+            const stepUid = 'st_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+            db.processTemplates[type].steps.push({ name: n, days: d, dayType: dayType, stepUid: stepUid });
+            window.markProcessUnsynced(type);
+
+            if (nameInput) nameInput.value = '';
+            if (daysInput) daysInput.value = '';
+            window.populateProcessDropdowns();
+            if (sel) sel.value = type;
+            window.renderConfig();
+            window.saveDataToGAS(false);
+            if (nameInput) nameInput.focus();
+            window.toast.fire({ icon: 'success', title: `Đã thêm bước ${db.processTemplates[type].steps.length}!` });
+        };
+
+        // Hỗ trợ nhấn phím Enter thêm nhanh Quy trình & Bước công việc (An toàn bộ gõ Tiếng Việt IME)
+        ['newProcessTitle', 'newStepName', 'newStepDays'].forEach((fieldId) => {
+            const inputEl = document.getElementById(fieldId);
+            if (!inputEl) return;
+            inputEl.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    if (event.isComposing || event.keyCode === 229) return;
+                    if (fieldId === 'newProcessTitle') {
+                        window.addNewProcessTemplate();
+                    } else {
+                        window.addConfigStep();
+                    }
+                }
+            });
+        });
+
+        // Xử lý đóng hộp thoại <dialog id="syncProcessDialog"> & fallback closedby="any" cho Safari
+        (function initSyncProcessDialog() {
+            const syncDlg = document.getElementById('syncProcessDialog');
+            if (syncDlg) {
+                syncDlg.addEventListener('close', function() {
+                    const rv = syncDlg.returnValue;
+                    syncDlg.returnValue = '';
+                    if (rv === 'only_new' && currentSyncProcessType) {
+                        window.dismissUnsyncedProcessBanner(currentSyncProcessType, true);
+                    }
+                });
+            }
+            if (typeof HTMLDialogElement !== 'undefined' && !('closedBy' in HTMLDialogElement.prototype)) {
+                const outside = (e, dialog) => {
+                    const r = dialog.getBoundingClientRect();
+                    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+                };
+                for (const dialog of document.querySelectorAll('dialog[closedby="any"]')) {
+                    let pressedOutside = false;
+                    dialog.addEventListener('pointerdown', (e) => { pressedOutside = outside(e, dialog); });
+                    dialog.addEventListener('pointerup', (e) => { if (pressedOutside && outside(e, dialog)) dialog.close(); });
+                }
+            }
+        })();
         
         window.addDocLink = function(docIndex) {
     let url = prompt("Nhập đường dẫn (Link) của văn bản/phụ lục (Bắt đầu bằng http:// hoặc https://):");
