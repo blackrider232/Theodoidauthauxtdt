@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # 1. Cơ sở dữ liệu PostgreSQL Alpine siêu nhẹ (~60MB - 80MB RAM)
+  # Sử dụng Docker Named Volume để Docker tự cấp quyền chuẩn cho Postgres, tránh lỗi quyền thư mục trên Synology
+  db:
+    image: postgres:16-alpine
+    container_name: sce_dauthau_db
+    restart: always
+    environment:
+      POSTGRES_DB: sce_dauthau
+      POSTGRES_USER: sce_admin
+      POSTGRES_PASSWORD: SceDauthau2026!
+    volumes:
+      - pgdata_volume:/var/lib/postgresql/data
+
+  # 2. Máy chủ API Node.js Express
+  api:
+    image: node:20-alpine
+    container_name: sce_dauthau_api
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: node server.js
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://sce_admin:SceDauthau2026!@db:5432/sce_dauthau
+      JWT_SECRET: sce_dauthau_nas_secret_key_2026
+    depends_on:
+      - db
+
+volumes:
+  pgdata_volume:
+    name: sce_dauthau_pgdata
