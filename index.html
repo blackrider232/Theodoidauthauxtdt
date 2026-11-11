@@ -1482,6 +1482,758 @@
             window.openAppScreen();
         };
 
+        
+        const VN_HOLIDAYS = ['01/01', '30/04', '01/05', '02/09'];
+// Các ngày nghỉ lễ Âm lịch (Tết Nguyên Đán, Giỗ Tổ Hùng Vương) 2024-2030 (Dự kiến)
+const LUNAR_HOLIDAYS = [
+    '08/02/2024','09/02/2024','10/02/2024','11/02/2024','12/02/2024','13/02/2024','14/02/2024','18/04/2024',
+    '25/01/2025','26/01/2025','27/01/2025','28/01/2025','29/01/2025','30/01/2025','31/01/2025','01/02/2025','02/02/2025','07/04/2025',
+    '14/02/2026','15/02/2026','16/02/2026','17/02/2026','18/02/2026','19/02/2026','20/02/2026','21/02/2026','22/02/2026','26/04/2026',
+    '04/02/2027','05/02/2027','06/02/2027','07/02/2027','08/02/2027','09/02/2027','10/02/2027','16/04/2027',
+    '24/01/2028','25/01/2028','26/01/2028','27/01/2028','28/01/2028','29/01/2028','30/01/2028','04/04/2028',
+    '11/02/2029','12/02/2029','13/02/2029','14/02/2029','15/02/2029','16/02/2029','17/02/2029','23/04/2029',
+    '31/01/2030','01/02/2030','02/02/2030','03/02/2030','04/02/2030','05/02/2030','06/02/2030','11/04/2030'
+];
+
+        let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
+
+        // --- HỆ THỐNG PHÂN QUYỀN 4 PHÒNG CHUYÊN MÔN & 4 VAI TRÒ TRUNG TÂM SCE ---
+        window.SCE_DEPARTMENTS = [
+            'Phòng Hành chính - Tổ chức',
+            'Phòng Phát triển doanh nghiệp',
+            'Phòng Xúc tiến đầu tư',
+            'Phòng Tư vấn doanh nghiệp'
+        ];
+
+        window.normalizeRole = function(role) {
+            const r = String(role || 'user').toLowerCase().trim();
+            if (r === 'admin') return 'admin';
+            if (r === 'leader') return 'leader';
+            if (r === 'dept_leader' || r === 'team_lead') return 'dept_leader';
+            return 'user'; // Bỏ phân quyền kiểm toán viên (auditor -> user)
+        };
+
+        window.getRoleLabel = function(role) {
+            const r = window.normalizeRole(role);
+            if (r === 'admin') return 'Admin';
+            if (r === 'leader') return 'Ban Giám đốc';
+            if (r === 'dept_leader') return 'Lãnh đạo phòng';
+            return 'Chuyên viên';
+        };
+
+        window.isReadOnlySupervisor = function(user) {
+            const u = user || currentUser;
+            if (!u) return true;
+            const r = window.normalizeRole(u.role);
+            return r === 'leader' || r === 'dept_leader';
+        };
+
+        window.getUserDepartment = function(fullnameOrEmail) {
+            if (!fullnameOrEmail || !db || !Array.isArray(db.users)) return '';
+            const target = String(fullnameOrEmail).toLowerCase().trim();
+            const found = db.users.find(u =>
+                (u.fullname && u.fullname.toLowerCase().trim() === target) ||
+                (u.email && u.email.toLowerCase().trim() === target) ||
+                (u.username && u.username.toLowerCase().trim() === target)
+            );
+            return found && found.department ? String(found.department).trim() : '';
+        };
+
+        window.getMissionDepartment = function(mission) {
+            if (!mission) return '';
+            if (mission.department && String(mission.department).trim()) return String(mission.department).trim();
+            return window.getUserDepartment(mission.owner);
+        };
+
+        window.getPackageDepartment = function(mission, pkg) {
+            if (pkg && pkg.department && String(pkg.department).trim()) return String(pkg.department).trim();
+            if (pkg && pkg.owner) {
+                const ownerDept = window.getUserDepartment(pkg.owner);
+                if (ownerDept) return ownerDept;
+            }
+            return window.getMissionDepartment(mission);
+        };
+
+        window.canViewPackage = function(mission, pkg, user) {
+            const u = user || currentUser;
+            if (!u) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin' || role === 'leader') return true;
+            const pkgOwner = String((pkg && pkg.owner) || (mission && mission.owner) || '').trim();
+            if (role === 'dept_leader') {
+                const myDept = String(u.department || window.getUserDepartment(u.fullname) || '').trim();
+                const pkgDept = window.getPackageDepartment(mission, pkg);
+                if (myDept && pkgDept && myDept === pkgDept) return true;
+                return pkgOwner === u.fullname || (mission && mission.owner === u.fullname);
+            }
+            // Chuyên viên thực hiện (user): Chỉ xem và thực hiện nhiệm vụ cụ thể của chính mình phụ trách
+            return pkgOwner === u.fullname;
+        };
+
+        window.canViewMission = function(mission, user) {
+            const u = user || currentUser;
+            if (!u || !mission) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin' || role === 'leader') return true;
+            if (Array.isArray(mission.packages) && mission.packages.length > 0) {
+                if (mission.packages.some(p => window.canViewPackage(mission, p, u))) return true;
+            }
+            if (role === 'dept_leader') {
+                const myDept = String(u.department || window.getUserDepartment(u.fullname) || '').trim();
+                const mDept = window.getMissionDepartment(mission);
+                if (myDept && mDept && myDept === mDept) return true;
+            }
+            return String(mission.owner || '').trim() === u.fullname;
+        };
+
+        window.canEditPackage = function(mission, pkg, user) {
+            const u = user || currentUser;
+            if (!u) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin') return true;
+            if (role === 'leader' || role === 'dept_leader') return false;
+            const pkgOwner = String((pkg && pkg.owner) || (mission && mission.owner) || '').trim();
+            return pkgOwner === u.fullname;
+        };
+
+        window.canEditMission = function(mission, user) {
+            const u = user || currentUser;
+            if (!u || !mission) return false;
+            const role = window.normalizeRole(u.role);
+            if (role === 'admin') return true;
+            if (role === 'leader' || role === 'dept_leader') return false;
+            const mOwner = String(mission.owner || '').trim();
+            return mOwner === u.fullname;
+        };
+
+        window.populateOwnerFilterByDepartment = function() {
+            const ownerSelect = document.getElementById('filterOwner');
+            const deptSelect = document.getElementById('filterDepartment');
+            if (!ownerSelect || !currentUser) return;
+            const role = window.normalizeRole(currentUser.role);
+            const myDept = String(currentUser.department || window.getUserDepartment(currentUser.fullname) || '').trim();
+            const currentSelectedOwner = ownerSelect.value || 'all';
+
+            if (role === 'user') {
+                ownerSelect.innerHTML = `<option value="${escapeHtml(currentUser.fullname)}">${escapeHtml(currentUser.fullname)}</option>`;
+                ownerSelect.value = currentUser.fullname;
+                ownerSelect.disabled = true;
+                return;
+            }
+            ownerSelect.disabled = false;
+            const selectedDept = deptSelect ? deptSelect.value : 'all';
+            ownerSelect.innerHTML = '<option value="all">Tất cả Chuyên viên</option>';
+            (db.users || []).forEach(u => {
+                const uDept = String(u.department || '').trim();
+                if (role === 'dept_leader' && myDept && uDept !== myDept) return;
+                if (selectedDept !== 'all' && uDept !== selectedDept) return;
+                ownerSelect.innerHTML += `<option value="${escapeHtml(u.fullname)}">${escapeHtml(u.fullname)}${uDept ? ' (' + escapeHtml(uDept.replace('Phòng ', 'P. ')) + ')' : ''}</option>`;
+            });
+            if (Array.from(ownerSelect.options).some(opt => opt.value === currentSelectedOwner)) {
+                ownerSelect.value = currentSelectedOwner;
+            } else {
+                ownerSelect.value = 'all';
+            }
+        };
+
+        window.onFilterDepartmentChange = function() {
+            window.populateOwnerFilterByDepartment();
+            window.renderMissions();
+        };
+        
+        // --- QUẢN LÝ HOÀN TÁC (UNDO / REDO) ---
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_HISTORY = 30;
+        let isPerformingHistoryAction = false;
+        let lastCommittedState = null;
+
+        // --- QUẢN LÝ MỞ RỘNG / THU GỌN 4 TẦNG (NHIỆM VỤ CHÍNH, NHIỆM VỤ CỤ THỂ, BƯỚC CHI TIẾT) ---
+        let expandedMissions = new Set();         // Tầng 1: Nhiệm vụ chính (m_index)
+        let expandedOverviewPackages = new Set(); // Tầng 2: Thông tin cơ bản nhiệm vụ cụ thể (mIndex_pkgIndex)
+        let expandedPackages = new Set();         // Tầng 3: Bảng các bước chi tiết (mIndex_pkgIndex)
+        let reorderPackages = new Set();          // Chế độ sắp xếp thứ tự bước
+        window.expandedMissions = expandedMissions;
+        window.expandedOverviewPackages = expandedOverviewPackages;
+        window.expandedPackages = expandedPackages;
+        window.reorderPackages = reorderPackages;
+        window.activeQuickProgressFilter = 'all'; // 'all' | 'in_progress' | 'overdue' | 'completed'
+        window.expandedMissionsInitialSeeded = false;
+
+        // Khôi phục trạng thái expandedMissions từ sessionStorage nếu có
+        try {
+            const savedMissions = sessionStorage.getItem('sce_expanded_missions');
+            if (savedMissions) {
+                JSON.parse(savedMissions).forEach(k => expandedMissions.add(k));
+                window.expandedMissionsInitialSeeded = true;
+            }
+        } catch(e) {}
+
+        window.saveExpandedMissionsState = function() {
+            try {
+                sessionStorage.setItem('sce_expanded_missions', JSON.stringify(Array.from(window.expandedMissions)));
+            } catch(e) {}
+        };
+
+        // Đóng / Mở 1 Nhiệm vụ chính
+        window.toggleMissionCollapse = function(mIndex) {
+            const key = `m_${mIndex}`;
+            if (window.expandedMissions.has(key)) {
+                window.expandedMissions.delete(key);
+            } else {
+                window.expandedMissions.add(key);
+            }
+            window.saveExpandedMissionsState();
+            window.renderMissions();
+        };
+
+        // Menu chế độ hiển thị (Phương án B)
+        window.toggleViewModeMenu = function(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('viewModeMenu');
+            const chevron = document.getElementById('viewModeChevron');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+            } else {
+                menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        };
+
+        window.setViewMode = function(mode) {
+            const menu = document.getElementById('viewModeMenu');
+            const chevron = document.getElementById('viewModeChevron');
+            if (menu) menu.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+
+            if (mode === 'collapse_all') {
+                window.expandedMissions.clear();
+                window.expandedOverviewPackages.clear();
+                window.expandedPackages.clear();
+            } else if (mode === 'expand_missions') {
+                if (db.missions) {
+                    db.missions.forEach((_, mIdx) => window.expandedMissions.add(`m_${mIdx}`));
+                }
+                window.expandedOverviewPackages.clear();
+                window.expandedPackages.clear();
+            } else if (mode === 'expand_all') {
+                if (db.missions) {
+                    db.missions.forEach((m, mIdx) => {
+                        window.expandedMissions.add(`m_${mIdx}`);
+                        if (m.packages) {
+                            m.packages.forEach((_, pIdx) => {
+                                window.expandedOverviewPackages.add(`${mIdx}_${pIdx}`);
+                                window.expandedPackages.add(`${mIdx}_${pIdx}`);
+                            });
+                        }
+                    });
+                }
+            }
+            window.saveExpandedMissionsState();
+            window.renderMissions();
+        };
+
+        // Đóng menu khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            const container = document.getElementById('viewModeDropdownContainer');
+            if (container && !container.contains(e.target)) {
+                const menu = document.getElementById('viewModeMenu');
+                const chevron = document.getElementById('viewModeChevron');
+                if (menu) menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        });
+
+        window.setQuickProgressFilter = function(mode) {
+            window.activeQuickProgressFilter = mode || 'all';
+            window.renderMissions();
+        };
+
+        window.toggleAdvancedSearch = function() {
+            const panel = document.getElementById('advancedSearchPanel');
+            const chevron = document.getElementById('advSearchChevron');
+            const btn = document.getElementById('btnAdvancedSearch');
+            if (!panel) return;
+            const isHidden = panel.classList.contains('hidden');
+            if (isHidden) {
+                panel.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+                if (btn) btn.classList.add('ring-2', 'ring-blue-500/30');
+            } else {
+                panel.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+                if (btn) btn.classList.remove('ring-2', 'ring-blue-500/30');
+            }
+        };
+
+        window.resetAdvancedSearch = function() {
+            const stEl = document.getElementById('filterStatus');
+            const dpEl = document.getElementById('filterDepartment');
+            const owEl = document.getElementById('filterOwner');
+            const frEl = document.getElementById('filterFromDate');
+            const toEl = document.getElementById('filterToDate');
+            if (stEl) stEl.value = 'active';
+            const role = currentUser ? window.normalizeRole(currentUser.role) : 'user';
+            const myDept = currentUser ? String(currentUser.department || window.getUserDepartment(currentUser.fullname) || '').trim() : '';
+            if (dpEl) {
+                dpEl.value = ((role === 'dept_leader' || role === 'user') && myDept) ? myDept : 'all';
+            }
+            window.populateOwnerFilterByDepartment();
+            if (owEl && role !== 'user') owEl.value = 'all';
+            if (frEl) frEl.value = '';
+            if (toEl) toEl.value = '';
+            window.renderMissions();
+        };
+
+        // Click Bước 1 -> Đóng/Mở Bước 2 (Thông tin cơ bản gói thầu)
+        window.togglePackageOverview = function(mIndex, pkgIndex) {
+            const key = `${mIndex}_${pkgIndex}`;
+            const pkgCard = document.getElementById(`pkg_card_${key}`);
+            const overviewContainer = document.getElementById(`overview_container_${key}`);
+            const chevronIcon = document.getElementById(`overview_chevron_${key}`);
+
+            if (window.expandedOverviewPackages.has(key)) {
+                window.expandedOverviewPackages.delete(key);
+                window.expandedPackages.delete(key);
+                if (overviewContainer) overviewContainer.classList.add('hidden');
+                if (chevronIcon) {
+                    chevronIcon.classList.remove('rotate-90', 'text-blue-600', 'dark:text-blue-400');
+                }
+                if (pkgCard) {
+                    pkgCard.classList.remove('border-l-4', 'border-l-blue-600', 'dark:border-l-blue-400', 'shadow-md', 'ring-1', 'ring-blue-500/20');
+                }
+                const stepsContainer = document.getElementById(`steps_container_${key}`);
+                const btn = document.getElementById(`btn_expand_${key}`);
+                const btnText = document.getElementById(`btn_expand_text_${key}`);
+                const btnIcon = document.getElementById(`btn_expand_icon_${key}`);
+                const bannerIcon = document.getElementById(`banner_expand_icon_${key}`);
+                const bannerText = document.getElementById(`banner_expand_text_${key}`);
+                if (stepsContainer) stepsContainer.classList.add('hidden');
+                const count = btnText ? (btnText.getAttribute('data-count') || '') : '';
+                if (btnText) btnText.innerText = count ? `Xem các bước chi tiết (${count} bước)` : 'Xem các bước chi tiết';
+                if (btnIcon) btnIcon.className = 'fas fa-chevron-down text-[11px]';
+                if (bannerIcon) bannerIcon.className = 'fas fa-chevron-down text-[10px]';
+                if (bannerText) bannerText.innerText = 'Xem các bước chi tiết';
+                if (btn) {
+                    btn.className = 'shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20';
+                }
+            } else {
+                window.expandedOverviewPackages.add(key);
+                if (overviewContainer) overviewContainer.classList.remove('hidden');
+                if (chevronIcon) {
+                    chevronIcon.classList.add('rotate-90', 'text-blue-600', 'dark:text-blue-400');
+                }
+                if (pkgCard) {
+                    pkgCard.classList.add('border-l-4', 'border-l-blue-600', 'dark:border-l-blue-400', 'shadow-md', 'ring-1', 'ring-blue-500/20');
+                }
+            }
+        };
+
+        // Click ở Bước 2 -> Đóng/Mở Bước 3 (Chi tiết các bước thực hiện)
+        window.togglePackageExpand = function(mIndex, pkgIndex) {
+            const key = `${mIndex}_${pkgIndex}`;
+            const container = document.getElementById(`steps_container_${key}`);
+            const btn = document.getElementById(`btn_expand_${key}`);
+            const btnText = document.getElementById(`btn_expand_text_${key}`);
+            const btnIcon = document.getElementById(`btn_expand_icon_${key}`);
+            const bannerIcon = document.getElementById(`banner_expand_icon_${key}`);
+            const bannerText = document.getElementById(`banner_expand_text_${key}`);
+            
+            if (window.expandedPackages.has(key)) {
+                window.expandedPackages.delete(key);
+                if (container) container.classList.add('hidden');
+                const count = btnText ? (btnText.getAttribute('data-count') || '') : '';
+                if (btnText) btnText.innerText = count ? `Xem các bước chi tiết (${count} bước)` : 'Xem các bước chi tiết';
+                if (btnIcon) btnIcon.className = 'fas fa-chevron-down text-[11px]';
+                if (bannerIcon) bannerIcon.className = 'fas fa-chevron-down text-[10px]';
+                if (bannerText) bannerText.innerText = 'Xem các bước chi tiết';
+                if (btn) {
+                    btn.className = 'shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20';
+                }
+            } else {
+                window.expandedPackages.add(key);
+                window.expandedOverviewPackages.add(key);
+                if (container) container.classList.remove('hidden');
+                if (btnText) btnText.innerText = 'Thu gọn chi tiết';
+                if (btnIcon) btnIcon.className = 'fas fa-chevron-up text-[11px]';
+                if (bannerIcon) bannerIcon.className = 'fas fa-chevron-up text-[10px]';
+                if (bannerText) bannerText.innerText = 'Đóng chi tiết';
+                if (btn) {
+                    btn.className = 'shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600';
+                }
+            }
+        };
+
+        window.toggleAllPackages = function() {
+            let allKeys = [];
+            if (db.missions) {
+                db.missions.forEach((m, mIdx) => {
+                    if (m.packages) {
+                        m.packages.forEach((p, pIdx) => {
+                            allKeys.push(`${mIdx}_${pIdx}`);
+                        });
+                    }
+                });
+            }
+            
+            const shouldOpen = window.expandedOverviewPackages.size < allKeys.length || window.expandedPackages.size < allKeys.length;
+            if (shouldOpen) {
+                allKeys.forEach(k => {
+                    window.expandedOverviewPackages.add(k);
+                    window.expandedPackages.add(k);
+                });
+            } else {
+                window.expandedOverviewPackages.clear();
+                window.expandedPackages.clear();
+            }
+            window.renderMissions();
+        };
+
+        // Bật/Tắt chế độ đổi thứ tự bước công việc cho 1 gói thầu (Phương án 3 Hybrid)
+        window.toggleReorderMode = function(mIndex, pkgIndex) {
+            const key = `${mIndex}_${pkgIndex}`;
+            const m = db.missions ? db.missions[mIndex] : null;
+            const pkg = (m && m.packages) ? m.packages[pkgIndex] : null;
+            if (!pkg || !window.canEditPackage(m, pkg, currentUser)) {
+                return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa nhiệm vụ cụ thể này!', 'warning');
+            }
+
+            if (window.reorderPackages.has(key)) {
+                window.reorderPackages.delete(key);
+            } else {
+                window.reorderPackages.add(key);
+                // Đảm bảo mở cả Bước 2 và Bước 3 để thao tác sắp xếp
+                window.expandedOverviewPackages.add(key);
+                window.expandedPackages.add(key);
+            }
+            window.renderMissions();
+        };
+
+        // Di chuyển vị trí bước bằng nút mũi tên Lên (-1) hoặc Xuống (+1)
+        window.moveStep = function(mIndex, pkgIndex, sIndex, direction) {
+            const m = db.missions ? db.missions[mIndex] : null;
+            const pkg = (m && m.packages) ? m.packages[pkgIndex] : null;
+            if (!pkg || !window.canEditPackage(m, pkg, currentUser)) {
+                return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa nhiệm vụ cụ thể này!', 'warning');
+            }
+            if (!pkg.steps || !Array.isArray(pkg.steps)) return;
+
+            const targetIndex = sIndex + direction;
+            if (targetIndex < 0 || targetIndex >= pkg.steps.length) return;
+
+            // Đổi chỗ 2 phần tử
+            const movedStep = pkg.steps[sIndex];
+            pkg.steps.splice(sIndex, 1);
+            pkg.steps.splice(targetIndex, 0, movedStep);
+
+            window.logActivity(mIndex, pkgIndex, `Đổi thứ tự bước: "${movedStep.name || 'Công việc'}"`);
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+        window.updateUndoRedoUI = function() {
+            const btnUndo = document.getElementById('btnUndo');
+            const btnRedo = document.getElementById('btnRedo');
+            if (btnUndo) {
+                btnUndo.disabled = undoStack.length === 0;
+                btnUndo.title = undoStack.length > 0 ? `Hoàn tác (${undoStack.length} thao tác - Ctrl+Z)` : 'Hoàn tác (Ctrl+Z)';
+            }
+            if (btnRedo) {
+                btnRedo.disabled = redoStack.length === 0;
+                btnRedo.title = redoStack.length > 0 ? `Làm lại (${redoStack.length} thao tác - Ctrl+Y)` : 'Làm lại (Ctrl+Y)';
+            }
+        };
+
+        window.undoAction = async function() {
+            if (undoStack.length === 0 || isPerformingHistoryAction) return;
+            isPerformingHistoryAction = true;
+            try {
+                // Đẩy trạng thái hiện tại sang redoStack
+                redoStack.push(JSON.stringify(db));
+                if (redoStack.length > MAX_HISTORY) redoStack.shift();
+
+                // Lấy trạng thái trước đó
+                const prevStateStr = undoStack.pop();
+                db = JSON.parse(prevStateStr);
+                lastCommittedState = prevStateStr;
+                applyDefaultsIfMissing();
+                if (window.unsyncedProcessChanges) window.unsyncedProcessChanges.clear();
+                window.renderMissions();
+                window.populateProcessDropdowns();
+                const vSettingsUndo = document.getElementById('view-settings');
+                if (vSettingsUndo && !vSettingsUndo.classList.contains('hidden')) window.renderConfig();
+                const vDocsUndo = document.getElementById('view-docs');
+                if (vDocsUndo && !vDocsUndo.classList.contains('hidden')) window.renderDocs();
+                window.updateUndoRedoUI();
+                await window.saveDataToGAS(false);
+                window.toast.fire({ icon: 'info', title: 'Đã hoàn tác (Ctrl+Z)' });
+            } catch (e) {
+                console.error("Lỗi hoàn tác:", e);
+            } finally {
+                isPerformingHistoryAction = false;
+            }
+        };
+
+        window.redoAction = async function() {
+            if (redoStack.length === 0 || isPerformingHistoryAction) return;
+            isPerformingHistoryAction = true;
+            try {
+                // Đẩy trạng thái hiện tại sang undoStack
+                undoStack.push(JSON.stringify(db));
+                if (undoStack.length > MAX_HISTORY) undoStack.shift();
+
+                // Lấy trạng thái kế tiếp
+                const nextStateStr = redoStack.pop();
+                db = JSON.parse(nextStateStr);
+                lastCommittedState = nextStateStr;
+                applyDefaultsIfMissing();
+                if (window.unsyncedProcessChanges) window.unsyncedProcessChanges.clear();
+                window.renderMissions();
+                window.populateProcessDropdowns();
+                const vSettingsRedo = document.getElementById('view-settings');
+                if (vSettingsRedo && !vSettingsRedo.classList.contains('hidden')) window.renderConfig();
+                const vDocsRedo = document.getElementById('view-docs');
+                if (vDocsRedo && !vDocsRedo.classList.contains('hidden')) window.renderDocs();
+                window.updateUndoRedoUI();
+                await window.saveDataToGAS(false);
+                window.toast.fire({ icon: 'info', title: 'Đã làm lại (Ctrl+Y)' });
+            } catch (e) {
+                console.error("Lỗi làm lại:", e);
+            } finally {
+                isPerformingHistoryAction = false;
+            }
+        };
+        let currentUser = null; 
+        let syncTimeout = null; 
+        let autoSyncInterval = null; 
+        let isDataSynchronized = false; 
+        let isSaving = false; 
+        let lastSaveTime = 0;
+        let currentMissionIndexForNewPackage = -1; 
+        let configSortableInstance = null; 
+        let sortableInstancesList = [];
+        let currentEditUserIndex = -1; 
+        let globalOverdueTasksList = [];
+        let cEditM = -1; 
+        let cEditP = -1; 
+        let cEditS = -1; 
+        let chartStatusIns = null;
+
+        // Tiện ích Toast
+        window.toast = Swal.mixin({ 
+            toast: true, 
+            position: 'top-end', 
+            showConfirmButton: false, 
+            timer: 3000, 
+            timerProgressBar: true, 
+            didOpen: (toast) => { 
+                toast.onmouseenter = Swal.stopTimer; 
+                toast.onmouseleave = Swal.resumeTimer; 
+            } 
+        });
+
+        // Hàm khử mã độc HTML (XSS prevention)
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Chuyển đổi giao diện Sáng / Tối
+        window.toggleDarkMode = function() {
+            document.documentElement.classList.toggle('dark'); 
+            const icon = document.getElementById('darkModeIcon');
+            if (document.documentElement.classList.contains('dark')) { 
+                icon.classList.remove('fa-moon'); 
+                icon.classList.add('fa-sun'); 
+                icon.classList.replace('text-indigo-200', 'text-white'); 
+            } else { 
+                icon.classList.remove('fa-sun'); 
+                icon.classList.add('fa-moon'); 
+                icon.classList.replace('text-white', 'text-indigo-200'); 
+            }
+            const vDash = document.getElementById('view-dashboard'); if (vDash && !vDash.classList.contains('hidden') && typeof window.renderCharts === 'function') { window.renderCharts(); }
+        };
+
+        function sanitizeDbUsers(usersArr) {
+            if (!Array.isArray(usersArr)) return [];
+            return usersArr.map(u => ({
+                id: u.id || null,
+                username: u.email || u.username || 'user@sce.gov.vn',
+                email: u.email || u.username || 'user@sce.gov.vn',
+                fullname: u.fullname || 'Chuyên viên SCE',
+                role: window.normalizeRole(u.role || 'user'),
+                department: u.department ? String(u.department).trim() : '',
+                is_active: u.is_active !== false
+            }));
+        }
+
+        window.isAdminUser = function(user) {
+            const u = user || currentUser;
+            return Boolean(u && window.normalizeRole(u.role) === 'admin');
+        };
+
+        function applyDefaultsIfMissing() {
+            if (!db) db = {};
+            if (!Array.isArray(db.deletedDefaultTemplates)) {
+                db.deletedDefaultTemplates = [];
+            }
+            const deletedSet = new Set(db.deletedDefaultTemplates);
+            if (!db.processTemplates || typeof db.processTemplates !== 'object' || Array.isArray(db.processTemplates)) {
+                db.processTemplates = {};
+            }
+            // Đảm bảo quy trình mẫu gốc luôn có mặt nếu chưa từng bị Admin chủ động xóa
+            for (const [k, v] of Object.entries(defaultTemplates)) {
+                if (!db.processTemplates[k] && !deletedSet.has(k)) {
+                    db.processTemplates[k] = JSON.parse(JSON.stringify(v));
+                }
+            }
+            // Chuẩn hóa dữ liệu từng quy trình để chống dữ liệu hỏng (null steps, days âm/chuỗi)
+            for (const [k, proc] of Object.entries(db.processTemplates)) {
+                if (!proc || typeof proc !== 'object') {
+                    delete db.processTemplates[k];
+                    continue;
+                }
+                proc.title = String(proc.title || 'Quy trình chưa đặt tên').trim() || 'Quy trình chưa đặt tên';
+                if (!Array.isArray(proc.steps)) proc.steps = [];
+                proc.steps = proc.steps.map((st, idx) => {
+                    const parsedDays = parseInt(st && st.days, 10);
+                    const safeDays = (!isNaN(parsedDays) && parsedDays >= 0) ? Math.min(parsedDays, 3650) : 0;
+                    return Object.assign({}, st, {
+                        name: String((st && st.name) || ('Bước ' + (idx + 1))).trim() || ('Bước ' + (idx + 1)),
+                        days: safeDays,
+                        dayType: (st && st.dayType === 'workday') ? 'workday' : 'calendar'
+                    });
+                });
+            }
+            if (!db.users || db.users.length === 0) {
+                db.users = currentUser
+                    ? [sanitizeDbUsers([currentUser])[0]]
+                    : [{ username: "admin@sce.gov.vn", email: "admin@sce.gov.vn", fullname: "Quản trị viên SCE", role: "admin", department: "" }];
+            } else {
+                // Tuyệt đối loại bỏ mọi trường password dạng rõ (plaintext) còn sót lại
+                db.users = sanitizeDbUsers(db.users);
+            }
+            if (!db.regulatoryDocs || db.regulatoryDocs.length === 0) {
+                db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+            }
+            if (!db.missions) {
+                db.missions = [];
+            }
+        }
+
+        function autoCleanArchivedData() {
+            if (!db.missions) return; 
+            const now = new Date(); 
+            let dataChanged = false;
+            db.missions.forEach(m => {
+                if (m.packages) {
+                    const originalLen = m.packages.length;
+                    m.packages = m.packages.filter(pkg => {
+                        if (pkg.archived) {
+                            if (!pkg.archiveDate) { 
+                                pkg.archiveDate = now.toISOString(); 
+                                dataChanged = true; 
+                                return true; 
+                            }
+                            if ((now - new Date(pkg.archiveDate)) / (1000 * 60 * 60 * 24) > 30) {
+                                return false; 
+                            }
+                        } 
+                        return true;
+                    });
+                    if (m.packages.length !== originalLen) dataChanged = true;
+                }
+            });
+            if (dataChanged && currentUser && currentUser.role === 'admin') {
+                window.saveDataToGAS(false);
+            }
+        }
+
+        window.formatDate = function(dIn) { 
+            if (!dIn) return ''; 
+            try { 
+                let dt = (typeof dIn === 'string' && dIn.includes('T')) ? new Date(dIn) : new Date(dIn); 
+                if (isNaN(dt.getTime())) return ''; 
+                return `${("0" + dt.getDate()).slice(-2)}/${("0" + (dt.getMonth() + 1)).slice(-2)}/${dt.getFullYear()}`; 
+            } catch(e) { return ''; }
+        };
+
+        window.formatForDateInput = function(dIn) { 
+            if (!dIn) return ''; 
+            try { 
+                if (typeof dIn === 'string' && !dIn.includes('T')) return dIn; 
+                let dt = new Date(dIn); 
+                if (isNaN(dt.getTime())) return ''; 
+                return `${dt.getFullYear()}-${("0" + (dt.getMonth() + 1)).slice(-2)}-${("0" + dt.getDate()).slice(-2)}`; 
+            } catch(e) { return ''; }
+        };
+
+        // Tính ngày hạn chót theo ngày làm việc hoặc ngày lịch
+        window.addCustomDays = function(dObj, days, type) {
+            let r = new Date(dObj);
+            if (isNaN(r.getTime())) r = new Date();
+            const parsedDays = parseInt(days, 10);
+            const safeDays = (!isNaN(parsedDays) && parsedDays > 0) ? Math.min(parsedDays, 3650) : 0;
+            if (safeDays === 0) return r;
+            if (type === 'workday') {
+                let a = 0;
+                while (a < safeDays) {
+                    r.setDate(r.getDate() + 1);
+                    let isWeekend = r.getDay() === 0 || r.getDay() === 6;
+                    let dateStr = ("0" + r.getDate()).slice(-2) + '/' + ("0" + (r.getMonth() + 1)).slice(-2);
+                    let fullDateStr = dateStr + '/' + r.getFullYear();
+                    let isHoliday = VN_HOLIDAYS.includes(dateStr) || LUNAR_HOLIDAYS.includes(fullDateStr);
+                    if (!isWeekend && !isHoliday) a++;
+                }
+            } else {
+                r.setDate(r.getDate() + safeDays);
+            }
+            return r;
+        };
+
+        window.logActivity = function(mIndex, pkgIndex, msg) { 
+            if (!db.missions[mIndex] || !db.missions[mIndex].packages[pkgIndex]) return;
+            let pkg = db.missions[mIndex].packages[pkgIndex]; 
+            if (!pkg.logs) pkg.logs = []; 
+            const now = new Date(); 
+            const timeStr = `${("0" + now.getHours()).slice(-2)}:${("0" + now.getMinutes()).slice(-2)} ${("0" + now.getDate()).slice(-2)}/${("0" + (now.getMonth()+1)).slice(-2)}`; 
+            const author = currentUser ? currentUser.fullname : 'Hệ thống';
+            pkg.logs.unshift(`[${timeStr}] ${author}: ${msg}`); 
+            if (pkg.logs.length > 50) pkg.logs.pop(); 
+        };
+
+        // Quản lý tự động đăng xuất khi không hoạt động (30 phút) để bảo vệ dữ liệu đấu thầu
+        let inactivityTimer = null;
+        const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
+        function resetInactivityTimer() {
+            if (!currentUser) return;
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (currentUser) {
+                    window.handleLogout(true);
+                }
+            }, INACTIVITY_LIMIT_MS);
+        }
+        ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, resetInactivityTimer, { passive: true });
+        });
+
+        // Biến lưu trạng thái таблица DB đang dùng ('sce_v2_app_data' ưu tiên, fallback về local/seed nếu chưa tạo bảng)
+        let activeAppDataTable = 'sce_v2_app_data';
+        let activeBackupsTable = 'sce_v2_backups';
+        let pendingMfaFactorId = null;
+
+        // Khởi động ứng dụng V2 với Supabase Auth Session
+        
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Đặt ngày hạn chót mặc định 1 tháng sau
