@@ -1,7 +1,8 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise-v10';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v11';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
+    './nas-connector.js',
     './manifest.json',
     './logo-192.png',
     './logo-512.png',
@@ -36,9 +37,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const reqUrl = event.request.url;
 
-    // TUYỆT ĐỐI KHÔNG CACHE các request xác thực JWT, REST API hoặc Storage của Supabase
+    // TUYỆT ĐỐI KHÔNG CACHE các request API, JWT, Backend NAS hoặc Storage
     if (
         event.request.method !== 'GET' ||
+        reqUrl.includes('/api/') ||
+        reqUrl.includes(':3000') ||
+        reqUrl.includes('trycloudflare.com') ||
         reqUrl.includes('supabase.co') ||
         reqUrl.includes('/auth/v1/') ||
         reqUrl.includes('/rest/v1/') ||

@@ -4,11 +4,17 @@
  */
 
 (function() {
-    const DEFAULT_NAS_URL = 'http://192.168.128.73:3000';
+    const DEFAULT_NAS_URL = 'https://favor-opponents-tiles-same.trycloudflare.com';
 
     window.SCE_NAS = {
         getUrl: function() {
-            return localStorage.getItem('sce_nas_backend_url') || DEFAULT_NAS_URL;
+            const saved = localStorage.getItem('sce_nas_backend_url');
+            if (saved && saved.startsWith('https://')) {
+                return saved;
+            }
+            // Tự động chuyển đổi từ IP HTTP nội bộ sang HTTPS Cloudflare Tunnel
+            localStorage.setItem('sce_nas_backend_url', DEFAULT_NAS_URL);
+            return DEFAULT_NAS_URL;
         },
         setUrl: function(url) {
             const cleanUrl = String(url || '').trim().replace(/\/+$/, '');

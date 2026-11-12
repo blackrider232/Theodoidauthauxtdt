@@ -6,6 +6,16 @@
     <title>Quản trị Đấu thầu SCE</title>
             <!-- NAS Synology Connector -->
     <script src="nas-connector.js"></script>
+    <script>
+        // Khởi tạo sớm hàm chuẩn hóa vai trò ngay từ đầu trang để chống lỗi cache
+        window.normalizeRole = function(role) {
+            const r = String(role || 'user').toLowerCase().trim();
+            if (r === 'admin') return 'admin';
+            if (r === 'leader') return 'leader';
+            if (r === 'dept_leader' || r === 'team_lead') return 'dept_leader';
+            return 'user';
+        };
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
@@ -1495,6 +1505,495 @@ const LUNAR_HOLIDAYS = [
     '31/01/2030','01/02/2030','02/02/2030','03/02/2030','04/02/2030','05/02/2030','06/02/2030','11/04/2030'
 ];
 
+        const defaultTemplates = {
+    "chidinh": {
+        "steps": [
+            {
+                "days": 1,
+                "name": "Lập Kế hoạch và dự toán",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Đăng tải lên mạng đấu thầu)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Đăng tải công văn và dự thảo Hợp đồng lên mạng đấu thầu",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Công văn trả lời của đơn vị kèm báo giá và hồ sơ năng lực",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Tờ trình phê duyệt chỉ định đơn vị",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Quyết định phê duyệt chỉ định đơn vị (đăng tải lên mạng đấu thầu)",
+                "dayType": "calendar"
+            },
+            {
+                "days": 1,
+                "name": "Ký Hợp đồng",
+                "dayType": "workday"
+            }
+        ],
+        "title": "Quy trình Chỉ định thầu"
+    },
+    "rongrai": {
+        "steps": [
+            {
+                "days": 10,
+                "name": "Lập, thẩm định và phê duyệt KHLCNT",
+                "dayType": "workday"
+            },
+            {
+                "days": 7,
+                "name": "Lập E-HSMT",
+                "dayType": "workday"
+            },
+            {
+                "days": 7,
+                "name": "Thẩm định và phê duyệt E-HSMT",
+                "dayType": "workday"
+            },
+            {
+                "days": 10,
+                "name": "Đăng tải Thông báo mời thầu",
+                "dayType": "calendar"
+            },
+            {
+                "days": 15,
+                "name": "Mở thầu và Đánh giá E-HSDT",
+                "dayType": "workday"
+            },
+            {
+                "days": 3,
+                "name": "Thương thảo hợp đồng",
+                "dayType": "workday"
+            },
+            {
+                "days": 7,
+                "name": "Thẩm định, phê duyệt và công khai kết quả",
+                "dayType": "workday"
+            },
+            {
+                "days": 3,
+                "name": "Ký kết hợp đồng",
+                "dayType": "workday"
+            }
+        ],
+        "title": "Đấu thầu rộng rãi (Phi tư vấn / Hàng hóa)"
+    },
+    "rongrai_cntt": {
+        "steps": [
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt Kế hoạch (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Kế hoạch (Giám đốc Trung tâm phê duyệt)",
+                "dayType": "workday",
+                "stepUid": "st_mw5odxab_1_r3g0"
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt dự toán giai đoạn chuẩn bị đầu tư (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt dự toán giai đoạn chuẩn bị đầu tư (Giám đốc Trung tâm phê duyệt)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Tờ trình phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (Giám đốc Trung tâm phê duyệt)",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nv617_6_10ot",
+                "prevNames": [
+                    "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 3,
+                "name": "Chỉ định các gói tư vấn Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá",
+                "dayType": "workday"
+            },
+            {
+                "days": 5,
+                "name": "Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá (phối hợp với tư vấn)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Tờ trình thẩm định dự án công nghệ thông tin (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 3,
+                "name": "Báo cáo thẩm định báo cáo kinh tế kỹ thuật (Tổ CNTT hoặc Hội đồng thẩm định)",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt dự án công nghệ thông tin (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt dự án công nghệ thông tin (Giám đốc Trung tâm phê duyệt)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu gói chính và gói tư vấn (nếu có) (cấp phòng)",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (Phối hợp phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nq043_2d91",
+                "prevNames": [
+                    "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 3,
+                "name": "Chỉ định các gói tư vấn lập và thẩm định Hồ sơ mời thầu",
+                "dayType": "workday",
+                "stepUid": "st_mw5ns38x_5oi3"
+            },
+            {
+                "days": 0,
+                "name": "Phân quyền tổ chuyên gia trên mạng đấu thầu (Phối hợp phòng HC-TC và tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nsw6f_m45l",
+                "prevNames": [
+                    "Phân quyền tổ chuyên gia trên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 3,
+                "name": "Lập và hoàn thiện Hồ sơ mời thầu (phối hợp với đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5ntkv7_wkcg",
+                "prevNames": [
+                    "Lập Hồ sơ mời thầu"
+                ]
+            },
+            {
+                "days": 0,
+                "name": "Báo cáo thẩm định Hồ sơ mời thầu (đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nxe9r_yv8u"
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt E-HSMT (cấp phòng)",
+                "dayType": "workday",
+                "stepUid": "st_mw5ny7c2_2kic"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt E-HSMT (Giám đốc Trung tâm)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nyh8j_enc3"
+            },
+            {
+                "days": 0,
+                "name": "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5nyvbs_5aeo",
+                "prevNames": [
+                    "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 9,
+                "name": "Đóng Hồ sơ đề xuất kỹ thuật",
+                "dayType": "calendar",
+                "stepUid": "st_mw5nzn76_687p",
+                "prevNames": [
+                    "Đóng thầu"
+                ]
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình cho phép mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (cấp phòng)",
+                "dayType": "workday",
+                "stepUid": "st_mw5o1b2o_kqzj"
+            },
+            {
+                "days": 0,
+                "name": "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (Giám đốc Trung tâm)",
+                "dayType": "workday",
+                "stepUid": "st_mw5o2dea_zr1d",
+                "prevNames": [
+                    "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có) (Giám đốc Trung tâm)"
+                ]
+            },
+            {
+                "days": 0,
+                "name": "Thao tác mở thầu trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5o3fka_byqc"
+            },
+            {
+                "days": 0,
+                "name": "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5o4t77_e00w",
+                "prevNames": [
+                    "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 3,
+                "name": "Báo cáo đánh giá Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5o9zaj_kvxe"
+            },
+            {
+                "days": 0,
+                "name": "báo cáo thẩm định danh sách nhà thầu đạt yêu cầu kỹ thuật (đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5oahhk_0wwn",
+                "prevNames": [
+                    "báo cáo thẩm định Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)"
+                ]
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (cấp phòng)",
+                "dayType": "workday",
+                "stepUid": "st_mw5ocyi0_smoo"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (Giám đốc Trung tâm)",
+                "dayType": "workday",
+                "stepUid": "st_mw5odca2_gkal"
+            },
+            {
+                "days": 0,
+                "name": "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5oge9c_9u7w",
+                "prevNames": [
+                    "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu"
+                ]
+            },
+            {
+                "days": 1,
+                "name": "Báo cáo đánh giá hồ sơ đề xuất tài chính (đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5oj4qu_jx1x"
+            },
+            {
+                "days": 0,
+                "name": "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu (Giám đốc Trung tâm)",
+                "dayType": "workday",
+                "stepUid": "st_mw5ojtjz_kclc",
+                "prevNames": [
+                    "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu"
+                ]
+            },
+            {
+                "days": 1,
+                "name": "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu (phối hợp với nhà thầu)",
+                "dayType": "workday",
+                "stepUid": "st_mw5oknmx_h056",
+                "prevNames": [
+                    "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu"
+                ]
+            },
+            {
+                "days": 0,
+                "name": "Đăng tải Biên bản thương thảo Hợp đồng lên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                "dayType": "workday",
+                "stepUid": "st_mw5ovcc1_31l7"
+            },
+            {
+                "days": 0,
+                "name": "Báo cáo thẩm định kết quả lựa chọn nhà thầu (đơn vị tư vấn)",
+                "dayType": "workday",
+                "stepUid": "st_mw5paxk9_80te"
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt kết quả lựa chọn nhà thầu (cấp phòng)",
+                "dayType": "workday",
+                "stepUid": "st_mw5pfus1_uygy"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt kết quả lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                "dayType": "workday",
+                "stepUid": "st_mw5pghgp_5nxb"
+            }
+        ],
+        "title": "Đấu thầu rộng rãi (Gói CNTT)"
+    },
+    "proc_1790739263585": {
+        "steps": [
+            {
+                "days": 1,
+                "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Công văn của đơn vị kèm báo giá và hồ sơ năng lực",
+                "dayType": "workday"
+            },
+            {
+                "days": 0,
+                "name": "Tờ trình phê duyệt đơn vị",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Quyết định phê duyệt đơn vị",
+                "dayType": "workday"
+            },
+            {
+                "days": 1,
+                "name": "Ký kết hợp đồng",
+                "dayType": "workday"
+            }
+        ],
+        "title": "Mua sắm dưới 100 triệu"
+    }
+};
+
+const defaultDocs = [
+    {
+        "links": [
+            {
+                "url": "https://drive.google.com/file/d/1mQ6ezEiUoZ6xaI9PhZvhx26k5ZFjD-uU/view?usp=sharing",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Quyết định Về việc giao dự toán thu, chi ngân sách nhà nước năm 2026 cho các đơn vị thuộc Sở Tài chính thành phố Hà Nội",
+        "number": "Quyết định số 15288/QĐ-STC ngày 01/12/2025"
+    },
+    {
+        "links": [
+            {
+                "url": "https://drive.google.com/file/d/18W8CirjoVmoM8nF8K7mvPvCTzNAsuDr2/view?usp=sharing",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Phê duyệt khối lượng, dự toán chi tiết nhiệm vụ chi ngân sách của Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội năm 2026",
+        "number": "Quyết định 10/QĐ-TTXT ngày 09/01/2026"
+    },
+    {
+        "links": [
+            {
+                "url": "https://drive.google.com/file/d/1ZElFgvhHSPDAxEC2Q_fu7aLmH2PGb9U2/view?usp=sharing",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Về việc điều chỉnh dự toán chi ngân sách nhà nước năm 2026 của Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội",
+        "number": "Quyết định số 4968/QĐ-STC ngày 07/4/2026"
+    },
+    {
+        "links": [
+            {
+                "url": "https://drive.google.com/file/d/1OCCTzvVydDxZZaUZMnoO2LE6nJxuAGKQ/view?usp=sharing",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Phê duyệt điều chỉnh khối lượng, dự toán chi tiết nhiệm vụ chi ngân sách của Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội năm 2026",
+        "number": "Quyết định số 89/QĐ-TTXT ngày 07/4/2026"
+    },
+    {
+        "links": [],
+        "title": "Luật Đấu thầu (Đã sửa đổi, bổ sung 2025/2026)",
+        "number": "22/2023/QH15",
+        "category": "thamkhao"
+    },
+    {
+        "links": [
+            {
+                "url": "https://www.google.com/search?q=Nghị+định+349%2F2026%2FNĐ-CP+lựa+chọn+nhà+thầu",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Nghị định 349 sửa đổi, bổ sung một số điều về lựa chọn nhà thầu (Mới nhất)",
+        "number": "349/2026/NĐ-CP",
+        "category": "thamkhao"
+    },
+    {
+        "links": [
+            {
+                "url": "https://www.google.com/search?q=Nghị+định+214%2F2025%2FNĐ-CP",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Nghị định 214 quy định chi tiết thi hành Luật Đấu thầu (Sửa đổi bởi NĐ 349/2026)",
+        "number": "214/2025/NĐ-CP",
+        "category": "thamkhao"
+    },
+    {
+        "links": [
+            {
+                "url": "https://www.google.com/search?q=Văn+bản+hợp+nhất+36%2F2026%2FVBHN-BTC+Bộ+Tài+chính",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Văn bản hợp nhất quy định đấu thầu (Bộ Tài chính ban hành)",
+        "number": "36/2026/VBHN-BTC",
+        "category": "thamkhao"
+    },
+    {
+        "links": [
+            {
+                "url": "https://www.google.com/search?q=Nghị+quyết+HĐND+Hà+Nội+phân+cấp+đấu+thầu+2026",
+                "name": "Văn bản chính"
+            }
+        ],
+        "title": "Nghị quyết của HĐND TP Hà Nội về phân cấp thẩm quyền quyết định mua sắm, đấu thầu",
+        "number": "NQ-HĐND-HN-2026",
+        "category": "thamkhao"
+    }
+];
+
         let db = { users: [], processTemplates: {}, missions: [], regulatoryDocs: [] };
 
         // --- HỆ THỐNG PHÂN QUYỀN 4 PHÒNG CHUYÊN MÔN & 4 VAI TRÒ TRUNG TÂM SCE ---
@@ -2839,8 +3338,24 @@ const LUNAR_HOLIDAYS = [
                 else el.classList.add('hidden'); 
             });
             
+            // Tự động mở rộng tất cả Nhiệm vụ chính để hiện ngay danh sách các gói thầu
+            if (window.expandedMissions && db.missions && Array.isArray(db.missions) && db.missions.length > 0) {
+                db.missions.forEach((_, idx) => {
+                    window.expandedMissions.add('m_' + idx);
+                });
+                window.saveExpandedMissionsState();
+            }
+
+            // Reset bộ lọc tìm kiếm và trạng thái tiến độ về mặc định
+            const sInput = document.getElementById('searchInput');
+            if (sInput) sInput.value = '';
+            const statFilter = document.getElementById('filterStatus');
+            if (statFilter) statFilter.value = 'active';
+            window.activeQuickProgressFilter = 'all';
+
             window.populateProcessDropdowns(); 
             window.switchTab('projects');
+            window.renderMissions();
             window.updateUndoRedoUI();
             
             if (autoSyncInterval) clearInterval(autoSyncInterval); 
@@ -3219,6 +3734,11 @@ const LUNAR_HOLIDAYS = [
                 }
                 
                 let visibleCount = 0;
+                if (!window.expandedMissionsInitialSeeded && window.expandedMissions && window.expandedMissions.size === 0 && db.missions && Array.isArray(db.missions) && db.missions.length > 0) {
+                    db.missions.forEach((_, idx) => window.expandedMissions.add('m_' + idx));
+                    window.expandedMissionsInitialSeeded = true;
+                    window.saveExpandedMissionsState();
+                }
                 if (db.missions && Array.isArray(db.missions) && db.missions.length > 0) {
                     db.missions.forEach((mission, mIndex) => {
                         let mNameSafe = mission.name || "Chưa có tên"; 
