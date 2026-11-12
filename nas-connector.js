@@ -153,6 +153,21 @@
             return await res.json();
         },
 
+        // 7b. Xóa tài khoản vĩnh viễn (Chỉ Admin)
+        deleteProfile: async function(id) {
+            const targetUrl = this.getUrl();
+            const token = this.getToken();
+            const res = await fetch(`${targetUrl}/api/profiles/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                throw new Error(errJson.error || `HTTP ${res.status}`);
+            }
+            return await res.json();
+        },
+
         // 8. Tải danh sách sao lưu từ NAS
         getBackups: async function() {
             const targetUrl = this.getUrl();

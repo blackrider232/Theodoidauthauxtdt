@@ -5197,15 +5197,39 @@ const defaultDocs = [
             }); 
         };
 
-        window.deleteUser = function(index) { 
-            if (currentUser.role !== 'admin') return; 
-            Swal.fire({title: 'Xóa tài khoản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
-                if(r.isConfirmed){ 
-                    db.users.splice(index, 1); 
-                    window.renderUsers(); 
-                    window.saveDataToGAS(false); 
-                } 
-            }); 
+        window.deleteUser = async function(index) {
+            if (currentUser.role !== 'admin') return;
+            const targetUser = db.users[index];
+            if (!targetUser) return;
+            const curEmail = (currentUser.email || currentUser.username || '').toLowerCase().trim();
+            const targetEmail = (targetUser.email || targetUser.username || '').toLowerCase().trim();
+            if (curEmail && targetEmail && curEmail === targetEmail) {
+                return Swal.fire('Cảnh báo', 'Bạn không thể tự xóa tài khoản Quản trị viên của chính mình!', 'warning');
+            }
+            const res = await Swal.fire({
+                title: 'Xóa tài khoản?',
+                html: `Bạn có chắc muốn xóa vĩnh viễn tài khoản <b>${escapeHtml(targetUser.fullname)}</b> (${escapeHtml(targetUser.email || targetUser.username)}) khỏi hệ thống NAS?<br><span class="text-xs text-red-500">Hành động này không thể hoàn tác!</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Xóa vĩnh viễn',
+                cancelButtonText: 'Hủy'
+            });
+            if (res.isConfirmed) {
+                try {
+                    const idToDelete = targetUser.id || targetUser.email || targetUser.username;
+                    if (window.SCE_NAS && idToDelete) {
+                        await window.SCE_NAS.deleteProfile(idToDelete);
+                    }
+                    db.users.splice(index, 1);
+                    await window.renderUsers();
+                    await window.saveDataToGAS(false);
+                    window.toast.fire({ icon: 'success', title: `Đã xóa tài khoản ${targetUser.fullname} thành công!` });
+                } catch (err) {
+                    Swal.fire('Lỗi xóa tài khoản', err.message || 'Không thể xóa trên máy chủ NAS', 'error');
+                }
+            }
         };
 
         window.countPackagesUsingProcess = function(typeKey) {
@@ -6816,15 +6840,18 @@ window.updateDoc = function(i, f, v) {
                 return Swal.fire('Lỗi', 'Email này đã có trong danh sách!', 'error');
             }
 
-            // Thêm vào danh sách phân quyền (KHÔNG lưu mật khẩu vào JSON)
-            db.users.push({
-                username: email,
-                email: email,
-                fullname: fullname,
-                role: role,
-                department: department,
-                is_active: true
-            });
+            // Đăng ký trực tiếp tài khoản lên Máy chủ NAS Synology
+            const userPassword = password || 'Sce@2026';
+            try {
+                if (window.SCE_NAS) {
+                    const regRes = await window.SCE_NAS.register(email, userPassword, fullname, department);
+                    if (regRes && regRes.user && regRes.user.id) {
+                        await window.SCE_NAS.updateProfile(regRes.user.id, { role: role, is_active: true });
+                    }
+                }
+            } catch (nasErr) {
+                console.warn('Lỗi lưu tài khoản lên NAS:', nasErr.message);
+            }
 
             document.getElementById('newUserUsername').value = '';
             if (document.getElementById('newUserPassword')) document.getElementById('newUserPassword').value = '';
@@ -6835,8 +6862,8 @@ window.updateDoc = function(i, f, v) {
             await window.saveDataToGAS(false);
 
             Swal.fire({
-                title: 'Đã cấp quyền Tài khoản!',
-                html: `Đã thêm <b>${escapeHtml(fullname)} (${escapeHtml(email)})</b><br>Vai trò: <b>${escapeHtml(window.getRoleLabel(role))}</b>${department ? `<br>Đơn vị: <b>${escapeHtml(department)}</b>` : ''}.<br><br><span class="text-xs text-gray-500">Người dùng có thể đăng nhập bằng Google hoặc vào tab <b>"Đăng ký Auth mới"</b> ngoài màn hình đăng nhập với đúng Email <b>${escapeHtml(email)}</b>.</span>`,
+                title: 'Đã tạo Tài khoản thành công!',
+                html: `Đã kích hoạt tài khoản cho <b>${escapeHtml(fullname)}</b> (${escapeHtml(email)})<br>Vai trò: <b>${escapeHtml(window.getRoleLabel(role))}</b>${department ? `<br>Đơn vị: <b>${escapeHtml(department)}</b>` : ''}<br>Mật khẩu khởi tạo: <b>${escapeHtml(userPassword)}</b><br><br><span class="text-xs text-emerald-600 font-semibold">Tài khoản đã sẵn sàng để đăng nhập vào hệ thống ngay lập tức!</span>`,
                 icon: 'success'
             });
         };
