@@ -32,6 +32,15 @@ services:
     depends_on:
       - db
 
+  # 3. Cloudflare Tunnel: Tự động tạo kết nối HTTPS xuyên qua mọi tường lửa (KHÔNG CẦN MỞ PORT MODEM CƠ QUAN)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sce_dauthau_tunnel
+    restart: always
+    command: tunnel --no-autoupdate --url http://api:3000
+    depends_on:
+      - api
+
 volumes:
   pgdata_volume:
     name: sce_dauthau_pgdata

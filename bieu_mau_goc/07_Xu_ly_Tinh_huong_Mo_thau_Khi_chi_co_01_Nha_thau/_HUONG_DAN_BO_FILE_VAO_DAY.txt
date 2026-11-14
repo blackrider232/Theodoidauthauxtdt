@@ -1,0 +1,20 @@
+====================================================================
+THU MUC: 07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau
+NOI DUNG: 07. Xử lý Tình huống Mở thầu khi chỉ có 01 Nhà thầu (trong 02 tiếng)
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM07A.docx
+     Mo ta: Tờ trình cho phép mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (cấp phòng)
+   - BM07B.docx
+     Mo ta: Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (Giám đốc Trung tâm)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 19, Bước 20
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 25, Bước 26
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

@@ -1,0 +1,20 @@
+====================================================================
+THU MUC: 09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu
+NOI DUNG: 09. Thương thảo Hợp đồng & Đối chiếu Tài liệu
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM09A.docx
+     Mo ta: Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu (Giám đốc Trung tâm)
+   - BM09B.docx
+     Mo ta: Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu (phối hợp với nhà thầu)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 24, Bước 25
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 35, Bước 36
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

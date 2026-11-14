@@ -304,8 +304,20 @@ app.delete('/api/profiles/:id', authenticateToken, async (req, res) => {
             return res.status(403).json({ error: 'Chỉ Quản trị viên mới có quyền xóa người dùng' });
         }
         const { id } = req.params;
-        await pool.query('DELETE FROM sce_v2_profiles WHERE id = $1', [id]);
-        res.json({ success: true, message: 'Đã xóa người dùng' });
+        const isNumeric = /^\d+$/.test(String(id).trim());
+        const paramId = isNumeric ? parseInt(id, 10) : String(id).trim();
+
+        // Không cho phép xóa chính mình
+        if (isNumeric && req.user.id && parseInt(req.user.id, 10) === parseInt(id, 10)) {
+            return res.status(400).json({ error: 'Không thể tự xóa tài khoản của chính mình' });
+        }
+        if (!isNumeric && req.user.email && req.user.email.toLowerCase() === String(id).toLowerCase().trim()) {
+            return res.status(400).json({ error: 'Không thể tự xóa tài khoản của chính mình' });
+        }
+
+        const whereClause = isNumeric ? 'id = $1' : 'LOWER(email) = LOWER($1)';
+        const delRes = await pool.query(`DELETE FROM sce_v2_profiles WHERE ${whereClause} RETURNING id, email, fullname`, [paramId]);
+        res.json({ success: true, message: 'Đã xóa người dùng thành công', deleted: delRes.rows[0] });
     } catch (err) {
         res.status(500).json({ error: 'Lỗi xóa người dùng: ' + err.message });
     }

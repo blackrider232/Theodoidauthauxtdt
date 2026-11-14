@@ -1,0 +1,21 @@
+====================================================================
+THU MUC: 04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT
+NOI DUNG: 04. Kế hoạch Lựa chọn Nhà thầu (KHLCNT)
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM04A.docx
+     Mo ta: Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu (cấp phòng)
+   - BM04B.docx
+     Mo ta: Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Quy trình Chỉ định thầu: Bước 3, Bước 4
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 8, Bước 9
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 5, Bước 6 (KHLCNT các gói tư vấn > 100 triệu) và Bước 14, Bước 15 (KHLCNT gói chính và gói tư vấn)
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

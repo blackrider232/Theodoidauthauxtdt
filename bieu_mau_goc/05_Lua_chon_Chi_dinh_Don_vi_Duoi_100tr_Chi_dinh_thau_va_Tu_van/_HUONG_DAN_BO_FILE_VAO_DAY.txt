@@ -1,0 +1,26 @@
+====================================================================
+THU MUC: 05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van
+NOI DUNG: 05. Lựa chọn / Chỉ định Đơn vị (Dưới 100tr, Chỉ định thầu & Các gói Tư vấn)
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM05A.docx
+     Mo ta: Công văn gửi đơn vị kèm dự thảo Hợp đồng (Giám đốc Trung tâm)
+   - BM05B.docx
+     Mo ta: Tờ trình phê duyệt đơn vị / lựa chọn đơn vị (cấp phòng)
+   - BM05C.docx
+     Mo ta: Quyết định phê duyệt đơn vị / lựa chọn đơn vị (Giám đốc Trung tâm)
+   - BM05D.docx
+     Mo ta: Hồ sơ lựa chọn / chỉ định & Hợp đồng thuê các gói tư vấn (thiết kế, thẩm định giá, lập/thẩm BCKT-KT, lập/thẩm E-HSMT, kiểm thử, giám sát)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Mua sắm dưới 100 triệu: Bước 1, Bước 3, Bước 4 (Bước 2 do đơn vị gửi báo giá & hồ sơ năng lực)
+   - Quy trình Chỉ định thầu: Bước 6, Bước 9, Bước 10 (Bước 8 do nhà thầu gửi báo giá & hồ sơ năng lực)
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 5 (Tư vấn thiết kế, thẩm định giá), Bước 11 (Tư vấn lập và thẩm định HSMT)
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 8 (Tư vấn Lập/Thẩm BCKT-KT, thẩm định giá), Bước 17 (Tư vấn lập & thẩm định HSMT), Bước 47 (Tư vấn Kiểm thử, Giám sát)
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

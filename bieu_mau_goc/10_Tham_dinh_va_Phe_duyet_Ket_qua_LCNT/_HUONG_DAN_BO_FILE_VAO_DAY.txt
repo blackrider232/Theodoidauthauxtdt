@@ -1,0 +1,21 @@
+====================================================================
+THU MUC: 10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT
+NOI DUNG: 10. Thẩm định & Phê duyệt Kết quả Lựa chọn Nhà thầu (KQLCNT)
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM10A.docx
+     Mo ta: Tờ trình phê duyệt kết quả lựa chọn nhà thầu (cấp phòng)
+   - BM10B.docx
+     Mo ta: Quyết định phê duyệt kết quả lựa chọn nhà thầu (Giám đốc Trung tâm)
+   *(Ghi chú: Đã bỏ BM10C / BN10C theo yêu cầu của Hoàng — Báo cáo thẩm định KQLCNT do đơn vị tư vấn lập)*
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 28 (BM10A), Bước 29 (BM10B)
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 39 (BM10A), Bước 40 (BM10B)
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

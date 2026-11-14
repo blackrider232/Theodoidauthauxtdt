@@ -1,0 +1,26 @@
+====================================================================
+THU MUC: 11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong
+NOI DUNG: 11. Thông báo Chấp thuận E-HSDT, Hoàn thiện & Ký Hợp đồng
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM11A.docx
+     Mo ta: Công văn Thông báo chấp thuận E-HSDT và trao hợp đồng (Giám đốc Trung tâm)
+   - BM11B.docx
+     Mo ta: Biên bản hoàn thiện Hợp đồng (02 bên ký tươi đóng dấu)
+   - BM11C.docx
+     Mo ta: Hợp đồng (dùng cho Mua sắm dưới 100 triệu & Chỉ định thầu)
+   - BM11D.docx
+     Mo ta: Hợp đồng Đấu thầu rộng rãi (dùng chung cho cả gói Tổ chức sự kiện & gói CNTT; đã gộp BM11D + BM11E theo yêu cầu của Hoàng)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Mua sắm dưới 100 triệu: Bước 5 (Ký kết hợp đồng - BM11C.docx)
+   - Quy trình Chỉ định thầu: Bước 12 (Ký Hợp đồng - BM11C.docx)
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 30 (BM11A.docx), Bước 31 (BM11B.docx), Bước 34 (BM11D.docx)
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 41 (BM11A.docx), Bước 42 (BM11B.docx), Bước 45 (BM11D.docx)
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

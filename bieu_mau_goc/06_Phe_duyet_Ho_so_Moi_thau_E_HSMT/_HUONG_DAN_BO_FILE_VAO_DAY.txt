@@ -1,0 +1,21 @@
+====================================================================
+THU MUC: 06_Phe_duyet_Ho_so_Moi_thau_E_HSMT
+NOI DUNG: 06. Thẩm định & Phê duyệt Hồ sơ Mời thầu (E-HSMT)
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM06A.docx
+     Mo ta: Tờ trình phê duyệt E-HSMT (cấp phòng)
+   - BM06B.docx
+     Mo ta: Quyết định phê duyệt E-HSMT (Giám đốc Trung tâm)
+   *(Ghi chú: Đã bỏ BM06C theo yêu cầu của Hoàng — Báo cáo thẩm định E-HSMT do đơn vị tư vấn lập)*
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 15 (BM06A), Bước 16 (BM06B)
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 21 (BM06A), Bước 22 (BM06B)
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

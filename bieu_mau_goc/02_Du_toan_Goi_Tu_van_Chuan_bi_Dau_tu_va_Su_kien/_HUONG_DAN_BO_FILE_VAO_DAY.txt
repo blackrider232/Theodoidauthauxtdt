@@ -1,0 +1,24 @@
+====================================================================
+THU MUC: 02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien
+NOI DUNG: 02. Dự toán các Gói Tư vấn, Chuẩn bị đầu tư & Tổ chức sự kiện
+====================================================================
+
+1. CAC FILE WORD (.docx) TRONG THU MUC NAY (DA CHUAN HOA):
+   - BM02A.docx
+     Mo ta: Tờ trình phê duyệt dự toán các gói tư vấn / dự toán giai đoạn chuẩn bị đầu tư (cấp phòng)
+   - BM02B.docx
+     Mo ta: Quyết định phê duyệt dự toán các gói tư vấn / dự toán giai đoạn chuẩn bị đầu tư (Giám đốc Trung tâm phê duyệt)
+   - BM02C.docx
+     Mo ta: Tờ trình phê duyệt dự toán tổ chức sự kiện (cấp phòng)
+   - BM02D.docx
+     Mo ta: Quyết định phê duyệt dự toán tổ chức sự kiện (Giám đốc Trung tâm)
+
+2. GAN VAO CAC BUOC TREN HE THONG QUAN LY DAU THAU SCE V2:
+   - Đấu thầu rộng rãi (Tổ chức sự kiện): Bước 3, Bước 4, Bước 6, Bước 7
+   - Đấu thầu rộng rãi (Gói CNTT): Bước 3, Bước 4
+
+3. QUY TAC CHUAN BI FILE WORD DE TU DONG DIEN:
+   - Luu dinh dang .docx (Word 2007+).
+   - Cho nao muon tu dong dien thong tin goi thau, chen dung ma bien {{...}}
+     (Xem danh sach ma bien trong DANH_MUC_BIEU_MAU_THEO_FOLDER.md hoac trong phan mem).
+   - Cho nao de chuyen vien tu dien thu cong, giu nguyen dau cham ....................

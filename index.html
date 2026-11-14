@@ -6,6 +6,16 @@
     <title>Quản trị Đấu thầu SCE</title>
             <!-- NAS Synology Connector -->
     <script src="nas-connector.js"></script>
+    <script>
+        // Khởi tạo sớm hàm chuẩn hóa vai trò ngay từ đầu trang để chống lỗi cache
+        window.normalizeRole = function(role) {
+            const r = String(role || 'user').toLowerCase().trim();
+            if (r === 'admin') return 'admin';
+            if (r === 'leader') return 'leader';
+            if (r === 'dept_leader' || r === 'team_lead') return 'dept_leader';
+            return 'user';
+        };
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
@@ -19,6 +29,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <!-- SheetJS (XLSX) for Native Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- PizZip for Smart DOCX Auto-Fill Template Merging -->
+    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
     <!-- PWA Manifest & iOS Standalone App Meta -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -769,20 +781,24 @@
 
     <!-- Modal Sửa Nhiệm vụ cụ thể -->
     <div id="editPackageModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500 max-h-[90vh] overflow-y-auto">
             <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-edit mr-2"></i>Chỉnh sửa Nhiệm vụ cụ thể</h2>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên Nhiệm vụ cụ thể</label>
             <input type="text" id="editPackageName" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hình thức lựa chọn nhà thầu</label>
+            <select id="editPackageBiddingMethod" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Loại hợp đồng</label>
+            <select id="editPackageContractType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày Bắt Đầu (Tự động tính lại lịch)</label>
             <input type="date" id="editPackageStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
-            <select id="editPackageOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
-<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-3">Giá dự toán</label>
-<input type="text" id="editPackageBudget" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.500.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
-<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nhà thầu thực hiện</label>
-<input type="text" id="editPackageContractor" placeholder="Tên công ty trúng thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
-<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giá trúng thầu</label>
-<input type="text" id="editPackageWinningBid" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.450.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 outline-none dark:text-white">
+            <select id="editPackageOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giá dự toán</label>
+            <input type="text" id="editPackageBudget" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.500.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nhà thầu thực hiện</label>
+            <input type="text" id="editPackageContractor" placeholder="Tên công ty trúng thầu..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 outline-none dark:text-white">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giá trúng thầu</label>
+            <input type="text" id="editPackageWinningBid" oninput="let v=this.value.replace(/\./g,''); if(/^\d*$/.test(v)) this.value=v.replace(/\B(?=(\d{3})+(?!\d))/g,'.');" placeholder="Ví dụ: 1.450.000.000" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 outline-none dark:text-white">
             <div class="flex justify-end gap-3">
                 <button onclick="window.closeEditPackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
                 <button onclick="window.saveEditPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md">Lưu thay đổi</button>
@@ -811,8 +827,8 @@
     </div>
 
     <!-- Modal Biểu mẫu Công đoạn -->
-    <div id="stepTemplateModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] px-4">
-        <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-teal-500 max-h-[92vh] flex flex-col">
+    <div id="stepTemplateModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] px-3 sm:px-4">
+        <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-2xl w-full max-w-xl border-t-4 border-teal-500 max-h-[92vh] flex flex-col">
             <div class="flex items-center justify-between pb-3 border-b dark:border-gray-700">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <span class="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 flex items-center justify-center shrink-0">
@@ -820,7 +836,7 @@
                     </span>
                     <div class="min-w-0">
                         <h2 class="text-base font-bold text-gray-800 dark:text-white leading-tight">Biểu mẫu Công đoạn</h2>
-                        <p id="stepTemplateStepName" class="text-xs text-teal-600 dark:text-teal-400 font-semibold truncate max-w-[260px] sm:max-w-[340px]"></p>
+                        <p id="stepTemplateStepName" class="text-xs text-teal-600 dark:text-teal-400 font-semibold truncate max-w-[240px] sm:max-w-[420px]"></p>
                     </div>
                 </div>
                 <button type="button" onclick="window.closeStepTemplateModal()" class="text-gray-400 hover:text-red-500 text-lg transition p-1 shrink-0">
@@ -828,7 +844,7 @@
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto py-4 space-y-4">
+            <div class="flex-1 overflow-y-auto py-4 space-y-4 pr-0.5">
                 <!-- KHỐI 1: HIỂN THỊ BIỂU MẪU HIỆN CÓ -->
                 <div id="stepTemplateCurrentCard" class="p-3.5 bg-teal-50/80 dark:bg-teal-950/40 rounded-xl border border-teal-200 dark:border-teal-800 space-y-3">
                     <div class="flex items-start justify-between gap-2">
@@ -844,17 +860,21 @@
                         </div>
                     </div>
 
-                    <!-- NÚT TẢI BIỂU MẪU VỀ MÁY DUY NHẤT DÀNH CHO CÁN BỘ -->
-                    <div class="pt-2.5 border-t border-teal-200/70 dark:border-teal-800/70">
-                        <a id="stepTemplateDownloadBtn" href="#" download target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs sm:text-sm">
+                    <!-- NÚT TẢI BIỂU MẪU (TỰ ĐỘNG ĐIỀN + BẢN GỐC) -->
+                    <div class="pt-2.5 border-t border-teal-200/70 dark:border-teal-800/70 space-y-2">
+                        <button type="button" id="stepTemplateSmartFillBtn" onclick="window.downloadSmartFilledDocx()" class="hidden w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs sm:text-sm cursor-pointer">
+                            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                            <span>Tải Biểu mẫu Đã Điền Sẵn Thông Tin (.docx)</span>
+                        </button>
+                        <a id="stepTemplateDownloadBtn" href="#" download target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-gray-700 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold py-2 px-4 rounded-lg shadow-xs transition text-xs sm:text-sm">
                             <i class="fas fa-download" aria-hidden="true"></i>
-                            <span>Tải biểu mẫu về máy</span>
+                            <span>Tải file biểu mẫu gốc (chưa điền)</span>
                         </a>
                     </div>
 
                     <div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-teal-100 dark:border-gray-700 leading-relaxed">
                         <i class="fas fa-lightbulb text-amber-500 mr-1" aria-hidden="true"></i>
-                        <strong>Hướng dẫn cán bộ:</strong> Bấm nút trên để tải biểu mẫu chuẩn về máy và soạn thảo. Sau khi hoàn thiện văn bản, sử dụng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc để đính kèm kết quả.
+                        <strong>Hướng dẫn cán bộ:</strong> Bấm <strong>"Tải Biểu mẫu Đã Điền Sẵn"</strong> để phần mềm tự động điền sẵn thông tin gói thầu vào các vị trí có biến, chỗ để trống bạn tự hoàn thiện nốt trên Word rồi dùng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc.
                     </div>
                 </div>
 
@@ -865,9 +885,21 @@
                     <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Quản trị viên có thể tải lên file Word/Excel mẫu hoặc dán liên kết Google Docs bên dưới.</p>
                 </div>
 
+                <!-- KHỐI 2: COPY NHANH THÔNG TIN GÓI THẦU (1-CLICK) -->
+                <div id="stepTemplateQuickCopySection" class="hidden p-3.5 bg-blue-50/70 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800/70 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                            <i class="fas fa-clipboard-list text-blue-600 dark:text-blue-400"></i>
+                            Copy Nhanh Thông Tin Gói Thầu (1-Click)
+                        </span>
+                        <span class="text-[10.5px] text-blue-600 dark:text-blue-400 italic">Bấm vào ô để copy</span>
+                    </div>
+                    <div id="stepTemplateQuickCopyGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"></div>
+                </div>
+
                 <!-- KHỐI DÀNH CHO ADMIN CẬP NHẬT BIỂU MẪU -->
-                <div id="stepTemplateAdminSection" class="hidden pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between mb-2">
+                <div id="stepTemplateAdminSection" class="hidden pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    <div class="flex items-center justify-between">
                         <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                             <i class="fas fa-user-shield text-indigo-500"></i> Quản trị viên cập nhật biểu mẫu
                         </span>
@@ -902,6 +934,21 @@
                                 <i class="fas fa-link"></i> Lưu liên kết biểu mẫu
                             </button>
                         </div>
+                    </div>
+
+                    <!-- TỪ ĐIỂN MÃ BIẾN TỰ ĐỘNG ĐIỀN CHO ADMIN -->
+                    <div id="stepTemplateVarDictSection" class="p-3 bg-indigo-50/70 dark:bg-indigo-950/30 rounded-xl border border-indigo-200 dark:border-indigo-800/70 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
+                                <i class="fas fa-tags text-indigo-600 dark:text-indigo-400"></i>
+                                Mã biến tự động điền trong Word (.docx)
+                            </span>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 italic">Bấm để copy mã</span>
+                        </div>
+                        <p class="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">
+                            Chèn các mã dưới đây vào file <strong>.docx</strong> trước khi tải lên. Những vị trí để chuyên viên tự điền thì giữ nguyên dấu chấm <code>....................</code>
+                        </p>
+                        <div id="stepTemplateVarDictGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-0.5"></div>
                     </div>
                 </div>
             </div>
@@ -1033,308 +1080,20 @@
 
         <!-- Modal Tạo Nhiệm vụ cụ thể mới -->
     <div id="createPackageModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-blue-500">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-blue-500 max-h-[90vh] overflow-y-auto">
             <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 pb-2 border-b dark:border-gray-700">Thêm Nhiệm vụ cụ thể mới</h2>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quy trình áp dụng</label>
-                    <select id="projType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+                    <select id="projType" onchange="window.onProjTypeChange && window.onProjTypeChange(this.value)" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên nhiệm vụ cụ thể</label>
-                    <input type="text" id="projName" placeholder="Tên nhiệm vụ cụ thể..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hình thức lựa chọn nhà thầu</label>
+                    <select id="projBiddingMethod" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày bắt đầu</label>
-                    <input type="date" id="projStartDate" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chuyên viên phụ trách</label>
-                    <select id="pkgOwner" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-4">
-                <button onclick="window.closeCreatePackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.createPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow">Thêm nhiệm vụ cụ thể</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Thông tin cá nhân & Bảo mật 2FA (V2) -->
-    <div id="profileModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-600 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700 flex items-center justify-between">
-                <span><i class="fas fa-user-shield mr-2 text-blue-600"></i>Tài khoản & Bảo mật V2</span>
-                <span id="profileAuthBadge" class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold uppercase">NAS Synology</span>
-            </h2>
-            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Email xác thực</label>
-            <input type="text" id="profileEmail" disabled class="w-full border dark:border-gray-600 bg-gray-100 dark:bg-gray-900 p-2 rounded text-sm mb-3 cursor-not-allowed text-gray-500 dark:text-gray-400">
-            
-            <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Phòng chuyên môn & Vai trò</label>
-            <input type="text" id="profileRoleDeptInfo" disabled class="w-full border dark:border-gray-600 bg-gray-100 dark:bg-gray-900 p-2 rounded text-sm mb-3 cursor-not-allowed text-blue-700 dark:text-blue-400 font-semibold">
-
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Họ và Tên hiển thị</label>
-            <input type="text" id="profileFullname" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-            
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Đổi mật khẩu mới (NAS Synology Bcrypt)</label>
-            <input type="password" id="profilePassword" placeholder="Bỏ trống nếu giữ nguyên (tối thiểu 6 ký tự)" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-            
-            <div class="flex justify-end gap-3">
-                <button onclick="window.closeEditPackageModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.saveEditPackage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md">Lưu thay đổi</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Sửa Công việc -->
-    <div id="editStepModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-emerald-500">
-            <h2 class="text-lg font-bold text-emerald-700 dark:text-emerald-400 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-tasks mr-2"></i>Cập nhật Công việc</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên công việc</label>
-            <input type="text" id="editStepName" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hạn chót</label>
-            <input type="date" id="editStepDeadline" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-1 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white">
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-3 italic">*Đổi hạn chót tự động đẩy lùi lịch các bước phía sau.</p>
-            <div class="hidden">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ghi chú / Báo cáo</label>
-                <textarea id="editStepNote" rows="3" placeholder="Ghi chú, lý do trễ hạn..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"></textarea>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button onclick="window.closeEditStepModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.saveEditStep()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium shadow-md">Lưu cập nhật</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Biểu mẫu Công đoạn -->
-    <div id="stepTemplateModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] px-4">
-        <div class="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-teal-500 max-h-[92vh] flex flex-col">
-            <div class="flex items-center justify-between pb-3 border-b dark:border-gray-700">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 flex items-center justify-center shrink-0">
-                        <i class="fas fa-file-contract text-base"></i>
-                    </span>
-                    <div class="min-w-0">
-                        <h2 class="text-base font-bold text-gray-800 dark:text-white leading-tight">Biểu mẫu Công đoạn</h2>
-                        <p id="stepTemplateStepName" class="text-xs text-teal-600 dark:text-teal-400 font-semibold truncate max-w-[260px] sm:max-w-[340px]"></p>
-                    </div>
-                </div>
-                <button type="button" onclick="window.closeStepTemplateModal()" class="text-gray-400 hover:text-red-500 text-lg transition p-1 shrink-0">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto py-4 space-y-4">
-                <!-- KHỐI 1: HIỂN THỊ BIỂU MẪU HIỆN CÓ -->
-                <div id="stepTemplateCurrentCard" class="p-3.5 bg-teal-50/80 dark:bg-teal-950/40 rounded-xl border border-teal-200 dark:border-teal-800 space-y-3">
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="flex items-start gap-2.5 min-w-0">
-                            <span id="stepTemplateFileIcon" class="text-2xl mt-0.5 shrink-0 text-blue-600 dark:text-blue-400">
-                                <i class="fas fa-file-word"></i>
-                            </span>
-                            <div class="min-w-0">
-                                <span class="text-[10.5px] uppercase font-bold tracking-wider text-teal-700 dark:text-teal-400 block">Biểu mẫu chuẩn:</span>
-                                <h4 id="stepTemplateFileName" class="text-sm font-bold text-gray-900 dark:text-gray-100 break-words leading-snug"></h4>
-                                <span id="stepTemplateMeta" class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- NÚT TẢI BIỂU MẪU VỀ MÁY DUY NHẤT DÀNH CHO CÁN BỘ -->
-                    <div class="pt-2.5 border-t border-teal-200/70 dark:border-teal-800/70">
-                        <a id="stepTemplateDownloadBtn" href="#" download target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs sm:text-sm">
-                            <i class="fas fa-download" aria-hidden="true"></i>
-                            <span>Tải biểu mẫu về máy</span>
-                        </a>
-                    </div>
-
-                    <div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-teal-100 dark:border-gray-700 leading-relaxed">
-                        <i class="fas fa-lightbulb text-amber-500 mr-1" aria-hidden="true"></i>
-                        <strong>Hướng dẫn cán bộ:</strong> Bấm nút trên để tải biểu mẫu chuẩn về máy và soạn thảo. Sau khi hoàn thiện văn bản, sử dụng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc để đính kèm kết quả.
-                    </div>
-                </div>
-
-                <!-- THÔNG BÁO KHI CHƯA CÓ BIỂU MẪU -->
-                <div id="stepTemplateEmptyNotice" class="hidden text-center py-6 px-4 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                    <i class="fas fa-file-circle-exclamation text-3xl text-gray-400 mb-2"></i>
-                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Công đoạn này chưa được gắn biểu mẫu chuẩn.</p>
-                    <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Quản trị viên có thể tải lên file Word/Excel mẫu hoặc dán liên kết Google Docs bên dưới.</p>
-                </div>
-
-                <!-- KHỐI DÀNH CHO ADMIN CẬP NHẬT BIỂU MẪU -->
-                <div id="stepTemplateAdminSection" class="hidden pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                            <i class="fas fa-user-shield text-indigo-500"></i> Quản trị viên cập nhật biểu mẫu
-                        </span>
-                        <button type="button" id="stepTemplateDeleteBtn" onclick="window.deleteStepTemplateForm()" class="hidden text-xs text-red-500 hover:text-red-700 font-semibold transition inline-flex items-center gap-1">
-                            <i class="fas fa-trash-alt"></i> Xóa biểu mẫu này
-                        </button>
-                    </div>
-
-                    <div class="bg-gray-50 dark:bg-gray-900/80 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 space-y-3">
-                        <!-- TÙY CHỌN 1: UPLOAD FILE MẪU -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Cách 1: Tải file Word/Excel mẫu từ máy tính</label>
-                            <input type="file" id="stepTemplateFileInput" class="hidden" accept=".doc,.docx,.xls,.xlsx,.pdf,.odt,.txt" onchange="window.handleUploadStepTemplateFile(this)">
-                            <button type="button" onclick="document.getElementById('stepTemplateFileInput').click()" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:border-teal-500 text-gray-700 dark:text-gray-200 text-xs font-medium py-2.5 px-3 rounded-lg shadow-xs transition flex items-center justify-center gap-2">
-                                <i class="fas fa-cloud-upload-alt text-teal-600 text-sm"></i>
-                                <span>Bấm để chọn file (.docx, .xlsx, .pdf) tải lên</span>
-                            </button>
-                        </div>
-
-                        <div class="relative flex py-1 items-center">
-                            <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-                            <span class="flex-shrink mx-2 text-[10px] uppercase font-bold text-gray-400">Hoặc</span>
-                            <div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-                        </div>
-
-                        <!-- TÙY CHỌN 2: DÁN LINK TRỰC TUYẾN -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Cách 2: Dán đường dẫn biểu mẫu trực tuyến (Google Docs / Drive)</label>
-                            <input type="text" id="stepTemplateCustomName" placeholder="Tên biểu mẫu (VD: Mẫu Tờ trình phê duyệt KHLCNT.docx)" class="w-full mb-1.5 p-2 border dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg text-xs outline-none dark:text-white">
-                            <input type="url" id="stepTemplateCustomUrl" placeholder="Đường dẫn URL (Google Docs, Google Sheets, OneDrive...)" class="w-full mb-2 p-2 border dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg text-xs outline-none dark:text-white">
-                            <button type="button" onclick="window.saveStepTemplateLink()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-xs transition flex items-center justify-center gap-1.5">
-                                <i class="fas fa-link"></i> Lưu liên kết biểu mẫu
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t dark:border-gray-700 flex justify-end">
-                <button type="button" onclick="window.closeStepTemplateModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-medium transition">
-                    Đóng
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hộp thoại Đồng bộ Quy trình mẫu sang Gói thầu đang thực hiện (Native <dialog>) -->
-    <dialog id="syncProcessDialog" aria-labelledby="syncProcessDialogTitle" closedby="any" class="m-auto p-0 rounded-2xl shadow-2xl w-[calc(100%-1.5rem)] max-w-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-t-4 border-indigo-600">
-        <div class="flex flex-col max-h-[88vh] p-4 sm:p-5">
-            <div class="flex justify-between items-start gap-2 pb-3 border-b dark:border-gray-700">
-                <div class="min-w-0">
-                    <h2 id="syncProcessDialogTitle" class="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                        <i class="fas fa-arrows-rotate text-indigo-600 dark:text-indigo-400 shrink-0" aria-hidden="true"></i>
-                        <span>Đồng bộ quy trình sang gói đang chạy</span>
-                    </h2>
-                    <p id="syncProcessDialogProcTitle" class="text-xs text-indigo-700 dark:text-indigo-300 font-semibold mt-0.5 break-words"></p>
-                </div>
-                <button type="button" onclick="window.closeSyncProcessModal()" aria-label="Đóng hộp thoại đồng bộ" class="text-gray-400 hover:text-red-500 p-1 rounded-lg transition shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
-                    <i class="fas fa-times text-lg" aria-hidden="true"></i>
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto py-3 space-y-3.5 pr-0.5">
-                <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-start gap-2">
-                    <i class="fas fa-shield-halved text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
-                    <div>
-                        <b>Bảo toàn tiến độ thực tế:</b> Mọi bước <b>Đã hoàn thành</b> (cùng hạn chót thực tế, người hoàn thành, tài liệu đính kèm, việc nhỏ) luôn được giữ nguyên 100%. Có thể nhấn <b>Ctrl+Z</b> để hoàn tác nếu cần.
-                    </div>
-                </div>
-
-                <!-- Phạm vi cập nhật -->
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-gray-900/70 border border-slate-200 dark:border-gray-700 space-y-2">
-                    <p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">1. Tuỳ chọn nội dung đồng bộ</p>
-                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
-                        <input type="checkbox" id="syncOptUpdate" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
-                        <span>Cập nhật <b>tên bước, định mức ngày, loại ngày & biểu mẫu</b> cho các bước <i>chưa hoàn thành</i></span>
-                    </label>
-                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
-                        <input type="checkbox" id="syncOptAdd" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
-                        <span>Bổ sung các <b>bước công việc mới thêm</b> trong quy trình mẫu vào gói thầu</span>
-                    </label>
-                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
-                        <input type="checkbox" id="syncOptReorder" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
-                        <span>Sắp xếp lại thứ tự bước theo quy trình mẫu & tự động tính lại hạn chót nối tiếp</span>
-                    </label>
-                    <label class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
-                        <input type="checkbox" id="syncOptRemoveExtra" class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 shrink-0">
-                        <span>Gỡ bước cũ đã xóa khỏi quy trình mẫu <span class="text-[11px] text-gray-500 dark:text-gray-400">(chỉ gỡ bước chưa xong, chưa có tài liệu/ghi chú; giữ nguyên việc phát sinh)</span></span>
-                    </label>
-                </div>
-
-                <!-- Danh sách gói thầu đang thực hiện -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">2. Chọn gói thầu đang chạy để áp dụng</p>
-                        <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 cursor-pointer">
-                            <input type="checkbox" id="syncSelectAllPkgs" checked onchange="window.toggleAllSyncPackages(this.checked)" class="rounded text-indigo-600 focus:ring-indigo-500">
-                            <span>Chọn tất cả (<span id="syncSelectedPkgCount">0</span>)</span>
-                        </label>
-                    </div>
-                    <div id="syncProcessPackageList" class="space-y-1.5 max-h-52 overflow-y-auto pr-0.5"></div>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t dark:border-gray-700 flex flex-wrap sm:flex-nowrap justify-end gap-2">
-                <form method="dialog" class="w-full sm:w-auto">
-                    <button type="submit" value="only_new" autofocus class="w-full sm:w-auto px-3.5 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-gray-400 outline-none">
-                        Chỉ áp dụng gói tạo mới
-                    </button>
-                </form>
-                <button type="button" id="btnConfirmSyncProcess" onclick="window.executeSyncProcessToPackages()" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition inline-flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-indigo-500 outline-none">
-                    <i class="fas fa-check-double" aria-hidden="true"></i>
-                    <span>Đồng bộ các gói đã chọn</span>
-                </button>
-            </div>
-        </div>
-    </dialog>
-
-    <!-- Modal Bình luận -->
-    <div id="commentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500 flex flex-col max-h-[90vh]">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 pb-2 border-b dark:border-gray-700 flex justify-between items-center">
-                <span><i class="fas fa-comments text-blue-500 mr-2"></i>Trao đổi: <span id="commentStepName" class="text-blue-600 dark:text-blue-400 text-sm font-normal"></span></span>
-                <button onclick="window.closeCommentsModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </h2>
-            <div id="commentsList" class="flex-1 overflow-y-auto space-y-3 mb-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg min-h-[250px] max-h-[400px]">
-                <!-- Comments will be injected here -->
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="newCommentText" placeholder="Nhập nội dung trao đổi, báo cáo..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" onkeypress="if(event.key === 'Enter') window.saveComment()">
-                <button onclick="window.saveComment()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md whitespace-nowrap"><i class="fas fa-paper-plane mr-1"></i>Gửi</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Việc nhỏ (Sub-Task) -->
-    <div id="subTaskModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-orange-500">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-list-ul text-orange-500 mr-2"></i>Thêm Việc nhỏ</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nội dung</label>
-            <input type="text" id="subTaskName" placeholder="VD: Gửi mail báo giá..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-orange-500 outline-none dark:text-white" onkeypress="if(event.key === 'Enter') window.saveSubTask()">
-            <div class="flex justify-end gap-3">
-                <button onclick="window.closeSubTaskModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.saveSubTask()" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-medium shadow-md">Thêm</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Tạo Nhiệm vụ mới -->
-    <div id="createMissionModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-emerald-500">
-            <h2 class="text-lg font-bold text-emerald-700 dark:text-emerald-400 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-folder-plus mr-2"></i>Tạo Nhiệm vụ mới</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên Nhiệm vụ tổng</label>
-            <input type="text" id="missionName" placeholder="VD: Triển khai ứng dụng phần mềm SCE..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thời hạn hoàn thành</label>
-            <input type="date" id="missionDeadline" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-4 focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white">
-            <div class="flex justify-end gap-3">
-                <button onclick="window.closeCreateMissionModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.createMission()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium shadow">Tạo mới</button>
-            </div>
-        </div>
-    </div>
-
-        <!-- Modal Tạo Nhiệm vụ cụ thể mới -->
-    <div id="createPackageModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-blue-500">
-            <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 pb-2 border-b dark:border-gray-700">Thêm Nhiệm vụ cụ thể mới</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quy trình áp dụng</label>
-                    <select id="projType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Loại hợp đồng</label>
+                    <select id="projContractType" class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"></select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên nhiệm vụ cụ thể</label>
@@ -1495,401 +1254,1403 @@ const LUNAR_HOLIDAYS = [
     '31/01/2030','01/02/2030','02/02/2030','03/02/2030','04/02/2030','05/02/2030','06/02/2030','11/04/2030'
 ];
 
+        const STANDARD_BM_CATALOG = {
+            "BM01A": {
+                "name": "BM01A.docx",
+                "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01A.docx",
+                "type": "file"
+            },
+            "BM01B": {
+                "name": "BM01B.docx",
+                "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01B.docx",
+                "type": "file"
+            },
+            "BM02A": {
+                "name": "BM02A.docx",
+                "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02A.docx",
+                "type": "file"
+            },
+            "BM02B": {
+                "name": "BM02B.docx",
+                "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02B.docx",
+                "type": "file"
+            },
+            "BM02C": {
+                "name": "BM02C.docx",
+                "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02C.docx",
+                "type": "file"
+            },
+            "BM02D": {
+                "name": "BM02D.docx",
+                "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02D.docx",
+                "type": "file"
+            },
+            "BM03A": {
+                "name": "BM03A.docx",
+                "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03A.docx",
+                "type": "file"
+            },
+            "BM03C": {
+                "name": "BM03C.docx",
+                "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03C.docx",
+                "type": "file"
+            },
+            "BM03D": {
+                "name": "BM03D.docx",
+                "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03D.docx",
+                "type": "file"
+            },
+            "BM04A": {
+                "name": "BM04A.docx",
+                "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04A.docx",
+                "type": "file"
+            },
+            "BM04B": {
+                "name": "BM04B.docx",
+                "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04B.docx",
+                "type": "file"
+            },
+            "BM05A": {
+                "name": "BM05A.docx",
+                "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05A.docx",
+                "type": "file"
+            },
+            "BM05B": {
+                "name": "BM05B.docx",
+                "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05B.docx",
+                "type": "file"
+            },
+            "BM05C": {
+                "name": "BM05C.docx",
+                "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05C.docx",
+                "type": "file"
+            },
+            "BM05D": {
+                "name": "BM05D.docx",
+                "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                "type": "file"
+            },
+            "BM06A": {
+                "name": "BM06A.docx",
+                "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06A.docx",
+                "type": "file"
+            },
+            "BM06B": {
+                "name": "BM06B.docx",
+                "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06B.docx",
+                "type": "file"
+            },
+            "BM07A": {
+                "name": "BM07A.docx",
+                "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07A.docx",
+                "type": "file"
+            },
+            "BM07B": {
+                "name": "BM07B.docx",
+                "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07B.docx",
+                "type": "file"
+            },
+            "BM08A": {
+                "name": "BM08A.docx",
+                "url": "./bieu_mau_goc/08_Danh_gia_HSDT_va_Phe_duyet_Danh_sach_Dat_Ky_thuat/BM08A.docx",
+                "type": "file"
+            },
+            "BM08B": {
+                "name": "BM08B.docx",
+                "url": "./bieu_mau_goc/08_Danh_gia_HSDT_va_Phe_duyet_Danh_sach_Dat_Ky_thuat/BM08B.docx",
+                "type": "file"
+            },
+            "BM09A": {
+                "name": "BM09A.docx",
+                "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09A.docx",
+                "type": "file"
+            },
+            "BM09B": {
+                "name": "BM09B.docx",
+                "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09B.docx",
+                "type": "file"
+            },
+            "BM10A": {
+                "name": "BM10A.docx",
+                "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10A.docx",
+                "type": "file"
+            },
+            "BM10B": {
+                "name": "BM10B.docx",
+                "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10B.docx",
+                "type": "file"
+            },
+            "BM11A": {
+                "name": "BM11A.docx",
+                "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11A.docx",
+                "type": "file"
+            },
+            "BM11B": {
+                "name": "BM11B.docx",
+                "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11B.docx",
+                "type": "file"
+            },
+            "BM11C": {
+                "name": "BM11C.docx",
+                "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11C.docx",
+                "type": "file"
+            },
+            "BM11D": {
+                "name": "BM11D.docx",
+                "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11D.docx",
+                "type": "file"
+            }
+        };
+
+        const STANDARD_STEP_BM_BY_UID = {
+            "st_mwebgdxb_1543": "BM01A",
+            "st_mwebgpqs_1_2hiv": "BM01B",
+            "st_mwebgtxo_2_p99q": "BM04A",
+            "st_mwebh05d_3_xiu0": "BM04B",
+            "st_mwebhzlw_5_knu2": "BM05A",
+            "st_mwebj46w_8_2053": "BM05B",
+            "st_mwebja4b_9_bt78": "BM05C",
+            "st_mwebkbef_11_gzug": "BM11C",
+            "st_mwebpzda_0_h216": "BM01A",
+            "st_mwebq6mq_1_zli5": "BM01B",
+            "st_mwebqk53_2_ac7p": "BM02A",
+            "st_mwebqrm5_3_jyde": "BM02B",
+            "st_mwebsyng_4_epon": "BM05D",
+            "st_mwebuq7v_5_n970": "BM02C",
+            "st_mwebxaqc_4ll6": "BM02D",
+            "st_mwebxx73_ei5w": "BM04A",
+            "st_mweby1s4_9qwl": "BM04B",
+            "st_mwebyk9p_br7f": "BM05D",
+            "st_mwebz2r8_7lea": "BM06A",
+            "st_mwebz5lj_l0as": "BM06B",
+            "st_mwec70f0_nhfu": "BM07A",
+            "st_mwec74fe_lgem": "BM07B",
+            "st_mweepiiw_bnv6": "BM09A",
+            "st_mweepn8v_iqyl": "BM09B",
+            "st_mweeq7mc_dw0x": "BM10A",
+            "st_mweeqbc2_3g5f": "BM10B",
+            "st_mweeqgi1_a6kz": "BM11A",
+            "st_mweeqkoo_d1yv": "BM11B",
+            "st_mweeqztz_ee49": "BM11D",
+            "st_mw5odxab_1_r3g0": "BM01B",
+            "st_mw5ns38x_5oi3": "BM05D",
+            "st_mw5ny7c2_2kic": "BM06A",
+            "st_mw5nyh8j_enc3": "BM06B",
+            "st_mw5o1b2o_kqzj": "BM07A",
+            "st_mw5o2dea_zr1d": "BM07B",
+            "st_mw5ocyi0_smoo": "BM08A",
+            "st_mw5odca2_gkal": "BM08B",
+            "st_mw5ojtjz_kclc": "BM09A",
+            "st_mw5oknmx_h056": "BM09B",
+            "st_mw5pfus1_uygy": "BM10A",
+            "st_mw5pghgp_5nxb": "BM10B",
+            "st_mwdds1bp_fw46": "BM11A",
+            "st_mwdduter_airo": "BM11B",
+            "st_mwddw198_vviu": "BM11D",
+            "st_mwddxrfx_4164": "BM05D",
+            "st_mwebkqhk_0_qt90": "BM05A",
+            "st_mwebnxan_2_nknw": "BM05B",
+            "st_mwebo2eh_3_655z": "BM05C",
+            "st_mweboenz_4_dyxj": "BM11C"
+        };
+
+        const STANDARD_STEP_BM_BY_PROC_INDEX = {
+            "chidinh": {
+                "expectedSteps": 12,
+                "map": {
+                    "0": "BM01A",
+                    "1": "BM01B",
+                    "2": "BM04A",
+                    "3": "BM04B",
+                    "5": "BM05A",
+                    "8": "BM05B",
+                    "9": "BM05C",
+                    "11": "BM11C"
+                }
+            },
+            "rongrai": {
+                "expectedSteps": 35,
+                "map": {
+                    "0": "BM01A",
+                    "1": "BM01B",
+                    "2": "BM02A",
+                    "3": "BM02B",
+                    "4": "BM05D",
+                    "5": "BM02C",
+                    "6": "BM02D",
+                    "7": "BM04A",
+                    "8": "BM04B",
+                    "10": "BM05D",
+                    "14": "BM06A",
+                    "15": "BM06B",
+                    "18": "BM07A",
+                    "19": "BM07B",
+                    "23": "BM09A",
+                    "24": "BM09B",
+                    "27": "BM10A",
+                    "28": "BM10B",
+                    "29": "BM11A",
+                    "30": "BM11B",
+                    "33": "BM11D"
+                }
+            },
+            "rongrai_cntt": {
+                "expectedSteps": 47,
+                "map": {
+                    "0": "BM01A",
+                    "1": "BM01B",
+                    "2": "BM02A",
+                    "3": "BM02B",
+                    "4": "BM04A",
+                    "5": "BM04B",
+                    "7": "BM05D",
+                    "9": "BM03A",
+                    "11": "BM03C",
+                    "12": "BM03D",
+                    "13": "BM04A",
+                    "14": "BM04B",
+                    "16": "BM05D",
+                    "20": "BM06A",
+                    "21": "BM06B",
+                    "24": "BM07A",
+                    "25": "BM07B",
+                    "30": "BM08A",
+                    "31": "BM08B",
+                    "34": "BM09A",
+                    "35": "BM09B",
+                    "38": "BM10A",
+                    "39": "BM10B",
+                    "40": "BM11A",
+                    "41": "BM11B",
+                    "44": "BM11D",
+                    "46": "BM05D"
+                }
+            },
+            "proc_1790739263585": {
+                "expectedSteps": 5,
+                "map": {
+                    "0": "BM05A",
+                    "2": "BM05B",
+                    "3": "BM05C",
+                    "4": "BM11C"
+                }
+            }
+        };
+
         const defaultTemplates = {
-    "chidinh": {
-        "steps": [
-            {
-                "days": 1,
-                "name": "Lập Kế hoạch và dự toán",
-                "dayType": "workday"
+            "chidinh": {
+                "steps": [
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt Kế hoạch kèm dự toán (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebgdxb_1543",
+                        "templateForm": {
+                            "name": "BM01A.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Kế hoạch và dự toán (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebgpqs_1_2hiv",
+                        "prevNames": [
+                            "Lập Kế hoạch và dự toán"
+                        ],
+                        "templateForm": {
+                            "name": "BM01B.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebgtxo_2_p99q",
+                        "prevNames": [
+                            "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu"
+                        ],
+                        "templateForm": {
+                            "name": "BM04A.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebh05d_3_xiu0",
+                        "prevNames": [
+                            "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Đăng tải lên mạng đấu thầu)",
+                            "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm) (Đăng tải lên mạng đấu thầu)"
+                        ],
+                        "templateForm": {
+                            "name": "BM04B.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebhbv7_dya4",
+                        "prevNames": [
+                            "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebhzlw_5_knu2",
+                        "prevNames": [
+                            "Công văn gửi đơn vị kèm dự thảo Hợp đồng"
+                        ],
+                        "templateForm": {
+                            "name": "BM05A.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải công văn và dự thảo Hợp đồng lên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebifp1_6_5b23",
+                        "prevNames": [
+                            "Đăng tải công văn và dự thảo Hợp đồng lên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 1,
+                        "name": "Công văn trả lời của đơn vị kèm báo giá và hồ sơ năng lực (nhà thầu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebisus_7_72o7",
+                        "prevNames": [
+                            "Công văn trả lời của đơn vị kèm báo giá và hồ sơ năng lực"
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt lựa chọn đơn vị (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebj46w_8_2053",
+                        "prevNames": [
+                            "Tờ trình phê duyệt chỉ định đơn vị"
+                        ],
+                        "templateForm": {
+                            "name": "BM05B.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt lựa chọn đơn vị (Giám đốc Trung tâm)",
+                        "dayType": "calendar",
+                        "stepUid": "st_mwebja4b_9_bt78",
+                        "prevNames": [
+                            "Quyết định phê duyệt chỉ định đơn vị (đăng tải lên mạng đấu thầu)",
+                            "Quyết định phê duyệt chỉ định đơn vị (Giám đốc Trung tâm)"
+                        ],
+                        "templateForm": {
+                            "name": "BM05C.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05C.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Quyết định phê duyệt đơn vị (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebjnse_wjdn"
+                    },
+                    {
+                        "days": 1,
+                        "name": "Ký Hợp đồng (phối hợp phòng HC-TC lấy số Hợp đồng, ký 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebkbef_11_gzug",
+                        "prevNames": [
+                            "Ký Hợp đồng"
+                        ],
+                        "templateForm": {
+                            "name": "BM11C.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11C.docx",
+                            "type": "file"
+                        }
+                    }
+                ],
+                "title": "Quy trình Chỉ định thầu"
             },
-            {
-                "days": 1,
-                "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu",
-                "dayType": "workday"
+            "rongrai": {
+                "steps": [
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt Kế hoạch (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebpzda_0_h216",
+                        "prevNames": [
+                            "Lập, thẩm định và phê duyệt KHLCNT"
+                        ],
+                        "templateForm": {
+                            "name": "BM01A.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Kế hoạch (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebq6mq_1_zli5",
+                        "prevNames": [
+                            "Lập E-HSMT"
+                        ],
+                        "templateForm": {
+                            "name": "BM01B.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt dự toán các gói tư vấn",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebqk53_2_ac7p",
+                        "prevNames": [
+                            "Thẩm định và phê duyệt E-HSMT"
+                        ],
+                        "templateForm": {
+                            "name": "BM02A.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt dự toán các gói tư vấn (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "calendar",
+                        "stepUid": "st_mwebqrm5_3_jyde",
+                        "prevNames": [
+                            "Đăng tải Thông báo mời thầu",
+                            "Quyết định phê duyệt dự toán giai đoạn chuẩn bị đầu tư (Giám đốc Trung tâm phê duyệt)"
+                        ],
+                        "templateForm": {
+                            "name": "BM02B.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 3,
+                        "name": "Lựa chọn đơn vị thực hiện các gói tư vấn thiết kế, thẩm định giá",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebsyng_4_epon",
+                        "prevNames": [
+                            "Thẩm định, phê duyệt và công khai kết quả"
+                        ],
+                        "templateForm": {
+                            "name": "BM05D.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 3,
+                        "name": "Tờ trình phê duyệt dự toán tổ chức sự kiện (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebuq7v_5_n970",
+                        "prevNames": [
+                            "Ký kết hợp đồng",
+                            "Tờ trình phê duyệt dự toán tổ chức sự kiện"
+                        ],
+                        "templateForm": {
+                            "name": "BM02C.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02C.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt dự toán tổ chức sự kiện (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebxaqc_4ll6",
+                        "templateForm": {
+                            "name": "BM02D.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu gói tổ chức sự kiện (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebxx73_ei5w",
+                        "templateForm": {
+                            "name": "BM04A.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweby1s4_9qwl",
+                        "templateForm": {
+                            "name": "BM04B.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (Phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweby5xs_jrot"
+                    },
+                    {
+                        "days": 3,
+                        "name": "Lựa chọn đơn vị thực hiện các gói tư vấn lập và thẩm định Hồ sơ mời thầu",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebyk9p_br7f",
+                        "templateForm": {
+                            "name": "BM05D.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Phân quyền tổ chuyên gia trên mạng đấu thầu (Phối hợp phòng HC-TC và tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebyo47_1ir9"
+                    },
+                    {
+                        "days": 3,
+                        "name": "Lập và hoàn thiện Hồ sơ mời thầu (phối hợp với đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebytdj_1j09"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Báo cáo thẩm định Hồ sơ mời thầu (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebyy0e_o268"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt E-HSMT (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebz2r8_7lea",
+                        "templateForm": {
+                            "name": "BM06A.docx",
+                            "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt E-HSMT (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebz5lj_l0as",
+                        "templateForm": {
+                            "name": "BM06B.docx",
+                            "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebza2i_qvwg"
+                    },
+                    {
+                        "days": 9,
+                        "name": "Đóng thầu",
+                        "dayType": "calendar",
+                        "stepUid": "st_mwec4uyb_opf6"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình cho phép mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwec70f0_nhfu",
+                        "templateForm": {
+                            "name": "BM07A.docx",
+                            "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwec74fe_lgem",
+                        "templateForm": {
+                            "name": "BM07B.docx",
+                            "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Thao tác mở thầu trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwec78dm_6zkq"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Phân quyền cho tổ chuyên gia đọc Hồ sơ dự thầu trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeopyh_2qgw"
+                    },
+                    {
+                        "days": 3,
+                        "name": "Báo cáo đánh giá Hồ sơ dự thầu (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweep6e1_z57r"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweepiiw_bnv6",
+                        "templateForm": {
+                            "name": "BM09A.docx",
+                            "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu (phối hợp với nhà thầu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweepn8v_iqyl",
+                        "templateForm": {
+                            "name": "BM09B.docx",
+                            "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Biên bản thương thảo Hợp đồng lên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweepvsf_f4jx"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Báo cáo thẩm định kết quả lựa chọn nhà thầu (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeq11g_8wia"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt kết quả lựa chọn nhà thầu (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeq7mc_dw0x",
+                        "templateForm": {
+                            "name": "BM10A.docx",
+                            "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt kết quả lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqbc2_3g5f",
+                        "templateForm": {
+                            "name": "BM10B.docx",
+                            "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Công văn Thông báo chấp thuận E-HSDT và trao hợp đồng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqgi1_a6kz",
+                        "templateForm": {
+                            "name": "BM11A.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Biên bản hoàn thiện Hợp đồng (02 bên ký tươi đóng dấu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqkoo_d1yv",
+                        "templateForm": {
+                            "name": "BM11B.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Biên bản hoàn thiện Hợp đồng lên mạng đấu thầu (ký số 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqpv6_knfg"
+                    },
+                    {
+                        "days": 2,
+                        "name": "Bảo lãnh thực hiện Hợp đồng (nhà thầu thực hiện)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqv65_4kx3"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Hợp đồng (02 bên ký tươi đóng đấu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweeqztz_ee49",
+                        "templateForm": {
+                            "name": "BM11D.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Hợp đồng trên mạng đấu thầu (ký số 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweer475_wjab"
+                    }
+                ],
+                "title": "Đấu thầu rộng rãi (một giai đoạn, một túi hồ sơ)"
             },
-            {
-                "days": 0,
-                "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Đăng tải lên mạng đấu thầu)",
-                "dayType": "workday"
+            "rongrai_cntt": {
+                "steps": [
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt Kế hoạch (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM01A.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Kế hoạch (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5odxab_1_r3g0",
+                        "templateForm": {
+                            "name": "BM01B.docx",
+                            "url": "./bieu_mau_goc/01_Ke_hoach_va_Du_toan_Nhiem_vu/BM01B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt dự toán giai đoạn chuẩn bị đầu tư (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM02A.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt dự toán giai đoạn chuẩn bị đầu tư (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM02B.docx",
+                            "url": "./bieu_mau_goc/02_Du_toan_Goi_Tu_van_Chuan_bi_Dau_tu_va_Su_kien/BM02B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Tờ trình phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM04A.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM04B.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nv617_6_10ot",
+                        "prevNames": [
+                            "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 3,
+                        "name": "Chỉ định các gói tư vấn Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM05D.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 5,
+                        "name": "Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá (phối hợp với tư vấn)",
+                        "dayType": "workday"
+                    },
+                    {
+                        "days": 1,
+                        "name": "Tờ trình thẩm định dự án công nghệ thông tin (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM03A.docx",
+                            "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 3,
+                        "name": "Báo cáo thẩm định báo cáo kinh tế kỹ thuật (Tổ CNTT hoặc Hội đồng thẩm định)",
+                        "dayType": "workday"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt dự án công nghệ thông tin (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM03C.docx",
+                            "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03C.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt dự án công nghệ thông tin (Giám đốc Trung tâm phê duyệt)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM03D.docx",
+                            "url": "./bieu_mau_goc/03_Tham_dinh_va_Phe_duyet_Du_an_CNTT_BCKTKT/BM03D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu gói chính và gói tư vấn (nếu có) (cấp phòng)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM04A.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "templateForm": {
+                            "name": "BM04B.docx",
+                            "url": "./bieu_mau_goc/04_Ke_hoach_Lua_chon_Nha_thau_KHLCNT/BM04B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (Phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nq043_2d91",
+                        "prevNames": [
+                            "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 3,
+                        "name": "Chỉ định các gói tư vấn lập và thẩm định Hồ sơ mời thầu",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ns38x_5oi3",
+                        "templateForm": {
+                            "name": "BM05D.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Phân quyền tổ chuyên gia trên mạng đấu thầu (Phối hợp phòng HC-TC và tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nsw6f_m45l",
+                        "prevNames": [
+                            "Phân quyền tổ chuyên gia trên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 3,
+                        "name": "Lập và hoàn thiện Hồ sơ mời thầu (phối hợp với đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ntkv7_wkcg",
+                        "prevNames": [
+                            "Lập Hồ sơ mời thầu"
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Báo cáo thẩm định Hồ sơ mời thầu (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nxe9r_yv8u"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt E-HSMT (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ny7c2_2kic",
+                        "templateForm": {
+                            "name": "BM06A.docx",
+                            "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt E-HSMT (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nyh8j_enc3",
+                        "templateForm": {
+                            "name": "BM06B.docx",
+                            "url": "./bieu_mau_goc/06_Phe_duyet_Ho_so_Moi_thau_E_HSMT/BM06B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5nyvbs_5aeo",
+                        "prevNames": [
+                            "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 9,
+                        "name": "Đóng Hồ sơ đề xuất kỹ thuật",
+                        "dayType": "calendar",
+                        "stepUid": "st_mw5nzn76_687p",
+                        "prevNames": [
+                            "Đóng thầu"
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình cho phép mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5o1b2o_kqzj",
+                        "templateForm": {
+                            "name": "BM07A.docx",
+                            "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5o2dea_zr1d",
+                        "prevNames": [
+                            "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có) (Giám đốc Trung tâm)"
+                        ],
+                        "templateForm": {
+                            "name": "BM07B.docx",
+                            "url": "./bieu_mau_goc/07_Xu_ly_Tinh_huong_Mo_thau_Khi_chi_co_01_Nha_thau/BM07B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Thao tác mở thầu trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5o3fka_byqc"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu (phối hợp phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5o4t77_e00w",
+                        "prevNames": [
+                            "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 3,
+                        "name": "Báo cáo đánh giá Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5o9zaj_kvxe"
+                    },
+                    {
+                        "days": 0,
+                        "name": "báo cáo thẩm định danh sách nhà thầu đạt yêu cầu kỹ thuật (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5oahhk_0wwn",
+                        "prevNames": [
+                            "báo cáo thẩm định Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)"
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ocyi0_smoo",
+                        "templateForm": {
+                            "name": "BM08A.docx",
+                            "url": "./bieu_mau_goc/08_Danh_gia_HSDT_va_Phe_duyet_Danh_sach_Dat_Ky_thuat/BM08A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5odca2_gkal",
+                        "templateForm": {
+                            "name": "BM08B.docx",
+                            "url": "./bieu_mau_goc/08_Danh_gia_HSDT_va_Phe_duyet_Danh_sach_Dat_Ky_thuat/BM08B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5oge9c_9u7w",
+                        "prevNames": [
+                            "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu"
+                        ]
+                    },
+                    {
+                        "days": 1,
+                        "name": "Báo cáo đánh giá hồ sơ đề xuất tài chính (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5oj4qu_jx1x"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ojtjz_kclc",
+                        "prevNames": [
+                            "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu"
+                        ],
+                        "templateForm": {
+                            "name": "BM09A.docx",
+                            "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu (phối hợp với nhà thầu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5oknmx_h056",
+                        "prevNames": [
+                            "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu"
+                        ],
+                        "templateForm": {
+                            "name": "BM09B.docx",
+                            "url": "./bieu_mau_goc/09_Thuong_thao_Hop_dong_va_Doi_chieu_Tai_lieu/BM09B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Biên bản thương thảo Hợp đồng lên mạng đấu thầu (phối hợp với phòng HC-TC)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5ovcc1_31l7"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Báo cáo thẩm định kết quả lựa chọn nhà thầu (đơn vị tư vấn)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5paxk9_80te"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt kết quả lựa chọn nhà thầu (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5pfus1_uygy",
+                        "templateForm": {
+                            "name": "BM10A.docx",
+                            "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt kết quả lựa chọn nhà thầu (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mw5pghgp_5nxb",
+                        "templateForm": {
+                            "name": "BM10B.docx",
+                            "url": "./bieu_mau_goc/10_Tham_dinh_va_Phe_duyet_Ket_qua_LCNT/BM10B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Công văn Thông báo chấp thuận E-HSDT và trao hợp đồng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwdds1bp_fw46",
+                        "prevNames": [
+                            "Công văn Thông báo chấp thuận E-HSDT và trao hợp đồng (Giám đốc Trung tâm"
+                        ],
+                        "templateForm": {
+                            "name": "BM11A.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Biên bản hoàn thiện Hợp đồng (02 bên ký tươi đóng dấu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwdduter_airo",
+                        "templateForm": {
+                            "name": "BM11B.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Biên bản hoàn thiện Hợp đồng lên mạng đấu thầu (ký số 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwddv4mi_k4ob",
+                        "prevNames": [
+                            "Đăng tải Biên bản hoàn thiện Hợp đồng lên mạng đấu thầu (ký ố 02 bên)"
+                        ]
+                    },
+                    {
+                        "days": 2,
+                        "name": "Bảo lãnh thực hiện Hợp đồng (nhà thầu thực hiện)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwddviq0_njzv"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Hợp đồng (02 bên ký tươi đóng đấu)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwddw198_vviu",
+                        "templateForm": {
+                            "name": "BM11D.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11D.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 0,
+                        "name": "Đăng tải Hợp đồng trên mạng đấu thầu (ký số 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwddxdnd_67ee"
+                    },
+                    {
+                        "days": 0,
+                        "name": "Chỉ định các gói tư vấn Kiểm thử, Giám sát (nếu có)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwddxrfx_4164",
+                        "templateForm": {
+                            "name": "BM05D.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05D.docx",
+                            "type": "file"
+                        }
+                    }
+                ],
+                "title": "Đấu thầu rộng rãi (Một giai đoạn, Hai túi hồ sơ)"
             },
-            {
-                "days": 1,
-                "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Đăng tải công văn và dự thảo Hợp đồng lên mạng đấu thầu",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Công văn trả lời của đơn vị kèm báo giá và hồ sơ năng lực",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Tờ trình phê duyệt chỉ định đơn vị",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Quyết định phê duyệt chỉ định đơn vị (đăng tải lên mạng đấu thầu)",
-                "dayType": "calendar"
-            },
-            {
-                "days": 1,
-                "name": "Ký Hợp đồng",
-                "dayType": "workday"
+            "proc_1790739263585": {
+                "steps": [
+                    {
+                        "days": 0,
+                        "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebkqhk_0_qt90",
+                        "prevNames": [
+                            "Công văn gửi đơn vị kèm dự thảo Hợp đồng"
+                        ],
+                        "templateForm": {
+                            "name": "BM05A.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05A.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Công văn của đơn vị kèm báo giá và hồ sơ năng lực (đơn vị thực hiện)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebl0mz_1_sewj",
+                        "prevNames": [
+                            "Công văn của đơn vị kèm báo giá và hồ sơ năng lực",
+                            "Công văn của đơn vị kèm báo giá và hồ sơ năng lực ("
+                        ]
+                    },
+                    {
+                        "days": 0,
+                        "name": "Tờ trình phê duyệt đơn vị (cấp phòng)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebnxan_2_nknw",
+                        "prevNames": [
+                            "Tờ trình phê duyệt đơn vị"
+                        ],
+                        "templateForm": {
+                            "name": "BM05B.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05B.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Quyết định phê duyệt đơn vị (Giám đốc Trung tâm)",
+                        "dayType": "workday",
+                        "stepUid": "st_mwebo2eh_3_655z",
+                        "prevNames": [
+                            "Quyết định phê duyệt đơn vị"
+                        ],
+                        "templateForm": {
+                            "name": "BM05C.docx",
+                            "url": "./bieu_mau_goc/05_Lua_chon_Chi_dinh_Don_vi_Duoi_100tr_Chi_dinh_thau_va_Tu_van/BM05C.docx",
+                            "type": "file"
+                        }
+                    },
+                    {
+                        "days": 1,
+                        "name": "Ký kết hợp đồng (phối hợp phòng HC-TC lấy số Hợp đồng, ký kết 02 bên)",
+                        "dayType": "workday",
+                        "stepUid": "st_mweboenz_4_dyxj",
+                        "prevNames": [
+                            "Ký kết hợp đồng"
+                        ],
+                        "templateForm": {
+                            "name": "BM11C.docx",
+                            "url": "./bieu_mau_goc/11_Thong_bao_Chap_thuan_Hoan_thien_va_Ky_Hop_dong/BM11C.docx",
+                            "type": "file"
+                        }
+                    }
+                ],
+                "title": "Mua sắm dưới 100 triệu"
             }
-        ],
-        "title": "Quy trình Chỉ định thầu"
-    },
-    "rongrai": {
-        "steps": [
-            {
-                "days": 10,
-                "name": "Lập, thẩm định và phê duyệt KHLCNT",
-                "dayType": "workday"
-            },
-            {
-                "days": 7,
-                "name": "Lập E-HSMT",
-                "dayType": "workday"
-            },
-            {
-                "days": 7,
-                "name": "Thẩm định và phê duyệt E-HSMT",
-                "dayType": "workday"
-            },
-            {
-                "days": 10,
-                "name": "Đăng tải Thông báo mời thầu",
-                "dayType": "calendar"
-            },
-            {
-                "days": 15,
-                "name": "Mở thầu và Đánh giá E-HSDT",
-                "dayType": "workday"
-            },
-            {
-                "days": 3,
-                "name": "Thương thảo hợp đồng",
-                "dayType": "workday"
-            },
-            {
-                "days": 7,
-                "name": "Thẩm định, phê duyệt và công khai kết quả",
-                "dayType": "workday"
-            },
-            {
-                "days": 3,
-                "name": "Ký kết hợp đồng",
-                "dayType": "workday"
+        };
+
+        const BIDDING_METHOD_OPTIONS = [
+            'Đấu thầu rộng rãi qua mạng một giai đoạn một túi hồ sơ',
+            'Đấu thầu rộng rãi qua mạng một giai đoạn hai túi hồ sơ',
+            'Chỉ định thầu rút gọn',
+            'Mua sắm dưới 100 triệu'
+        ];
+        const CONTRACT_TYPE_OPTIONS = [
+            'Trọn gói',
+            'Đơn giá cố định'
+        ];
+
+        window.getDefaultBiddingMethodForProcess = function(typeKey, procTitle) {
+            const tk = String(typeKey || '').toLowerCase();
+            const title = String(procTitle || (typeof db !== 'undefined' && db.processTemplates && db.processTemplates[typeKey] ? db.processTemplates[typeKey].title : '') || '').toLowerCase();
+            if (tk === 'proc_1790739263585' || tk.includes('100') || title.includes('dưới 100 triệu') || title.includes('100 triệu')) {
+                return 'Mua sắm dưới 100 triệu';
             }
-        ],
-        "title": "Đấu thầu rộng rãi (Phi tư vấn / Hàng hóa)"
-    },
-    "rongrai_cntt": {
-        "steps": [
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt Kế hoạch (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Kế hoạch (Giám đốc Trung tâm phê duyệt)",
-                "dayType": "workday",
-                "stepUid": "st_mw5odxab_1_r3g0"
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt dự toán giai đoạn chuẩn bị đầu tư (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt dự toán giai đoạn chuẩn bị đầu tư (Giám đốc Trung tâm phê duyệt)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Tờ trình phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt kế hoạch lựa chọn nhà thầu các gói tư vấn giá trị trên 100 triệu (Giám đốc Trung tâm phê duyệt)",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nv617_6_10ot",
-                "prevNames": [
-                    "Đăng tải kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 3,
-                "name": "Chỉ định các gói tư vấn Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá",
-                "dayType": "workday"
-            },
-            {
-                "days": 5,
-                "name": "Lập báo cáo kinh tế kỹ thuật, thẩm báo cáo kinh tế kỹ thuật, thẩm định giá (phối hợp với tư vấn)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Tờ trình thẩm định dự án công nghệ thông tin (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 3,
-                "name": "Báo cáo thẩm định báo cáo kinh tế kỹ thuật (Tổ CNTT hoặc Hội đồng thẩm định)",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt dự án công nghệ thông tin (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt dự án công nghệ thông tin (Giám đốc Trung tâm phê duyệt)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Tờ trình phê duyệt Kế hoạch lựa chọn nhà thầu gói chính và gói tư vấn (nếu có) (cấp phòng)",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt Kế hoạch lựa chọn nhà thầu (Giám đốc Trung tâm)",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu (Phối hợp phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nq043_2d91",
-                "prevNames": [
-                    "Đăng tải Kế hoạch lựa chọn nhà thầu lên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 3,
-                "name": "Chỉ định các gói tư vấn lập và thẩm định Hồ sơ mời thầu",
-                "dayType": "workday",
-                "stepUid": "st_mw5ns38x_5oi3"
-            },
-            {
-                "days": 0,
-                "name": "Phân quyền tổ chuyên gia trên mạng đấu thầu (Phối hợp phòng HC-TC và tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nsw6f_m45l",
-                "prevNames": [
-                    "Phân quyền tổ chuyên gia trên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 3,
-                "name": "Lập và hoàn thiện Hồ sơ mời thầu (phối hợp với đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5ntkv7_wkcg",
-                "prevNames": [
-                    "Lập Hồ sơ mời thầu"
-                ]
-            },
-            {
-                "days": 0,
-                "name": "Báo cáo thẩm định Hồ sơ mời thầu (đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nxe9r_yv8u"
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt E-HSMT (cấp phòng)",
-                "dayType": "workday",
-                "stepUid": "st_mw5ny7c2_2kic"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt E-HSMT (Giám đốc Trung tâm)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nyh8j_enc3"
-            },
-            {
-                "days": 0,
-                "name": "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu (phối hợp phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5nyvbs_5aeo",
-                "prevNames": [
-                    "Đăng tải Hồ sơ mời thầu lên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 9,
-                "name": "Đóng Hồ sơ đề xuất kỹ thuật",
-                "dayType": "calendar",
-                "stepUid": "st_mw5nzn76_687p",
-                "prevNames": [
-                    "Đóng thầu"
-                ]
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình cho phép mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (cấp phòng)",
-                "dayType": "workday",
-                "stepUid": "st_mw5o1b2o_kqzj"
-            },
-            {
-                "days": 0,
-                "name": "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có), xử lý ngay trong vòng 02 tiếng (Giám đốc Trung tâm)",
-                "dayType": "workday",
-                "stepUid": "st_mw5o2dea_zr1d",
-                "prevNames": [
-                    "Quyết định mở thầu trong trường hợp chỉ có 01 nhà thầu (nếu có) (Giám đốc Trung tâm)"
-                ]
-            },
-            {
-                "days": 0,
-                "name": "Thao tác mở thầu trên mạng đấu thầu (phối hợp phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5o3fka_byqc"
-            },
-            {
-                "days": 0,
-                "name": "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu (phối hợp phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5o4t77_e00w",
-                "prevNames": [
-                    "Phân quyền cho tổ chuyên gia đọc Hồ sơ đề xuất kỹ thuật trên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 3,
-                "name": "Báo cáo đánh giá Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5o9zaj_kvxe"
-            },
-            {
-                "days": 0,
-                "name": "báo cáo thẩm định danh sách nhà thầu đạt yêu cầu kỹ thuật (đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5oahhk_0wwn",
-                "prevNames": [
-                    "báo cáo thẩm định Hồ sơ đề xuất kỹ thuật (đơn vị tư vấn)"
-                ]
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (cấp phòng)",
-                "dayType": "workday",
-                "stepUid": "st_mw5ocyi0_smoo"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật (Giám đốc Trung tâm)",
-                "dayType": "workday",
-                "stepUid": "st_mw5odca2_gkal"
-            },
-            {
-                "days": 0,
-                "name": "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu (phối hợp với phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5oge9c_9u7w",
-                "prevNames": [
-                    "Phê duyệt danh sách nhà thầu đạt yêu cầu kỹ thuật, mở hồ sơ đề xuất tài chính, phân quyền tổ chuyên gia đọc hồ sơ trên mạng đấu thầu"
-                ]
-            },
-            {
-                "days": 1,
-                "name": "Báo cáo đánh giá hồ sơ đề xuất tài chính (đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5oj4qu_jx1x"
-            },
-            {
-                "days": 0,
-                "name": "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu (Giám đốc Trung tâm)",
-                "dayType": "workday",
-                "stepUid": "st_mw5ojtjz_kclc",
-                "prevNames": [
-                    "Công văn mời thương thảo Hợp đồng và đối chiếu tài liệu"
-                ]
-            },
-            {
-                "days": 1,
-                "name": "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu (phối hợp với nhà thầu)",
-                "dayType": "workday",
-                "stepUid": "st_mw5oknmx_h056",
-                "prevNames": [
-                    "Biên bản thương thảo Hợp đồng và Biên bản đối chiếu tài liệu"
-                ]
-            },
-            {
-                "days": 0,
-                "name": "Đăng tải Biên bản thương thảo Hợp đồng lên mạng đấu thầu (phối hợp với phòng HC-TC)",
-                "dayType": "workday",
-                "stepUid": "st_mw5ovcc1_31l7"
-            },
-            {
-                "days": 0,
-                "name": "Báo cáo thẩm định kết quả lựa chọn nhà thầu (đơn vị tư vấn)",
-                "dayType": "workday",
-                "stepUid": "st_mw5paxk9_80te"
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt kết quả lựa chọn nhà thầu (cấp phòng)",
-                "dayType": "workday",
-                "stepUid": "st_mw5pfus1_uygy"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt kết quả lựa chọn nhà thầu (Giám đốc Trung tâm)",
-                "dayType": "workday",
-                "stepUid": "st_mw5pghgp_5nxb"
+            if (tk === 'rongrai_cntt' || title.includes('hai túi hồ sơ') || title.includes('2 túi hồ sơ') || title.includes('cntt')) {
+                return 'Đấu thầu rộng rãi qua mạng một giai đoạn hai túi hồ sơ';
             }
-        ],
-        "title": "Đấu thầu rộng rãi (Gói CNTT)"
-    },
-    "proc_1790739263585": {
-        "steps": [
-            {
-                "days": 1,
-                "name": "Công văn gửi đơn vị kèm dự thảo Hợp đồng",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Công văn của đơn vị kèm báo giá và hồ sơ năng lực",
-                "dayType": "workday"
-            },
-            {
-                "days": 0,
-                "name": "Tờ trình phê duyệt đơn vị",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Quyết định phê duyệt đơn vị",
-                "dayType": "workday"
-            },
-            {
-                "days": 1,
-                "name": "Ký kết hợp đồng",
-                "dayType": "workday"
+            if (tk === 'rongrai' || title.includes('một túi hồ sơ') || title.includes('1 túi hồ sơ') || title.includes('rộng rãi')) {
+                return 'Đấu thầu rộng rãi qua mạng một giai đoạn một túi hồ sơ';
             }
-        ],
-        "title": "Mua sắm dưới 100 triệu"
-    }
-};
+            return 'Chỉ định thầu rút gọn';
+        };
+
+        window.makeStandardTemplateForm = function(bmCode) {
+            const meta = STANDARD_BM_CATALOG[bmCode];
+            if (!meta) return null;
+            return { name: meta.name, url: meta.url, type: 'file' };
+        };
+
+        window.resolveDefaultStepTemplateForm = function(procKey, procTitle, stepIdx, stepObj, totalSteps) {
+            if (!stepObj) return null;
+            const uid = stepObj.stepUid || stepObj.templateStepUid;
+            if (uid && STANDARD_STEP_BM_BY_UID[uid]) {
+                return window.makeStandardTemplateForm(STANDARD_STEP_BM_BY_UID[uid]);
+            }
+
+            const titleLow = String(procTitle || '').toLowerCase();
+            let resolvedKey = procKey;
+            if (!STANDARD_STEP_BM_BY_PROC_INDEX[resolvedKey]) {
+                if (titleLow.includes('dưới 100 triệu')) resolvedKey = 'proc_1790739263585';
+                else if (titleLow.includes('chỉ định thầu')) resolvedKey = 'chidinh';
+                else if (titleLow.includes('hai túi hồ sơ') || titleLow.includes('2 túi hồ sơ') || titleLow.includes('cntt')) resolvedKey = 'rongrai_cntt';
+                else if (titleLow.includes('một túi hồ sơ') || titleLow.includes('1 túi hồ sơ') || titleLow.includes('sự kiện')) resolvedKey = 'rongrai';
+            }
+
+            const procSpec = STANDARD_STEP_BM_BY_PROC_INDEX[resolvedKey];
+            if (procSpec && totalSteps === procSpec.expectedSteps) {
+                const bmCode = procSpec.map[String(stepIdx)];
+                return bmCode ? window.makeStandardTemplateForm(bmCode) : null;
+            }
+
+            const n = String(stepObj.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            if (!n) return null;
+            const nonFormPrefixes = [
+                'đăng tải', 'phân quyền', 'thao tác mở thầu', 'đóng ', 'mở thầu',
+                'báo cáo thẩm định', 'báo cáo đánh giá', 'bảo lãnh', 'lập báo cáo',
+                'lập và hoàn thiện', 'lập và thẩm định', 'công văn trả lời',
+                'công văn của đơn vị', 'phụ lục hợp đồng', 'phê duyệt danh sách',
+                'báo giá của', 'đăng thầu', 'thẩm định báo cáo'
+            ];
+            if (nonFormPrefixes.some(p => n.startsWith(p))) return null;
+
+            const isWideBidding = resolvedKey === 'rongrai' || resolvedKey === 'rongrai_cntt' || titleLow.includes('rộng rãi') || titleLow.includes('túi hồ sơ');
+
+            if (n.includes('tờ trình phê duyệt kế hoạch') && !n.includes('lựa chọn nhà thầu')) return window.makeStandardTemplateForm('BM01A');
+            if (n.startsWith('kế hoạch')) return window.makeStandardTemplateForm('BM01B');
+            if (n.includes('tờ trình phê duyệt dự toán') && n.includes('sự kiện')) return window.makeStandardTemplateForm('BM02C');
+            if (n.includes('quyết định phê duyệt dự toán') && n.includes('sự kiện')) return window.makeStandardTemplateForm('BM02D');
+            if (n.includes('tờ trình phê duyệt dự toán')) return window.makeStandardTemplateForm('BM02A');
+            if (n.includes('quyết định phê duyệt dự toán')) return window.makeStandardTemplateForm('BM02B');
+            if (n.includes('tờ trình thẩm định dự án') || n.includes('tờ trình thẩm định báo cáo kinh tế kỹ thuật')) return window.makeStandardTemplateForm('BM03A');
+            if (n.includes('tờ trình phê duyệt dự án')) return window.makeStandardTemplateForm('BM03C');
+            if (n.includes('quyết định phê duyệt dự án') || n.includes('quyết định phê duyệt báo cáo kinh tế kỹ thuật')) return window.makeStandardTemplateForm('BM03D');
+            if ((n.includes('tờ trình') && n.includes('kế hoạch lựa chọn nhà thầu')) || n.startsWith('lập khlcnt')) return window.makeStandardTemplateForm('BM04A');
+            if (n.includes('quyết định') && n.includes('kế hoạch lựa chọn nhà thầu')) return window.makeStandardTemplateForm('BM04B');
+            if (n.includes('công văn gửi đơn vị')) return window.makeStandardTemplateForm('BM05A');
+            if (n.includes('tờ trình phê duyệt đơn vị') || n.includes('tờ trình phê duyệt lựa chọn đơn vị') || n.includes('tờ trình phê duyệt chỉ định đơn vị')) return window.makeStandardTemplateForm('BM05B');
+            if (n.includes('quyết định phê duyệt đơn vị') || n.includes('quyết định phê duyệt lựa chọn đơn vị') || n.includes('quyết định phê duyệt chỉ định đơn vị')) return window.makeStandardTemplateForm('BM05C');
+            if (n.includes('chỉ định các gói tư vấn') || n.includes('lựa chọn đơn vị thực hiện các gói tư vấn')) return window.makeStandardTemplateForm('BM05D');
+            if (n.includes('tờ trình phê duyệt e-hsmt')) return window.makeStandardTemplateForm('BM06A');
+            if (n.includes('quyết định phê duyệt e-hsmt') || n.includes('quyết định phê duyêt e-hsmt')) return window.makeStandardTemplateForm('BM06B');
+            if (n.includes('tờ trình cho phép mở thầu')) return window.makeStandardTemplateForm('BM07A');
+            if (n.includes('quyết định mở thầu')) return window.makeStandardTemplateForm('BM07B');
+            if (n.includes('tờ trình phê duyệt danh sách nhà thầu đạt')) return window.makeStandardTemplateForm('BM08A');
+            if (n.includes('quyết định phê duyệt danh sách nhà thầu đạt')) return window.makeStandardTemplateForm('BM08B');
+            if (n.includes('công văn mời thương thảo')) return window.makeStandardTemplateForm('BM09A');
+            if (n.includes('biên bản thương thảo') || n === 'thương thảo hợp đồng') return window.makeStandardTemplateForm('BM09B');
+            if (n.includes('tờ trình phê duyệt kết quả lựa chọn')) return window.makeStandardTemplateForm('BM10A');
+            if (n.includes('quyết định phê duyệt kết quả lựa chọn') || n === 'thẩm định, phê duyệt và công khai kết quả') return window.makeStandardTemplateForm('BM10B');
+            if (n.includes('thông báo chấp thuận e-hsdt')) return window.makeStandardTemplateForm('BM11A');
+            if (n.includes('biên bản hoàn thiện hợp đồng')) return window.makeStandardTemplateForm('BM11B');
+            if (n.startsWith('ký hợp đồng') || n.startsWith('ký kết hợp đồng') || n.startsWith('hợp đồng (02 bên')) {
+                return window.makeStandardTemplateForm(isWideBidding ? 'BM11D' : 'BM11C');
+            }
+            return null;
+        };
+
 
 const defaultDocs = [
     {
@@ -2569,52 +3330,88 @@ const defaultDocs = [
             return Boolean(u && window.normalizeRole(u.role) === 'admin');
         };
 
-        function applyDefaultsIfMissing() {
-            if (!db) db = {};
-            if (!Array.isArray(db.deletedDefaultTemplates)) {
-                db.deletedDefaultTemplates = [];
+        function applyDefaultsIfMissing(targetDb) {
+            const tDb = targetDb || db || (db = {});
+            if (!Array.isArray(tDb.deletedDefaultTemplates)) {
+                tDb.deletedDefaultTemplates = [];
             }
-            const deletedSet = new Set(db.deletedDefaultTemplates);
-            if (!db.processTemplates || typeof db.processTemplates !== 'object' || Array.isArray(db.processTemplates)) {
-                db.processTemplates = {};
+            const deletedSet = new Set(tDb.deletedDefaultTemplates);
+            if (!tDb.processTemplates || typeof tDb.processTemplates !== 'object' || Array.isArray(tDb.processTemplates)) {
+                tDb.processTemplates = {};
             }
             // Đảm bảo quy trình mẫu gốc luôn có mặt nếu chưa từng bị Admin chủ động xóa
             for (const [k, v] of Object.entries(defaultTemplates)) {
-                if (!db.processTemplates[k] && !deletedSet.has(k)) {
-                    db.processTemplates[k] = JSON.parse(JSON.stringify(v));
+                if (!tDb.processTemplates[k] && !deletedSet.has(k)) {
+                    tDb.processTemplates[k] = JSON.parse(JSON.stringify(v));
                 }
             }
             // Chuẩn hóa dữ liệu từng quy trình để chống dữ liệu hỏng (null steps, days âm/chuỗi)
-            for (const [k, proc] of Object.entries(db.processTemplates)) {
+            for (const [k, proc] of Object.entries(tDb.processTemplates)) {
                 if (!proc || typeof proc !== 'object') {
-                    delete db.processTemplates[k];
+                    delete tDb.processTemplates[k];
                     continue;
                 }
                 proc.title = String(proc.title || 'Quy trình chưa đặt tên').trim() || 'Quy trình chưa đặt tên';
                 if (!Array.isArray(proc.steps)) proc.steps = [];
+                const totalProcSteps = proc.steps.length;
                 proc.steps = proc.steps.map((st, idx) => {
                     const parsedDays = parseInt(st && st.days, 10);
                     const safeDays = (!isNaN(parsedDays) && parsedDays >= 0) ? Math.min(parsedDays, 3650) : 0;
-                    return Object.assign({}, st, {
+                    const normalizedStep = Object.assign({}, st, {
                         name: String((st && st.name) || ('Bước ' + (idx + 1))).trim() || ('Bước ' + (idx + 1)),
                         days: safeDays,
                         dayType: (st && st.dayType === 'workday') ? 'workday' : 'calendar'
                     });
+                    if (!(normalizedStep.templateForm && normalizedStep.templateForm.url) && !normalizedStep.templateFormDeleted) {
+                        const defaultForm = window.resolveDefaultStepTemplateForm(k, proc.title, idx, normalizedStep, totalProcSteps);
+                        if (defaultForm) {
+                            normalizedStep.templateForm = defaultForm;
+                        }
+                    }
+                    return normalizedStep;
                 });
             }
-            if (!db.users || db.users.length === 0) {
-                db.users = currentUser
+            if (!tDb.users || tDb.users.length === 0) {
+                tDb.users = currentUser
                     ? [sanitizeDbUsers([currentUser])[0]]
                     : [{ username: "admin@sce.gov.vn", email: "admin@sce.gov.vn", fullname: "Quản trị viên SCE", role: "admin", department: "" }];
             } else {
                 // Tuyệt đối loại bỏ mọi trường password dạng rõ (plaintext) còn sót lại
-                db.users = sanitizeDbUsers(db.users);
+                tDb.users = sanitizeDbUsers(tDb.users);
             }
-            if (!db.regulatoryDocs || db.regulatoryDocs.length === 0) {
-                db.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
+            if (!tDb.regulatoryDocs || tDb.regulatoryDocs.length === 0) {
+                tDb.regulatoryDocs = JSON.parse(JSON.stringify(defaultDocs));
             }
-            if (!db.missions) {
-                db.missions = [];
+            if (!tDb.missions) {
+                tDb.missions = [];
+            }
+            // Chuẩn hóa metadata gói thầu và tự động gắn biểu mẫu chuẩn cho các công đoạn chưa có biểu mẫu
+            if (Array.isArray(tDb.missions)) {
+                tDb.missions.forEach((m) => {
+                    if (!m || !Array.isArray(m.packages)) return;
+                    m.packages.forEach((pkg) => {
+                        if (!pkg || typeof pkg !== 'object') return;
+                        const resolvedProcTitle = pkg.processTitle || (tDb.processTemplates && tDb.processTemplates[pkg.processType] ? tDb.processTemplates[pkg.processType].title : '');
+                        if (!pkg.biddingMethod) {
+                            pkg.biddingMethod = window.getDefaultBiddingMethodForProcess(pkg.processType, resolvedProcTitle);
+                        }
+                        if (!pkg.contractType) {
+                            pkg.contractType = CONTRACT_TYPE_OPTIONS[0];
+                        }
+                        if (Array.isArray(pkg.steps)) {
+                            const totalPkgSteps = pkg.steps.length;
+                            pkg.steps.forEach((st, idx) => {
+                                if (!st || typeof st !== 'object') return;
+                                if (!(st.templateForm && st.templateForm.url) && !st.templateFormDeleted) {
+                                    const resolved = window.resolveDefaultStepTemplateForm(pkg.processType, resolvedProcTitle, idx, st, totalPkgSteps);
+                                    if (resolved) {
+                                        st.templateForm = resolved;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
             }
         }
 
@@ -3107,6 +3904,7 @@ const defaultDocs = [
                 const nasData = await window.SCE_NAS.loadData();
                 if (nasData) {
                     const serverDb = nasData;
+                    applyDefaultsIfMissing(serverDb);
                     const missionsChanged = JSON.stringify(db.missions) !== JSON.stringify(serverDb.missions);
                     const templatesChanged = JSON.stringify(db.processTemplates) !== JSON.stringify(serverDb.processTemplates);
                     if (missionsChanged || templatesChanged) {
@@ -4120,6 +4918,8 @@ const defaultDocs = [
                                             : 'bg-blue-600 text-white ring-2 ring-blue-200 dark:ring-blue-900'));
                                 let pkgNameSafe = escapeHtml(pkg.name || "Nhiệm vụ cụ thể không tên"); 
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
+                                let pkgBiddingMethod = escapeHtml(pkg.biddingMethod || window.getDefaultBiddingMethodForProcess(pkg.processType, pkg.processTitle));
+                                let pkgContractType = escapeHtml(pkg.contractType || 'Trọn gói');
 
                                 // Khối hiển thị Ghi chú gói thầu (chỉ hiện khi có nội dung ghi chú)
                                 let pkgNoteHtml = "";
@@ -4191,8 +4991,10 @@ const defaultDocs = [
                                                             ${btnLogPkg}
                                                         </div>
 
-                                                        <!-- DÒNG THÔNG TIN CƠ BẢN: Dự toán, Nhà thầu, Giá trúng, Ký HĐ dự kiến, Chuyên viên -->
+                                                        <!-- DÒNG THÔNG TIN CƠ BẢN: Hình thức LCNT, Loại HĐ, Dự toán, Nhà thầu, Giá trúng, Ký HĐ dự kiến, Chuyên viên -->
                                                         <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                            <span class="inline-flex items-center gap-1 flex-wrap"><i class="fas fa-gavel text-cyan-600 dark:text-cyan-400 shrink-0"></i>Hình thức LCNT: <strong class="text-gray-800 dark:text-gray-200">${pkgBiddingMethod}</strong></span>
+                                                            <span class="inline-flex items-center gap-1 shrink-0"><i class="fas fa-file-signature text-teal-600 dark:text-teal-400"></i>Loại HĐ: <strong class="text-gray-800 dark:text-gray-200">${pkgContractType}</strong></span>
                                                             ${pkg.budget ? `<span class="inline-flex items-center gap-1 shrink-0"><i class="fas fa-coins text-amber-500"></i>Dự toán: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.budget))}</strong></span>` : ''}
                                                             ${pkg.contractor ? `<span class="inline-flex items-center gap-1 flex-wrap break-words w-full sm:w-auto"><i class="fas fa-building text-blue-500 shrink-0"></i>Nhà thầu: <strong class="text-gray-800 dark:text-gray-200 break-words">${escapeHtml(pkg.contractor)}</strong></span>` : ''}
                                                             ${pkg.winningBid ? `<span class="inline-flex items-center gap-1 shrink-0"><i class="fas fa-hand-holding-usd text-emerald-500"></i>Giá trúng: <strong class="text-gray-800 dark:text-gray-200">${window.formatMoney(escapeHtml(pkg.winningBid))}</strong></span>` : ''}
@@ -4485,7 +5287,11 @@ const defaultDocs = [
             if (!window.canEditPackage(m, p, currentUser)) return Swal.fire('Cảnh báo', 'Bạn không có quyền chỉnh sửa Gói thầu này!', 'warning');
             cEditM = mIndex; 
             cEditP = pIndex; 
+            window.populatePackageMetaDropdowns();
             document.getElementById('editPackageName').value = p.name || "";
+            const defaultMethod = window.getDefaultBiddingMethodForProcess(p.processType, p.processTitle);
+            document.getElementById('editPackageBiddingMethod').value = BIDDING_METHOD_OPTIONS.includes(p.biddingMethod) ? p.biddingMethod : defaultMethod;
+            document.getElementById('editPackageContractType').value = CONTRACT_TYPE_OPTIONS.includes(p.contractType) ? p.contractType : CONTRACT_TYPE_OPTIONS[0];
             document.getElementById('editPackageBudget').value = p.budget || "";
             document.getElementById('editPackageContractor').value = p.contractor || "";
             document.getElementById('editPackageWinningBid').value = p.winningBid || "";
@@ -4545,6 +5351,8 @@ const defaultDocs = [
             pkg.name = name; 
             pkg.owner = owner;
             pkg.department = window.getUserDepartment(owner) || pkg.department || currentUser.department || '';
+            pkg.biddingMethod = document.getElementById('editPackageBiddingMethod').value || window.getDefaultBiddingMethodForProcess(pkg.processType, pkg.processTitle);
+            pkg.contractType = document.getElementById('editPackageContractType').value || CONTRACT_TYPE_OPTIONS[0];
             pkg.budget = document.getElementById('editPackageBudget').value.trim();
             pkg.contractor = document.getElementById('editPackageContractor').value.trim();
             pkg.winningBid = document.getElementById('editPackageWinningBid').value.trim();
@@ -4693,8 +5501,430 @@ const defaultDocs = [
             window.saveDataToGAS(false);
         };
 
-        // --- QUẢN LÝ BIỂU MẪU CÔNG ĐOẠN (STEP TEMPLATE FORMS) ---
+        // --- QUẢN LÝ BIỂU MẪU CÔNG ĐOẠN (STEP TEMPLATE FORMS & SMART DOCX AUTO-FILL) ---
         let currentTemplateTarget = null; // { type: 'package_step', mIndex, pkgIndex, sIndex } or { type: 'config_step', typeKey, sIndex }
+
+        window.populatePackageMetaDropdowns = function() {
+            const fillSelect = (id, options, preferredVal) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const current = preferredVal || el.value;
+                el.innerHTML = options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
+                if (current && options.includes(current)) el.value = current;
+            };
+            fillSelect('projBiddingMethod', BIDDING_METHOD_OPTIONS);
+            fillSelect('editPackageBiddingMethod', BIDDING_METHOD_OPTIONS);
+            fillSelect('projContractType', CONTRACT_TYPE_OPTIONS);
+            fillSelect('editPackageContractType', CONTRACT_TYPE_OPTIONS);
+        };
+
+        window.onProjTypeChange = function(typeKey) {
+            const methodSel = document.getElementById('projBiddingMethod');
+            if (!methodSel) return;
+            if (!methodSel.options || methodSel.options.length === 0) window.populatePackageMetaDropdowns();
+            methodSel.value = window.getDefaultBiddingMethodForProcess(typeKey);
+        };
+
+        const STEP_TEMPLATE_VAR_DEFS = [
+            { key: 'CO_QUAN_CHU_QUAN', label: 'Cơ quan chủ quản' },
+            { key: 'TEN_TRUNG_TAM', label: 'Tên Trung tâm (IN HOA)' },
+            { key: 'TEN_TRUNG_TAM_THUONG', label: 'Tên Trung tâm (thường)' },
+            { key: 'PHONG_CHU_TRI', label: 'Phòng chủ trì' },
+            { key: 'PHONG_CHU_TRI_HOA', label: 'Phòng chủ trì (IN HOA)' },
+            { key: 'MA_PHONG', label: 'Mã viết tắt phòng' },
+            { key: 'TEN_NHIEM_VU', label: 'Tên Nhiệm vụ chính' },
+            { key: 'TEN_GOI_THAU', label: 'Tên Gói thầu / NV cụ thể' },
+            { key: 'HINH_THUC_LCNT', label: 'Hình thức lựa chọn nhà thầu' },
+            { key: 'LOAI_HOP_DONG', label: 'Loại hợp đồng' },
+            { key: 'GIA_DU_TOAN', label: 'Giá dự toán (số)' },
+            { key: 'GIA_DU_TOAN_BANG_CHU', label: 'Giá dự toán (bằng chữ)' },
+            { key: 'NHA_THAU', label: 'Nhà thầu trúng thầu' },
+            { key: 'GIA_TRUNG_THAU', label: 'Giá trúng thầu (số)' },
+            { key: 'GIA_TRUNG_THAU_BANG_CHU', label: 'Giá trúng thầu (bằng chữ)' },
+            { key: 'CHUYEN_VIEN', label: 'Chuyên viên phụ trách' },
+            { key: 'TEN_BUOC', label: 'Tên bước công việc' },
+            { key: 'NGAY_THANG_NAM', label: 'Ngày... tháng... năm...' },
+            { key: 'NGAY', label: 'Ngày hiện tại (dd)' },
+            { key: 'THANG', label: 'Tháng hiện tại (mm)' },
+            { key: 'NAM', label: 'Năm hiện tại (yyyy)' }
+        ];
+
+        window.readMoneyToVietnameseWords = function(rawVal) {
+            const digits = String(rawVal == null ? '' : rawVal).replace(/[^\d]/g, '').replace(/^0+/, '');
+            if (!digits) return '........................................................';
+            const numWords = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const unitNames = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+
+            const readThreeDigits = (tripleStr, showZeroHundred) => {
+                const h = Number(tripleStr[0]);
+                const t = Number(tripleStr[1]);
+                const u = Number(tripleStr[2]);
+                const parts = [];
+                if (h > 0 || showZeroHundred) {
+                    parts.push(numWords[h] + ' trăm');
+                    if (t === 0 && u > 0) parts.push('linh');
+                }
+                if (t > 1) {
+                    parts.push(numWords[t] + ' mươi');
+                    if (u === 1) parts.push('mốt');
+                    else if (u === 5) parts.push('lăm');
+                    else if (u > 0) parts.push(numWords[u]);
+                } else if (t === 1) {
+                    parts.push('mười');
+                    if (u === 5) parts.push('lăm');
+                    else if (u > 0) parts.push(numWords[u]);
+                } else if (u > 0) {
+                    parts.push(numWords[u]);
+                }
+                return parts.join(' ');
+            };
+
+            const groups = [];
+            for (let end = digits.length; end > 0; end -= 3) {
+                const start = Math.max(0, end - 3);
+                groups.unshift(digits.slice(start, end).padStart(3, '0'));
+            }
+
+            const resultParts = [];
+            for (let i = 0; i < groups.length; i++) {
+                const g = groups[i];
+                if (g === '000') continue;
+                const unitIndex = groups.length - 1 - i;
+                const showZeroHundred = i > 0;
+                const words = readThreeDigits(g, showZeroHundred);
+                if (words) {
+                    const unit = unitNames[unitIndex] || '';
+                    resultParts.push(unit ? `${words} ${unit}` : words);
+                }
+            }
+
+            if (resultParts.length === 0) return '........................................................';
+            let text = resultParts.join(' ').trim();
+            text = text.charAt(0).toUpperCase() + text.slice(1);
+            const lastGroup = groups[groups.length - 1];
+            const isRoundMillionOrMore = groups.length >= 2 && lastGroup === '000';
+            return isRoundMillionOrMore ? `${text} đồng chẵn` : `${text} đồng`;
+        };
+
+        window.getDepartmentShortCode = function(deptName) {
+            const lower = String(deptName || '').toLowerCase();
+            if (lower.includes('xúc tiến đầu tư')) return 'XTĐT';
+            if (lower.includes('hành chính')) return 'HCTC';
+            if (lower.includes('phát triển doanh nghiệp')) return 'PTDN';
+            if (lower.includes('tư vấn doanh nghiệp')) return 'TVDN';
+            if (lower.includes('giám đốc')) return 'BGĐ';
+            return 'TTXT';
+        };
+
+        window.formatMoneyDisplayForDoc = function(rawVal) {
+            const digits = String(rawVal == null ? '' : rawVal).replace(/[^\d]/g, '').replace(/^0+/, '');
+            if (!digits) return '........................ đồng';
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' đồng';
+        };
+
+        window.buildPackageTemplateVariables = function(mIndex, pkgIndex, sIndex) {
+            const m = (db && db.missions && db.missions[mIndex]) ? db.missions[mIndex] : {};
+            const pkg = (m.packages && m.packages[pkgIndex]) ? m.packages[pkgIndex] : {};
+            const step = (pkg.steps && pkg.steps[sIndex]) ? pkg.steps[sIndex] : {};
+            const dept = window.getPackageDepartment(m, pkg) || (currentUser && currentUser.department) || 'Phòng Xúc tiến đầu tư';
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = String(now.getFullYear());
+            const budgetDigits = String(pkg.budget || '').replace(/[^\d]/g, '').replace(/^0+/, '');
+            const winningDigits = String(pkg.winningBid || '').replace(/[^\d]/g, '').replace(/^0+/, '');
+
+            return {
+                CO_QUAN_CHU_QUAN: 'SỞ TÀI CHÍNH HÀ NỘI',
+                TEN_TRUNG_TAM: 'TRUNG TÂM XÚC TIẾN ĐẦU TƯ VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI',
+                TEN_TRUNG_TAM_THUONG: 'Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội',
+                PHONG_CHU_TRI: dept,
+                PHONG_CHU_TRI_HOA: dept.toUpperCase(),
+                MA_PHONG: window.getDepartmentShortCode(dept),
+                TEN_NHIEM_VU: m.name || '............................................',
+                TEN_GOI_THAU: pkg.name || '............................................',
+                HINH_THUC_LCNT: pkg.biddingMethod || window.getDefaultBiddingMethodForProcess(pkg.processType, pkg.processTitle) || '........................',
+                LOAI_HOP_DONG: pkg.contractType || CONTRACT_TYPE_OPTIONS[0],
+                GIA_DU_TOAN: budgetDigits ? window.formatMoneyDisplayForDoc(budgetDigits) : '........................ đồng',
+                GIA_DU_TOAN_BANG_CHU: budgetDigits ? window.readMoneyToVietnameseWords(budgetDigits) : '........................................................',
+                NHA_THAU: pkg.contractor ? String(pkg.contractor).trim() : '............................................',
+                GIA_TRUNG_THAU: winningDigits ? window.formatMoneyDisplayForDoc(winningDigits) : '........................ đồng',
+                GIA_TRUNG_THAU_BANG_CHU: winningDigits ? window.readMoneyToVietnameseWords(winningDigits) : '........................................................',
+                CHUYEN_VIEN: pkg.owner || m.owner || (currentUser && currentUser.fullname) || '........................',
+                TEN_BUOC: step.name || '',
+                NGAY: dd,
+                THANG: mm,
+                NAM: yyyy,
+                NGAY_THANG_NAM: `ngày ${dd} tháng ${mm} năm ${yyyy}`
+            };
+        };
+
+        window.copyTemplateVar = async function(textVal, labelName) {
+            const txt = String(textVal == null ? '' : textVal);
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(txt);
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = txt;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: `Đã copy: ${labelName || txt}`,
+                    showConfirmButton: false,
+                    timer: 1600
+                });
+            } catch (err) {
+                Swal.fire('Thông báo', 'Không thể tự động copy, vui lòng chọn thủ công: ' + txt, 'info');
+            }
+        };
+
+        window.renderStepTemplateQuickCopy = function(varsMap) {
+            const section = document.getElementById('stepTemplateQuickCopySection');
+            const grid = document.getElementById('stepTemplateQuickCopyGrid');
+            if (!section || !grid) return;
+
+            if (!varsMap) {
+                section.classList.add('hidden');
+                grid.innerHTML = '';
+                return;
+            }
+
+            grid.innerHTML = '';
+            const items = [
+                { key: 'CO_QUAN_CHU_QUAN', label: 'Cơ quan chủ quản' },
+                { key: 'TEN_TRUNG_TAM', label: 'Tên Trung tâm' },
+                { key: 'PHONG_CHU_TRI', label: 'Phòng chủ trì' },
+                { key: 'MA_PHONG', label: 'Mã phòng' },
+                { key: 'TEN_NHIEM_VU', label: 'Tên Nhiệm vụ chính', full: true },
+                { key: 'TEN_GOI_THAU', label: 'Tên Gói thầu / NV cụ thể', full: true },
+                { key: 'HINH_THUC_LCNT', label: 'Hình thức LCNT', full: true },
+                { key: 'LOAI_HOP_DONG', label: 'Loại hợp đồng' },
+                { key: 'CHUYEN_VIEN', label: 'Chuyên viên' },
+                { key: 'GIA_DU_TOAN', label: 'Giá dự toán (số)' },
+                { key: 'GIA_DU_TOAN_BANG_CHU', label: 'Dự toán (bằng chữ)' },
+                { key: 'NHA_THAU', label: 'Nhà thầu trúng thầu' },
+                { key: 'GIA_TRUNG_THAU', label: 'Giá trúng thầu (số)' },
+                { key: 'GIA_TRUNG_THAU_BANG_CHU', label: 'Giá trúng (bằng chữ)', full: true },
+                { key: 'NGAY_THANG_NAM', label: 'Ngày tháng năm' }
+            ];
+
+            items.forEach(item => {
+                const val = varsMap[item.key] || '';
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `${item.full ? 'sm:col-span-2 ' : ''}text-left p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 border border-blue-200/80 dark:border-blue-800/60 transition flex items-center justify-between gap-2 group cursor-pointer`;
+                btn.title = `Bấm để copy: ${val}`;
+
+                const left = document.createElement('div');
+                left.className = 'min-w-0 flex-1';
+                const lbl = document.createElement('div');
+                lbl.className = 'text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight';
+                lbl.textContent = item.label;
+                const vEl = document.createElement('div');
+                vEl.className = 'text-xs font-medium text-gray-800 dark:text-gray-200 truncate';
+                vEl.textContent = val;
+                left.appendChild(lbl);
+                left.appendChild(vEl);
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-copy text-xs text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 shrink-0';
+                btn.appendChild(left);
+                btn.appendChild(icon);
+                btn.addEventListener('click', () => window.copyTemplateVar(val, item.label));
+                grid.appendChild(btn);
+            });
+
+            section.classList.remove('hidden');
+        };
+
+        window.renderStepTemplateVarDictionary = function() {
+            const grid = document.getElementById('stepTemplateVarDictGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            STEP_TEMPLATE_VAR_DEFS.forEach(def => {
+                const token = `{{${def.key}}}`;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'text-left px-2 py-1.5 rounded-lg bg-white dark:bg-gray-800 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/40 border border-indigo-200/80 dark:border-indigo-800/60 transition flex items-center justify-between gap-1.5 group cursor-pointer';
+                btn.title = `Bấm để copy mã biến ${token}`;
+
+                const left = document.createElement('div');
+                left.className = 'min-w-0 flex-1';
+                const codeEl = document.createElement('code');
+                codeEl.className = 'block text-[11px] font-bold text-indigo-700 dark:text-indigo-300 truncate';
+                codeEl.textContent = token;
+                const descEl = document.createElement('span');
+                descEl.className = 'block text-[10px] text-gray-500 dark:text-gray-400 truncate';
+                descEl.textContent = def.label;
+                left.appendChild(codeEl);
+                left.appendChild(descEl);
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-copy text-[11px] text-indigo-400 group-hover:text-indigo-600 shrink-0';
+                btn.appendChild(left);
+                btn.appendChild(icon);
+                btn.addEventListener('click', () => window.copyTemplateVar(token, token));
+                grid.appendChild(btn);
+            });
+        };
+
+        window.mergeDocxXmlVariables = function(xmlString, varsMap) {
+            if (!xmlString || !varsMap) return xmlString;
+            // Gộp các thẻ XML bị Microsoft Word tách nhỏ bên trong cặp {{...}}
+            let merged = xmlString.replace(/\{\{(?:<[^>]*>|[A-Z0-9_\s]){1,2000}\}\}/g, (match) => {
+                return match.replace(/<[^>]*>/g, '').replace(/\s+/g, '');
+            });
+            const escapeXmlValue = (str) => String(str == null ? '' : str)
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+
+            Object.keys(varsMap).forEach(key => {
+                const token = `{{${key}}}`;
+                if (merged.includes(token)) {
+                    const safeVal = escapeXmlValue(varsMap[key]);
+                    merged = merged.split(token).join(safeVal);
+                }
+            });
+            return merged;
+        };
+
+        window.isDocxTemplateForm = function(tf) {
+            if (!tf || !tf.url) return false;
+            const lowerName = String(tf.name || '').toLowerCase();
+            const rawUrl = String(tf.url || '').toLowerCase();
+            if (lowerName.endsWith('.docx')) return true;
+            if (rawUrl.includes('docs.google.com/document/d/')) return true;
+            if (rawUrl.endsWith('.docx')) return true;
+            return false;
+        };
+
+        window.downloadSmartFilledDocx = async function() {
+            if (!currentTemplateTarget || currentTemplateTarget.type !== 'package_step') return;
+            const { mIndex, pkgIndex, sIndex } = currentTemplateTarget;
+            const m = db.missions[mIndex];
+            const pkg = m ? m.packages[pkgIndex] : null;
+            const step = pkg && pkg.steps ? pkg.steps[sIndex] : null;
+            const tf = step ? step.templateForm : null;
+            if (!tf || !tf.url) return;
+
+            if (typeof window.PizZip === 'undefined') {
+                Swal.fire('Thông báo', 'Thư viện xử lý Word chưa sẵn sàng, đang tải biểu mẫu gốc...', 'info');
+                window.open(window.buildTemplateDownloadUrl(tf), '_blank');
+                return;
+            }
+
+            const btn = document.getElementById('stepTemplateSmartFillBtn');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Đang điền tự động thông tin...</span>';
+            }
+
+            try {
+                let dlUrl = window.buildTemplateDownloadUrl(tf);
+                let resp = null;
+                try {
+                    resp = await fetch(dlUrl);
+                } catch (netErr) {
+                    // Fallback nếu URL NAS cũ chứa /uploads/ từ Quick Tunnel trước đây
+                    const uploadsIdx = dlUrl.indexOf('/uploads/');
+                    if (uploadsIdx !== -1 && window.SCE_NAS && typeof window.SCE_NAS.getUrl === 'function') {
+                        const retriedUrl = window.SCE_NAS.getUrl() + dlUrl.slice(uploadsIdx);
+                        if (retriedUrl !== dlUrl) {
+                            dlUrl = retriedUrl;
+                            resp = await fetch(dlUrl);
+                        } else {
+                            throw netErr;
+                        }
+                    } else {
+                        throw netErr;
+                    }
+                }
+
+                if (!resp || !resp.ok) {
+                    throw new Error(`HTTP ${resp ? resp.status : 'Error'}`);
+                }
+
+                const arrayBuf = await resp.arrayBuffer();
+                const zip = new window.PizZip(arrayBuf);
+                const varsMap = window.buildPackageTemplateVariables(mIndex, pkgIndex, sIndex);
+
+                const xmlTargets = Object.keys(zip.files).filter(name =>
+                    /^word\/(document|header\d+|footer\d+|footnotes|endnotes)\.xml$/i.test(name)
+                );
+                if (xmlTargets.length === 0) {
+                    throw new Error('Không phải định dạng DOCX hợp lệ');
+                }
+
+                xmlTargets.forEach(fileName => {
+                    const fileObj = zip.file(fileName);
+                    if (fileObj) {
+                        const xmlContent = fileObj.asText();
+                        const mergedXml = window.mergeDocxXmlVariables(xmlContent, varsMap);
+                        zip.file(fileName, mergedXml);
+                    }
+                });
+
+                const outBlob = zip.generate({
+                    type: 'blob',
+                    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                });
+
+                const baseName = String(tf.name || 'Bieu_mau').replace(/\.docx$/i, '');
+                const shortPkg = String(pkg.name || 'Goi_thau')
+                    .replace(/[\\/:*?"<>|]/g, '')
+                    .trim()
+                    .slice(0, 45);
+                const outputFileName = `${baseName}_${shortPkg}.docx`;
+
+                const blobUrl = URL.createObjectURL(outBlob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = outputFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Đã tải biểu mẫu điền sẵn thông tin!',
+                    showConfirmButton: false,
+                    timer: 2200
+                });
+            } catch (err) {
+                console.warn('Smart DOCX Auto-Fill fallback to raw file:', err);
+                Swal.fire({
+                    title: 'Tải file biểu mẫu gốc',
+                    text: 'Trình duyệt không thể chỉnh tự động file từ liên kết ngoài (hoặc file không phải .docx). Hệ thống sẽ tải file gốc về máy để bạn dùng bảng Copy Nhanh bên dưới.',
+                    icon: 'info',
+                    confirmButtonText: 'Tải file gốc ngay'
+                }).then(() => {
+                    const dlBtn = document.getElementById('stepTemplateDownloadBtn');
+                    if (dlBtn) dlBtn.click();
+                });
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                }
+            }
+        };
 
         window.openStepTemplateModal = function(mIndex, pkgIndex, sIndex) {
             const m = db.missions[mIndex];
@@ -4758,6 +5988,9 @@ const defaultDocs = [
             const emptyNotice = document.getElementById('stepTemplateEmptyNotice');
             const adminSection = document.getElementById('stepTemplateAdminSection');
             const deleteBtn = document.getElementById('stepTemplateDeleteBtn');
+            const smartBtn = document.getElementById('stepTemplateSmartFillBtn');
+
+            const isPkgStep = currentTemplateTarget && currentTemplateTarget.type === 'package_step';
 
             if (tf && tf.url) {
                 currentCard.classList.remove('hidden');
@@ -4783,7 +6016,16 @@ const defaultDocs = [
                 if (tf.updatedAt) metaTxt += ` • ${window.formatDate(tf.updatedAt)}`;
                 document.getElementById('stepTemplateMeta').innerText = metaTxt;
 
-                // Cấu hình duy nhất nút Tải biểu mẫu về máy (chuyển mọi link Docs/Sheets/Slides/Drive/Supabase sang link download trực tiếp)
+                // Hiển thị nút Tự động điền (.docx) khi mở từ gói thầu cụ thể và file là .docx
+                if (smartBtn) {
+                    if (isPkgStep && window.isDocxTemplateForm(tf)) {
+                        smartBtn.classList.remove('hidden');
+                    } else {
+                        smartBtn.classList.add('hidden');
+                    }
+                }
+
+                // Nút tải biểu mẫu gốc về máy
                 const dlBtn = document.getElementById('stepTemplateDownloadBtn');
                 if (dlBtn) {
                     dlBtn.href = window.buildTemplateDownloadUrl(tf);
@@ -4796,10 +6038,24 @@ const defaultDocs = [
                 currentCard.classList.add('hidden');
                 emptyNotice.classList.remove('hidden');
                 deleteBtn.classList.add('hidden');
+                if (smartBtn) smartBtn.classList.add('hidden');
+            }
+
+            // Hiển thị bảng Copy Nhanh 1-Click khi mở từ bước của gói thầu
+            if (isPkgStep) {
+                const varsMap = window.buildPackageTemplateVariables(
+                    currentTemplateTarget.mIndex,
+                    currentTemplateTarget.pkgIndex,
+                    currentTemplateTarget.sIndex
+                );
+                window.renderStepTemplateQuickCopy(varsMap);
+            } else {
+                window.renderStepTemplateQuickCopy(null);
             }
 
             if (canManage) {
                 adminSection.classList.remove('hidden');
+                window.renderStepTemplateVarDictionary();
             } else {
                 adminSection.classList.add('hidden');
             }
@@ -4868,6 +6124,7 @@ const defaultDocs = [
                 const { mIndex, pkgIndex, sIndex } = currentTemplateTarget;
                 const step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
                 step.templateForm = templateForm;
+                delete step.templateFormDeleted;
                 window.logActivity(mIndex, pkgIndex, `Cập nhật biểu mẫu công việc [${step.name}]: ${templateForm.name}`);
                 window.renderMissions();
                 window.saveDataToGAS(false);
@@ -4888,6 +6145,7 @@ const defaultDocs = [
                 if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
                 const step = db.processTemplates[typeKey].steps[sIndex];
                 step.templateForm = templateForm;
+                delete step.templateFormDeleted;
                 window.renderConfig();
                 window.saveDataToGAS(false);
                 window.openConfigStepTemplateModal(typeKey, sIndex);
@@ -4970,6 +6228,7 @@ const defaultDocs = [
                         const { mIndex, pkgIndex, sIndex } = currentTemplateTarget;
                         const step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
                         delete step.templateForm;
+                        step.templateFormDeleted = true;
                         window.logActivity(mIndex, pkgIndex, `Đã xóa biểu mẫu công việc: ${step.name}`);
                         window.renderMissions();
                         window.saveDataToGAS(false);
@@ -4979,6 +6238,7 @@ const defaultDocs = [
                         if (!db.processTemplates[typeKey] || !db.processTemplates[typeKey].steps[sIndex]) return;
                         const step = db.processTemplates[typeKey].steps[sIndex];
                         delete step.templateForm;
+                        step.templateFormDeleted = true;
                         if (window.markProcessUnsynced) window.markProcessUnsynced(typeKey);
                         window.renderConfig();
                         window.saveDataToGAS(false);
@@ -5187,15 +6447,39 @@ const defaultDocs = [
             }); 
         };
 
-        window.deleteUser = function(index) { 
-            if (currentUser.role !== 'admin') return; 
-            Swal.fire({title: 'Xóa tài khoản?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
-                if(r.isConfirmed){ 
-                    db.users.splice(index, 1); 
-                    window.renderUsers(); 
-                    window.saveDataToGAS(false); 
-                } 
-            }); 
+        window.deleteUser = async function(index) {
+            if (currentUser.role !== 'admin') return;
+            const targetUser = db.users[index];
+            if (!targetUser) return;
+            const curEmail = (currentUser.email || currentUser.username || '').toLowerCase().trim();
+            const targetEmail = (targetUser.email || targetUser.username || '').toLowerCase().trim();
+            if (curEmail && targetEmail && curEmail === targetEmail) {
+                return Swal.fire('Cảnh báo', 'Bạn không thể tự xóa tài khoản Quản trị viên của chính mình!', 'warning');
+            }
+            const res = await Swal.fire({
+                title: 'Xóa tài khoản?',
+                html: `Bạn có chắc muốn xóa vĩnh viễn tài khoản <b>${escapeHtml(targetUser.fullname)}</b> (${escapeHtml(targetUser.email || targetUser.username)}) khỏi hệ thống NAS?<br><span class="text-xs text-red-500">Hành động này không thể hoàn tác!</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Xóa vĩnh viễn',
+                cancelButtonText: 'Hủy'
+            });
+            if (res.isConfirmed) {
+                try {
+                    const idToDelete = targetUser.id || targetUser.email || targetUser.username;
+                    if (window.SCE_NAS && idToDelete) {
+                        await window.SCE_NAS.deleteProfile(idToDelete);
+                    }
+                    db.users.splice(index, 1);
+                    await window.renderUsers();
+                    await window.saveDataToGAS(false);
+                    window.toast.fire({ icon: 'success', title: `Đã xóa tài khoản ${targetUser.fullname} thành công!` });
+                } catch (err) {
+                    Swal.fire('Lỗi xóa tài khoản', err.message || 'Không thể xóa trên máy chủ NAS', 'error');
+                }
+            }
         };
 
         window.countPackagesUsingProcess = function(typeKey) {
@@ -5662,9 +6946,16 @@ const defaultDocs = [
                     delete s._isUnmatchedCustom;
                 });
 
+                const prevProcessType = pkg.processType;
                 pkg.steps = nextSteps;
                 pkg.processType = typeKey;
                 pkg.processTitle = proc.title;
+                if (!pkg.biddingMethod || prevProcessType !== typeKey) {
+                    pkg.biddingMethod = window.getDefaultBiddingMethodForProcess(typeKey, proc.title);
+                }
+                if (!pkg.contractType) {
+                    pkg.contractType = CONTRACT_TYPE_OPTIONS[0];
+                }
                 window.logActivity(mIndex, pkgIndex, 'Đồng bộ cập nhật quy trình mẫu "' + proc.title + '" (giữ nguyên các bước đã hoàn thành)');
                 syncedPkgCount++;
             });
@@ -6106,6 +7397,12 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
         window.openCreatePackageModal = function(mIndex) { 
             if (window.isReadOnlySupervisor(currentUser)) return; 
             currentMissionIndexForNewPackage = mIndex; 
+            window.populateProcessDropdowns();
+            window.populatePackageMetaDropdowns();
+            const projTypeEl = document.getElementById('projType');
+            if (projTypeEl) window.onProjTypeChange(projTypeEl.value);
+            const projContractEl = document.getElementById('projContractType');
+            if (projContractEl) projContractEl.value = CONTRACT_TYPE_OPTIONS[0];
             const sel = document.getElementById('pkgOwner'); 
             sel.innerHTML = ''; 
             const normRole = window.normalizeRole(currentUser.role);
@@ -6136,6 +7433,10 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
             if (!typeKey || !db.processTemplates || !db.processTemplates[typeKey]) {
                 return Swal.fire('Chưa có quy trình mẫu', 'Vui lòng chọn một quy trình áp dụng hợp lệ (hoặc tạo quy trình mẫu trong mục Quy trình)!', 'warning');
             }
+            const biddingMethodEl = document.getElementById('projBiddingMethod');
+            const contractTypeEl = document.getElementById('projContractType');
+            const biddingMethod = (biddingMethodEl && biddingMethodEl.value) ? biddingMethodEl.value : window.getDefaultBiddingMethodForProcess(typeKey, db.processTemplates[typeKey].title);
+            const contractType = (contractTypeEl && contractTypeEl.value) ? contractTypeEl.value : CONTRACT_TYPE_OPTIONS[0];
 
             let currentDt = new Date(startDateStr);
             let steps = [];
@@ -6164,11 +7465,13 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                 startDate: startDateStr,
                 processType: typeKey,
                 processTitle: db.processTemplates[typeKey].title,
+                biddingMethod: biddingMethod,
+                contractType: contractType,
                 owner: owner,
                 department: pkgDept,
                 archived: false,
                 completed: false,
-                logs: [`Khởi tạo nhiệm vụ cụ thể theo quy trình: ${db.processTemplates[typeKey].title}`],
+                logs: [`Khởi tạo nhiệm vụ cụ thể theo quy trình: ${db.processTemplates[typeKey].title} (${biddingMethod}; Loại HĐ: ${contractType})`],
                 steps: steps
             });
             window.closeCreatePackageModal();
@@ -6806,15 +8109,18 @@ window.updateDoc = function(i, f, v) {
                 return Swal.fire('Lỗi', 'Email này đã có trong danh sách!', 'error');
             }
 
-            // Thêm vào danh sách phân quyền (KHÔNG lưu mật khẩu vào JSON)
-            db.users.push({
-                username: email,
-                email: email,
-                fullname: fullname,
-                role: role,
-                department: department,
-                is_active: true
-            });
+            // Đăng ký trực tiếp tài khoản lên Máy chủ NAS Synology
+            const userPassword = password || 'Sce@2026';
+            try {
+                if (window.SCE_NAS) {
+                    const regRes = await window.SCE_NAS.register(email, userPassword, fullname, department);
+                    if (regRes && regRes.user && regRes.user.id) {
+                        await window.SCE_NAS.updateProfile(regRes.user.id, { role: role, is_active: true });
+                    }
+                }
+            } catch (nasErr) {
+                console.warn('Lỗi lưu tài khoản lên NAS:', nasErr.message);
+            }
 
             document.getElementById('newUserUsername').value = '';
             if (document.getElementById('newUserPassword')) document.getElementById('newUserPassword').value = '';
@@ -6825,8 +8131,8 @@ window.updateDoc = function(i, f, v) {
             await window.saveDataToGAS(false);
 
             Swal.fire({
-                title: 'Đã cấp quyền Tài khoản!',
-                html: `Đã thêm <b>${escapeHtml(fullname)} (${escapeHtml(email)})</b><br>Vai trò: <b>${escapeHtml(window.getRoleLabel(role))}</b>${department ? `<br>Đơn vị: <b>${escapeHtml(department)}</b>` : ''}.<br><br><span class="text-xs text-gray-500">Người dùng có thể đăng nhập bằng Google hoặc vào tab <b>"Đăng ký Auth mới"</b> ngoài màn hình đăng nhập với đúng Email <b>${escapeHtml(email)}</b>.</span>`,
+                title: 'Đã tạo Tài khoản thành công!',
+                html: `Đã kích hoạt tài khoản cho <b>${escapeHtml(fullname)}</b> (${escapeHtml(email)})<br>Vai trò: <b>${escapeHtml(window.getRoleLabel(role))}</b>${department ? `<br>Đơn vị: <b>${escapeHtml(department)}</b>` : ''}<br>Mật khẩu khởi tạo: <b>${escapeHtml(userPassword)}</b><br><br><span class="text-xs text-emerald-600 font-semibold">Tài khoản đã sẵn sàng để đăng nhập vào hệ thống ngay lập tức!</span>`,
                 icon: 'success'
             });
         };

@@ -4,11 +4,17 @@
  */
 
 (function() {
-    const DEFAULT_NAS_URL = 'http://192.168.128.73:3000';
+    const DEFAULT_NAS_URL = 'https://favor-opponents-tiles-same.trycloudflare.com';
 
     window.SCE_NAS = {
         getUrl: function() {
-            return localStorage.getItem('sce_nas_backend_url') || DEFAULT_NAS_URL;
+            const saved = localStorage.getItem('sce_nas_backend_url');
+            if (saved && saved.startsWith('https://')) {
+                return saved;
+            }
+            // Tự động chuyển đổi từ IP HTTP nội bộ sang HTTPS Cloudflare Tunnel
+            localStorage.setItem('sce_nas_backend_url', DEFAULT_NAS_URL);
+            return DEFAULT_NAS_URL;
         },
         setUrl: function(url) {
             const cleanUrl = String(url || '').trim().replace(/\/+$/, '');
@@ -139,6 +145,21 @@
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(updates)
+            });
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                throw new Error(errJson.error || `HTTP ${res.status}`);
+            }
+            return await res.json();
+        },
+
+        // 7b. Xóa tài khoản vĩnh viễn (Chỉ Admin)
+        deleteProfile: async function(id) {
+            const targetUrl = this.getUrl();
+            const token = this.getToken();
+            const res = await fetch(`${targetUrl}/api/profiles/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) {
                 const errJson = await res.json().catch(() => ({}));
