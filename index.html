@@ -2616,10 +2616,12 @@ const LUNAR_HOLIDAYS = [
             return 'Chỉ định thầu rút gọn';
         };
 
+        const BM_TEMPLATE_VERSION = '20261114_v18';
+
         window.makeStandardTemplateForm = function(bmCode) {
             const meta = STANDARD_BM_CATALOG[bmCode];
             if (!meta) return null;
-            return { name: meta.name, url: meta.url, type: 'file' };
+            return { name: meta.name, url: `${meta.url}?v=${BM_TEMPLATE_VERSION}`, type: 'file' };
         };
 
         window.resolveDefaultStepTemplateForm = function(procKey, procTitle, stepIdx, stepObj, totalSteps) {
@@ -3401,7 +3403,9 @@ const defaultDocs = [
                         days: safeDays,
                         dayType: (st && st.dayType === 'workday') ? 'workday' : 'calendar'
                     });
-                    if (!(normalizedStep.templateForm && normalizedStep.templateForm.url) && !normalizedStep.templateFormDeleted) {
+                    const tfUrl = normalizedStep.templateForm && normalizedStep.templateForm.url ? String(normalizedStep.templateForm.url) : '';
+                    if (!normalizedStep.templateFormDeleted && (!tfUrl || tfUrl.includes('bieu_mau_goc/'))) {
+                        delete normalizedStep.templateForm;
                         const defaultForm = window.resolveDefaultStepTemplateForm(k, proc.title, idx, normalizedStep, totalProcSteps);
                         if (defaultForm) {
                             normalizedStep.templateForm = defaultForm;
@@ -3441,7 +3445,9 @@ const defaultDocs = [
                             const totalPkgSteps = pkg.steps.length;
                             pkg.steps.forEach((st, idx) => {
                                 if (!st || typeof st !== 'object') return;
-                                if (!(st.templateForm && st.templateForm.url) && !st.templateFormDeleted) {
+                                const stUrl = st.templateForm && st.templateForm.url ? String(st.templateForm.url) : '';
+                                if (!st.templateFormDeleted && (!stUrl || stUrl.includes('bieu_mau_goc/'))) {
+                                    delete st.templateForm;
                                     const resolved = window.resolveDefaultStepTemplateForm(pkg.processType, resolvedProcTitle, idx, st, totalPkgSteps);
                                     if (resolved) {
                                         st.templateForm = resolved;
@@ -3702,7 +3708,17 @@ const defaultDocs = [
                     try {
                         const nasData = await window.SCE_NAS.loadData();
                         if (nasData) {
+                            const beforeDefaultsStr = JSON.stringify(nasData);
                             db = nasData;
+                            applyDefaultsIfMissing();
+                            const afterDefaultsStr = JSON.stringify(db);
+                            if (beforeDefaultsStr !== afterDefaultsStr && window.isAdminUser()) {
+                                try {
+                                    await window.SCE_NAS.saveData(db, false);
+                                } catch (syncBackErr) {
+                                    console.warn("Không thể tự đồng bộ biểu mẫu/mặc định mới lên NAS:", syncBackErr.message);
+                                }
+                            }
                         } else {
                             db = {
                                 users: [],
@@ -3710,9 +3726,9 @@ const defaultDocs = [
                                 missions: [],
                                 regulatoryDocs: JSON.parse(JSON.stringify(defaultDocs))
                             };
+                            applyDefaultsIfMissing();
                             await window.SCE_NAS.saveData(db);
                         }
-                        applyDefaultsIfMissing();
                         try { saveToIDB(JSON.stringify({ db: db })); } catch(e) {}
                         isDataSynchronized = true;
                         lastCommittedState = JSON.stringify(db);
@@ -5907,7 +5923,7 @@ const defaultDocs = [
             const rawUrl = String(tf.url || '').toLowerCase();
             if (lowerName.endsWith('.docx')) return true;
             if (rawUrl.includes('docs.google.com/document/d/')) return true;
-            if (rawUrl.endsWith('.docx')) return true;
+            if (rawUrl.split(/[?#]/)[0].endsWith('.docx')) return true;
             return false;
         };
 
@@ -5937,7 +5953,7 @@ const defaultDocs = [
                 let dlUrl = window.buildTemplateDownloadUrl(tf);
                 let resp = null;
                 try {
-                    resp = await fetch(dlUrl);
+                    resp = await fetch(dlUrl, { cache: 'no-store' });
                 } catch (netErr) {
                     // Fallback nếu URL NAS cũ chứa /uploads/ từ Quick Tunnel trước đây
                     const uploadsIdx = dlUrl.indexOf('/uploads/');
@@ -5945,7 +5961,7 @@ const defaultDocs = [
                         const retriedUrl = window.SCE_NAS.getUrl() + dlUrl.slice(uploadsIdx);
                         if (retriedUrl !== dlUrl) {
                             dlUrl = retriedUrl;
-                            resp = await fetch(dlUrl);
+                            resp = await fetch(dlUrl, { cache: 'no-store' });
                         } else {
                             throw netErr;
                         }
@@ -5980,7 +5996,9 @@ const defaultDocs = [
 
                 const outBlob = zip.generate({
                     type: 'blob',
-                    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
                 });
 
                 const baseName = String(tf.name || 'Bieu_mau').replace(/\.docx$/i, '');
@@ -6074,6 +6092,14 @@ const defaultDocs = [
                 const sep = rawUrl.includes('?') ? '&' : '?';
                 const fileName = tf.name ? encodeURIComponent(tf.name) : '';
                 return rawUrl + sep + 'download=' + fileName;
+            }
+            if (rawUrl.includes('bieu_mau_goc/')) {
+                const cleanUrl = rawUrl
+                    .replace(/([?&])v=[^&#]*/g, '$1')
+                    .replace(/\?&/, '?')
+                    .replace(/[?&]+$/, '');
+                const sep = cleanUrl.includes('?') ? '&' : '?';
+                return `${cleanUrl}${sep}v=${BM_TEMPLATE_VERSION}`;
             }
             return rawUrl;
         };

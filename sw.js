@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise-v17';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v18';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -37,9 +37,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const reqUrl = event.request.url;
 
-    // TUYỆT ĐỐI KHÔNG CACHE các request API, JWT, Backend NAS hoặc Storage
+    // TUYỆT ĐỐI KHÔNG CACHE các request API, JWT, Backend NAS, biểu mẫu DOCX hoặc Storage
     if (
         event.request.method !== 'GET' ||
+        reqUrl.includes('/bieu_mau_goc/') ||
+        reqUrl.includes('.docx') ||
         reqUrl.includes('/api/') ||
         reqUrl.includes(':3000') ||
         reqUrl.includes('trycloudflare.com') ||
