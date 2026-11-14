@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise-v16';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v17';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

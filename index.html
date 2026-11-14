@@ -92,6 +92,45 @@
         overflow: hidden;
         overscroll-behavior: contain;
     }
+    input[type="date"][data-vn-date] {
+        position: relative;
+        caret-color: transparent;
+    }
+    input[type="date"][data-vn-date]::-webkit-datetime-edit,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-fields-wrapper,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-text,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-month-field,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-day-field,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-year-field,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-month-field:focus,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-day-field:focus,
+    input[type="date"][data-vn-date]::-webkit-datetime-edit-year-field:focus {
+        color: transparent !important;
+        background: transparent !important;
+    }
+    input[type="date"][data-vn-date]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        position: relative;
+        z-index: 2;
+    }
+    input[type="date"][data-vn-date]::before {
+        content: attr(data-vn-date);
+        position: absolute;
+        left: 0.625rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: inherit;
+        font: inherit;
+        white-space: nowrap;
+    }
+    #filterFromDate[data-vn-date]::before,
+    #filterToDate[data-vn-date]::before {
+        left: 0;
+    }
+    input[type="date"][data-vn-date][data-vn-empty="true"]::before {
+        color: #9ca3af;
+    }
     </style>
 <style id="mobile-ux">
 @media (max-width: 768px) {
@@ -3462,6 +3501,63 @@ const defaultDocs = [
             } catch(e) { return ''; }
         };
 
+        window.formatIsoToVnDisplay = function(isoVal) {
+            const s = String(isoVal || '').trim();
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!m) return 'dd/mm/yyyy';
+            return `${m[3]}/${m[2]}/${m[1]}`;
+        };
+
+        window.syncDateInputVnDisplay = function(el) {
+            if (!el || el.tagName !== 'INPUT' || el.type !== 'date') return;
+            const rawVal = el.value || '';
+            el.setAttribute('data-vn-date', window.formatIsoToVnDisplay(rawVal));
+            el.setAttribute('data-vn-empty', rawVal ? 'false' : 'true');
+        };
+
+        window.initVnDateInputs = function() {
+            if (!window.__vnDateProtoPatched && typeof HTMLInputElement !== 'undefined') {
+                window.__vnDateProtoPatched = true;
+                const valDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+                if (valDesc && valDesc.configurable) {
+                    Object.defineProperty(HTMLInputElement.prototype, 'value', {
+                        configurable: true,
+                        enumerable: valDesc.enumerable,
+                        get: function() { return valDesc.get.call(this); },
+                        set: function(v) {
+                            valDesc.set.call(this, v);
+                            if (this.type === 'date') window.syncDateInputVnDisplay(this);
+                        }
+                    });
+                }
+                const dateDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'valueAsDate');
+                if (dateDesc && dateDesc.configurable) {
+                    Object.defineProperty(HTMLInputElement.prototype, 'valueAsDate', {
+                        configurable: true,
+                        enumerable: dateDesc.enumerable,
+                        get: function() { return dateDesc.get.call(this); },
+                        set: function(v) {
+                            dateDesc.set.call(this, v);
+                            if (this.type === 'date') window.syncDateInputVnDisplay(this);
+                        }
+                    });
+                }
+            }
+            document.querySelectorAll('input[type="date"]').forEach(el => {
+                window.syncDateInputVnDisplay(el);
+                if (!el.dataset.vnDateBound) {
+                    el.dataset.vnDateBound = '1';
+                    el.addEventListener('input', () => window.syncDateInputVnDisplay(el));
+                    el.addEventListener('change', () => window.syncDateInputVnDisplay(el));
+                    el.addEventListener('click', () => {
+                        if (typeof el.showPicker === 'function') {
+                            try { el.showPicker(); } catch (e) {}
+                        }
+                    });
+                }
+            });
+        };
+
         // Tính ngày hạn chót theo ngày làm việc hoặc ngày lịch
         window.addCustomDays = function(dObj, days, type) {
             let r = new Date(dObj);
@@ -3522,11 +3618,15 @@ const defaultDocs = [
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                if (typeof window.initVnDateInputs === 'function') window.initVnDateInputs();
                 // Đặt ngày hạn chót mặc định 1 tháng sau
                 const dlDate = new Date();
                 dlDate.setMonth(dlDate.getMonth() + 1);
                 const mDlEl = document.getElementById('missionDeadline');
-                if (mDlEl) mDlEl.valueAsDate = dlDate;
+                if (mDlEl) {
+                    mDlEl.value = window.formatForDateInput(dlDate);
+                    window.syncDateInputVnDisplay(mDlEl);
+                }
                 
                 const today = new Date();
                 const dateEl = document.getElementById('dashCurrentDate');
@@ -7369,6 +7469,15 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
 
         window.openCreateMissionModal = function() { 
             if (window.isReadOnlySupervisor(currentUser)) return; 
+            const mDlEl = document.getElementById('missionDeadline');
+            if (mDlEl) {
+                if (!mDlEl.value) {
+                    const dlDate = new Date();
+                    dlDate.setMonth(dlDate.getMonth() + 1);
+                    mDlEl.value = window.formatForDateInput(dlDate);
+                }
+                if (typeof window.syncDateInputVnDisplay === 'function') window.syncDateInputVnDisplay(mDlEl);
+            }
             document.getElementById('createMissionModal').classList.remove('hidden'); 
         };
         window.closeCreateMissionModal = function() { 
@@ -7403,6 +7512,11 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
             if (projTypeEl) window.onProjTypeChange(projTypeEl.value);
             const projContractEl = document.getElementById('projContractType');
             if (projContractEl) projContractEl.value = CONTRACT_TYPE_OPTIONS[0];
+            const startEl = document.getElementById('projStartDate');
+            if (startEl) {
+                if (!startEl.value) startEl.value = window.formatForDateInput(new Date());
+                if (typeof window.syncDateInputVnDisplay === 'function') window.syncDateInputVnDisplay(startEl);
+            }
             const sel = document.getElementById('pkgOwner'); 
             sel.innerHTML = ''; 
             const normRole = window.normalizeRole(currentUser.role);
