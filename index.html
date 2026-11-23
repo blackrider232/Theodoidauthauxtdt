@@ -276,6 +276,12 @@
     .dark .step-row {
         background-color: #1e293b;
     }
+    .step-row.step-completed {
+        background-color: #f8fafc;
+    }
+    .dark .step-row.step-completed {
+        background-color: rgba(15, 23, 42, 0.55);
+    }
     @media (min-width: 769px) {
         .step-row td {
             border: 1px solid #e2e8f0;
@@ -286,6 +292,12 @@
         .dark .step-row td {
             border-color: #334155;
             box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        }
+        .step-row.step-completed td {
+            border-color: #cbd5e1;
+        }
+        .dark .step-row.step-completed td {
+            border-color: #334155;
         }
         .step-row:hover {
             transform: translateY(-1px);
@@ -4817,7 +4829,7 @@ const defaultDocs = [
                                 const isPkgOverdue = !isPkgDone && hasOverdueStep;
                                 let pkgStatusBadgeHtml = "";
                                 if (isPkgDone) {
-                                    pkgStatusBadgeHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shrink-0"><i class="fas fa-check-circle"></i> Đã xong</span>`;
+                                    pkgStatusBadgeHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-xs shrink-0"><i class="fas fa-check-circle" aria-hidden="true"></i> Đã hoàn thành</span>`;
                                 } else if (isPkgOverdue) {
                                     pkgStatusBadgeHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300 border border-red-300 dark:border-red-700 shrink-0"><i class="fas fa-exclamation-triangle animate-pulse"></i> Chậm tiến độ</span>`;
                                 } else {
@@ -4910,7 +4922,8 @@ const defaultDocs = [
                                         let dateColor = 'text-gray-700 dark:text-gray-300'; 
                                         let bgRow = '';
                                         if(step.completed) { 
-                                            dateColor = 'text-green-600 dark:text-green-400'; 
+                                            dateColor = 'text-emerald-700 dark:text-emerald-400'; 
+                                            bgRow = 'step-completed';
                                         } else if(isOverdue) { 
                                             dateColor = 'text-red-600 dark:text-red-400 font-bold'; 
                                             bgRow = 'bg-red-50 dark:bg-red-900/20'; 
@@ -4920,11 +4933,15 @@ const defaultDocs = [
                                         }
                                         
                                         let safeStepName = escapeHtml(step.name || ''); 
-                                        let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-snug break-words">${safeStepName}</div>`;
+                                        let nameHtml = step.completed
+                                            ? `<div class="flex items-start gap-2 text-[13.5px] font-semibold text-slate-700 dark:text-slate-200 leading-snug break-words"><i class="fas fa-check-circle text-emerald-600 dark:text-emerald-400 text-[15px] mt-0.5 shrink-0" aria-hidden="true"></i><span>${safeStepName}</span></div>`
+                                            : `<div class="font-bold text-gray-900 dark:text-gray-100 text-[13.5px] leading-snug break-words">${safeStepName}</div>`;
                                         
                                         let dateHtml = `<span class="text-[13px] font-semibold ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-blue-50/70 dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm whitespace-nowrap">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : ""; 
-                                        let completedByHtml = step.completedBy ? `<span class="text-[11.5px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-check text-[10px]"></i> ${escapeHtml(step.completedBy)}</span>` : "";
+                                        let completedByHtml = step.completed
+                                            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 whitespace-nowrap"><i class="fas fa-check text-[10px]" aria-hidden="true"></i> Đã xong</span>`
+                                            : "";
 
                                         let templateFormHtml = "";
                                         if (step.templateForm && step.templateForm.url) {
@@ -4980,7 +4997,7 @@ const defaultDocs = [
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        let checkboxHtml = `<input type="checkbox" class="w-5 h-5 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 rounded shrink-0" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked, this)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : 'Đánh dấu hoàn thành bước công việc'}">`;
+                                        let checkboxHtml = `<input type="checkbox" class="w-5 h-5 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} ${step.completed ? 'accent-emerald-600' : 'accent-blue-600'} rounded shrink-0" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked, this)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : 'Đánh dấu hoàn thành bước công việc'}">`;
 
                                         const reorderRowHighlight = isReorderActive ? 'ring-1 ring-indigo-400/60 dark:ring-indigo-500/60 shadow-xs' : '';
 
@@ -5045,7 +5062,7 @@ const defaultDocs = [
                                 let btnEditPkg = canEditPkg ? `<button onclick="window.openEditPackageModal(${mIndex}, ${pkgIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] ml-2 transition"><i class="fas fa-edit"></i> Sửa</button>` : '';
                                 let pkgDeptBadge = pkgDept ? `<span class="inline-flex items-center gap-1 shrink-0 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded text-[11px] font-semibold"><i class="fas fa-building-user text-[10px]"></i>${escapeHtml(pkgDept)}</span>` : '';
 
-                                let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (isPkgDone ? 'bg-emerald-50/40 dark:bg-emerald-900/20' : (isPkgOverdue ? 'bg-red-50/30 dark:bg-red-900/10' : 'bg-slate-50 dark:bg-gray-800/90'));
+                                let headerBg = pkg.archived ? 'bg-gray-100 dark:bg-gray-900' : (isPkgDone ? 'bg-slate-50/70 dark:bg-gray-800/90' : (isPkgOverdue ? 'bg-red-50/30 dark:bg-red-900/10' : 'bg-slate-50 dark:bg-gray-800/90'));
                                 let borderColor = pkg.archived ? 'border-gray-300 opacity-90' : (isPkgDone ? 'border-emerald-300 dark:border-emerald-800' : (isPkgOverdue ? 'border-red-300 dark:border-red-800' : 'border-gray-200 dark:border-gray-700'));
                                 let pkgCircleClass = pkg.archived
                                     ? 'bg-gray-400 text-white ring-2 ring-gray-200 dark:ring-gray-700'
@@ -5054,6 +5071,9 @@ const defaultDocs = [
                                         : (isPkgOverdue
                                             ? 'bg-red-600 text-white ring-2 ring-red-200 dark:ring-red-900 animate-pulse'
                                             : 'bg-blue-600 text-white ring-2 ring-blue-200 dark:ring-blue-900'));
+                                let pkgCircleContent = (isPkgDone && !pkg.archived)
+                                    ? '<i class="fas fa-check text-[11px]" aria-hidden="true"></i>'
+                                    : pkgOrderNum;
                                 let pkgNameSafe = escapeHtml(pkg.name || "Nhiệm vụ cụ thể không tên"); 
                                 let pkgProcessTitle = escapeHtml(pkg.processTitle || "Quy trình đấu thầu");
                                 let pkgBiddingMethod = escapeHtml(pkg.biddingMethod || window.getDefaultBiddingMethodForProcess(pkg.processType, pkg.processTitle));
@@ -5103,8 +5123,8 @@ const defaultDocs = [
                                         <div onclick="window.togglePackageOverview(${mIndex}, ${pkgIndex})" class="${headerBg} px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition select-none" title="Bấm vào để xem thông tin cơ bản của nhiệm vụ cụ thể">
                                             <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                                 <i id="overview_chevron_${pkgKey}" class="fas fa-chevron-right text-xs text-gray-400 dark:text-gray-500 transition-transform duration-200 shrink-0 ${isOverviewExpanded ? 'rotate-90 text-blue-600 dark:text-blue-400' : ''}"></i>
-                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-extrabold shrink-0 shadow-sm ${pkgCircleClass}">${pkgOrderNum}</span>
-                                                <h4 class="font-bold text-[14px] sm:text-[14.5px] leading-snug break-words ${pkg.archived ? 'text-gray-600 dark:text-gray-400 line-through' : (isPkgDone ? 'text-emerald-800 dark:text-emerald-400' : (isPkgOverdue ? 'text-red-700 dark:text-red-400' : 'text-blue-900 dark:text-blue-300'))}">
+                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-extrabold shrink-0 shadow-sm ${pkgCircleClass}">${pkgCircleContent}</span>
+                                                <h4 class="font-bold text-[14px] sm:text-[14.5px] leading-snug break-words ${pkg.archived ? 'text-gray-500 dark:text-gray-400' : (isPkgDone ? 'text-slate-800 dark:text-slate-100' : (isPkgOverdue ? 'text-red-700 dark:text-red-400' : 'text-blue-900 dark:text-blue-300'))}">
                                                     <span>${pkgNameSafe}</span>
                                                 </h4>
                                             </div>
@@ -5178,9 +5198,9 @@ const defaultDocs = [
                                                     <div class="flex items-center gap-2">
                                                         <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">${completedStepsCount}/${totalStepsCount}</span>
                                                         <div class="w-20 sm:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden shadow-inner">
-                                                            <div class="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                                                            <div class="${(isPkgDone || progressPercent === 100) ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-blue-600 dark:bg-blue-500'} h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                                                         </div>
-                                                        <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 w-8 text-right">${progressPercent}%</span>
+                                                        <span class="text-[11px] font-bold ${(isPkgDone || progressPercent === 100) ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'} w-8 text-right">${progressPercent}%</span>
                                                     </div>
                                                     <span class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium select-none ml-2 shrink-0">
                                                         <span id="banner_expand_text_${pkgKey}">${isExpanded ? 'Đóng chi tiết' : 'Xem các bước chi tiết'}</span>
