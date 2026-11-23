@@ -1072,6 +1072,75 @@
         </div>
     </dialog>
 
+    <!-- Hộp thoại Xác nhận Hoàn thành bước công việc / Bắt buộc đính kèm PDF (Native <dialog>) -->
+    <dialog id="completeStepDialog" aria-labelledby="completeStepDialogTitle" closedby="any" class="m-auto p-0 rounded-2xl shadow-2xl w-[calc(100%-1.5rem)] max-w-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-t-4 border-emerald-600">
+        <form id="completeStepForm" novalidate class="flex flex-col max-h-[88vh] p-4 sm:p-5">
+            <div class="flex justify-between items-start gap-2 pb-3 border-b dark:border-gray-700">
+                <div class="min-w-0">
+                    <h1 id="completeStepDialogTitle" class="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-check-circle text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true"></i>
+                        <span>Xác nhận hoàn thành công việc</span>
+                    </h1>
+                    <p id="completeStepDialogPkgName" class="text-xs text-blue-700 dark:text-blue-300 font-semibold mt-0.5 break-words"></p>
+                </div>
+                <button type="button" id="btnCloseCompleteStepDialog" aria-label="Đóng hộp thoại xác nhận hoàn thành" class="text-gray-400 hover:text-red-500 p-1 rounded-lg transition shrink-0 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none">
+                    <i class="fas fa-times text-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-3.5 space-y-3.5 pr-0.5">
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-gray-900/70 border border-slate-200 dark:border-gray-700">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Bước công việc</p>
+                    <p id="completeStepDialogStepName" class="text-sm font-bold text-gray-900 dark:text-gray-100 break-words leading-snug"></p>
+                </div>
+
+                <!-- Chế độ 1: Bước KHÔNG có biểu mẫu -->
+                <div id="completeStepSimpleSection" class="hidden p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 flex items-start gap-2.5 text-sm text-emerald-950 dark:text-emerald-100">
+                    <i class="fas fa-circle-question text-emerald-600 dark:text-emerald-400 text-base mt-0.5 shrink-0" aria-hidden="true"></i>
+                    <div>
+                        <p class="font-semibold">Bạn có chắc chắn muốn hoàn thành công việc này không?</p>
+                        <p class="text-xs text-emerald-800 dark:text-emerald-300 mt-1">Hệ thống sẽ ghi nhận trạng thái hoàn thành và người thực hiện cho bước công việc này.</p>
+                    </div>
+                </div>
+
+                <!-- Chế độ 2: Bước CÓ biểu mẫu (Bắt buộc đính kèm PDF) -->
+                <div id="completeStepPdfSection" class="hidden space-y-3">
+                    <div id="completeStepTemplateBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-teal-50 dark:bg-teal-950/70 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-800"></div>
+
+                    <div id="completeStepPdfStatusBanner" class="p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5"></div>
+
+                    <div id="completeStepPdfListWrap" class="hidden space-y-1.5">
+                        <p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">Văn bản PDF đã đính kèm</p>
+                        <div id="completeStepPdfList" class="space-y-1.5"></div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-dashed border-gray-300 dark:border-gray-600 space-y-2">
+                        <label for="completeStepPdfInput" class="block text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                            Đính kèm văn bản đã hoàn thành (.pdf) <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <input type="file" id="completeStepPdfInput" name="completedPdf" accept=".pdf,application/pdf" aria-describedby="completeStepPdfHelp completeStepPdfError" class="block w-full text-xs sm:text-sm text-gray-700 dark:text-gray-200 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 p-1.5 focus-visible:outline-2 focus-visible:outline-blue-600">
+                        <p id="completeStepPdfHelp" class="text-[11px] text-gray-500 dark:text-gray-400">Chỉ chấp nhận định dạng PDF (<code>.pdf</code>), dung lượng tối đa 25MB.</p>
+                        <div id="completeStepPdfUploading" role="status" aria-live="polite" class="hidden items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg px-2.5 py-2">
+                            <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+                            <span>Đang tải file PDF lên máy chủ NAS...</span>
+                        </div>
+                        <p id="completeStepPdfError" role="alert" aria-live="polite" class="hidden text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t dark:border-gray-700 flex flex-wrap sm:flex-nowrap justify-end gap-2">
+                <button type="button" id="btnCancelCompleteStep" class="w-full sm:w-auto px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs sm:text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-gray-400 outline-none">
+                    Hủy
+                </button>
+                <button type="submit" id="btnConfirmCompleteStep" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-bold shadow-xs transition inline-flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none">
+                    <i class="fas fa-check" aria-hidden="true"></i>
+                    <span>Xác nhận hoàn thành</span>
+                </button>
+            </div>
+        </form>
+    </dialog>
+
     <!-- Modal Bình luận -->
     <div id="commentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500 flex flex-col max-h-[90vh]">
@@ -4879,8 +4948,9 @@ const defaultDocs = [
                                         let linksDisplayHtml = "";
                                         if (step.links && Array.isArray(step.links) && step.links.length > 0) {
                                             linksDisplayHtml = `<div class="flex flex-wrap gap-1 mt-1.5">` + step.links.map((l, lIndex) => {
-                                                let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1"><i class="fas fa-times"></i></button>` : '';
-                                                return `<div class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-gray-600 px-2 py-0.5 rounded text-[11px] shadow-sm"><a href="${escapeHtml(l.url)}" target="_blank" class="hover:underline font-medium truncate max-w-[140px]" title="${escapeHtml(l.url)}"><i class="fas fa-link mr-1"></i>${escapeHtml(l.name)}</a>${actDelLink}</div>`;
+                                                let actDelLink = canEditPkg ? `<button onclick="window.removeLink(${mIndex}, ${pkgIndex}, ${sIndex}, ${lIndex})" class="text-gray-400 hover:text-red-500 ml-1" title="Xóa tệp đính kèm"><i class="fas fa-times"></i></button>` : '';
+                                                const clipIcon = window.isPdfFileLink(l) ? 'fa-file-pdf text-red-500 dark:text-red-400' : 'fa-paperclip text-blue-600 dark:text-blue-400';
+                                                return `<div class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-gray-600 px-2 py-0.5 rounded text-[11px] shadow-sm"><a href="${escapeHtml(l.url)}" target="_blank" class="hover:underline font-medium truncate max-w-[140px]" title="${escapeHtml(l.url)}"><i class="fas ${clipIcon} mr-1" aria-hidden="true"></i>${escapeHtml(l.name)}</a>${actDelLink}</div>`;
                                             }).join('') + `</div>`;
                                         }
                                         
@@ -4910,7 +4980,7 @@ const defaultDocs = [
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
-                                        let checkboxHtml = `<input type="checkbox" class="w-5 h-5 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 rounded shrink-0" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : 'Đánh dấu hoàn thành bước công việc'}">`;
+                                        let checkboxHtml = `<input type="checkbox" class="w-5 h-5 ${!lockMain?'cursor-pointer':'cursor-not-allowed'} accent-blue-600 rounded shrink-0" ${step.completed?'checked':''} ${lockMain?'disabled':''} onchange="window.updateStepStatus(${mIndex}, ${pkgIndex}, ${sIndex}, this.checked, this)" title="${anyPrevIncomplete ? 'Phải hoàn thành các bước trước đó mới được làm bước này' : 'Đánh dấu hoàn thành bước công việc'}">`;
 
                                         const reorderRowHighlight = isReorderActive ? 'ring-1 ring-indigo-400/60 dark:ring-indigo-500/60 shadow-xs' : '';
 
@@ -5877,6 +5947,28 @@ const defaultDocs = [
             if (rawUrl.includes('docs.google.com/document/d/')) return true;
             if (rawUrl.split(/[?#]/)[0].endsWith('.docx')) return true;
             return false;
+        };
+
+        window.stepHasTemplateForm = function(step) {
+            return Boolean(step && step.templateForm && String(step.templateForm.url || '').trim());
+        };
+
+        window.isPdfFileLink = function(linkObj) {
+            if (!linkObj) return false;
+            const lowerName = String(linkObj.name || '').trim().toLowerCase();
+            const rawUrlNoQuery = String(linkObj.url || '').trim().toLowerCase().split(/[?#]/)[0];
+            return lowerName.endsWith('.pdf') || rawUrlNoQuery.endsWith('.pdf');
+        };
+
+        window.isPdfUploadFile = function(file) {
+            if (!file) return false;
+            const lowerName = String(file.name || '').trim().toLowerCase();
+            const mime = String(file.type || '').trim().toLowerCase();
+            return lowerName.endsWith('.pdf') || mime === 'application/pdf';
+        };
+
+        window.stepHasCompletedPdf = function(step) {
+            return Boolean(step && Array.isArray(step.links) && step.links.some(l => window.isPdfFileLink(l)));
         };
 
         window.downloadSmartFilledDocx = async function() {
@@ -7176,18 +7268,44 @@ const defaultDocs = [
         };
 
         window.removeLink = function(mIndex, pkgIndex, sIndex, lIndex) { 
-            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return; 
-            Swal.fire({title: 'Xóa đính kèm?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa'}).then((r)=>{ 
-                if(r.isConfirmed){ 
-                    let step = db.missions[mIndex].packages[pkgIndex].steps[sIndex];
-                    let link = step.links[lIndex];
-                    if (link && link.url) window.deleteFileFromDrive(link.url);
-                    step.links.splice(lIndex, 1); 
-                    window.logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm`); 
-                    window.renderMissions(); 
-                    window.saveDataToGAS(false); 
-                } 
-            }); 
+            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pkgIndex], currentUser)) return;
+            const step = db.missions[mIndex] && db.missions[mIndex].packages[pkgIndex] && db.missions[mIndex].packages[pkgIndex].steps
+                ? db.missions[mIndex].packages[pkgIndex].steps[sIndex]
+                : null;
+            if (!step || !Array.isArray(step.links) || !step.links[lIndex]) return;
+            const targetLink = step.links[lIndex];
+            const remainingLinks = step.links.filter((_, idx) => idx !== lIndex);
+            const willInvalidateCompletedPdf = Boolean(
+                step.completed &&
+                window.stepHasTemplateForm(step) &&
+                window.isPdfFileLink(targetLink) &&
+                !remainingLinks.some(l => window.isPdfFileLink(l))
+            );
+            Swal.fire({
+                title: 'Xóa đính kèm?',
+                text: willInvalidateCompletedPdf
+                    ? 'Bước này có biểu mẫu bắt buộc phải đính kèm PDF. Khi xóa file PDF cuối cùng, trạng thái bước sẽ tự chuyển về chưa hoàn thành.'
+                    : '',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    if (targetLink && targetLink.url) window.deleteFileFromDrive(targetLink.url);
+                    step.links.splice(lIndex, 1);
+                    if (willInvalidateCompletedPdf) {
+                        step.completed = false;
+                        step.completedBy = "";
+                        window.logActivity(mIndex, pkgIndex, `Xóa file PDF cuối cùng và chuyển bước [${step.name}] về chưa hoàn thành`);
+                    } else {
+                        window.logActivity(mIndex, pkgIndex, `Xóa tài liệu đính kèm`);
+                    }
+                    window.renderMissions();
+                    window.saveDataToGAS(false);
+                }
+            });
         };
 
         window.archivePackage = function(mIndex, pkgIndex) {
@@ -7233,17 +7351,263 @@ const defaultDocs = [
             window.saveDataToGAS(false); 
         };
 
-        window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked) { 
-            let m = db.missions[mIndex]; 
-            let p = m.packages[pkgIndex]; 
+        let pendingCompleteStepTarget = null;
+        let isUploadingCompletePdf = false;
+
+        window.updateStepStatus = function(mIndex, pkgIndex, stepIndex, checked, checkboxEl) {
+            const m = db.missions[mIndex];
+            const p = m ? m.packages[pkgIndex] : null;
+            const step = p && Array.isArray(p.steps) ? p.steps[stepIndex] : null;
+            if (!step) return;
             if (!window.canEditPackage(m, p, currentUser)) {
-                return Swal.fire('Lỗi','Bạn không có quyền thao tác trên nhiệm vụ cụ thể này!','error'); 
+                if (checkboxEl) checkboxEl.checked = Boolean(step.completed);
+                return Swal.fire('Lỗi', 'Bạn không có quyền thao tác trên nhiệm vụ cụ thể này!', 'error');
             }
-            p.steps[stepIndex].completed = checked; 
-            p.steps[stepIndex].completedBy = checked ? currentUser.fullname : ""; 
-            window.logActivity(mIndex, pkgIndex, `${checked ? 'Hoàn thành' : 'Bỏ hoàn thành'} bước: ${p.steps[stepIndex].name}`); 
-            window.renderMissions(); 
-            window.saveDataToGAS(false); 
+            if (checked) {
+                const prevIncomplete = p.steps.slice(0, stepIndex).some(s => s && !s.completed);
+                if (prevIncomplete) {
+                    if (checkboxEl) checkboxEl.checked = false;
+                    return Swal.fire('Cảnh báo', 'Phải hoàn thành các bước trước đó mới được hoàn thành bước này!', 'warning');
+                }
+                if (checkboxEl) checkboxEl.checked = false;
+                window.openCompleteStepDialog(mIndex, pkgIndex, stepIndex);
+                return;
+            }
+            step.completed = false;
+            step.completedBy = "";
+            window.logActivity(mIndex, pkgIndex, `Bỏ hoàn thành bước: ${step.name}`);
+            window.renderMissions();
+            window.saveDataToGAS(false);
+        };
+
+        window.setCompleteStepPdfError = function(msg) {
+            const errEl = document.getElementById('completeStepPdfError');
+            const inputEl = document.getElementById('completeStepPdfInput');
+            if (!errEl) return;
+            if (msg) {
+                errEl.innerHTML = `<i class="fas fa-exclamation-circle shrink-0" aria-hidden="true"></i><span>${escapeHtml(msg)}</span>`;
+                errEl.classList.remove('hidden');
+                if (inputEl) inputEl.setAttribute('aria-invalid', 'true');
+            } else {
+                errEl.textContent = '';
+                errEl.classList.add('hidden');
+                if (inputEl) inputEl.removeAttribute('aria-invalid');
+            }
+        };
+
+        window.renderCompleteStepDialogState = function() {
+            if (!pendingCompleteStepTarget) return;
+            const { mIndex, pkgIndex, stepIndex } = pendingCompleteStepTarget;
+            const m = db.missions[mIndex];
+            const p = m ? m.packages[pkgIndex] : null;
+            const step = p && Array.isArray(p.steps) ? p.steps[stepIndex] : null;
+            if (!step) return;
+
+            const hasTemplate = window.stepHasTemplateForm(step);
+            const hasPdf = window.stepHasCompletedPdf(step);
+
+            const titleEl = document.getElementById('completeStepDialogTitle');
+            const pkgNameEl = document.getElementById('completeStepDialogPkgName');
+            const stepNameEl = document.getElementById('completeStepDialogStepName');
+            const simpleSec = document.getElementById('completeStepSimpleSection');
+            const pdfSec = document.getElementById('completeStepPdfSection');
+            const tmplBadge = document.getElementById('completeStepTemplateBadge');
+            const statusBanner = document.getElementById('completeStepPdfStatusBanner');
+            const pdfListWrap = document.getElementById('completeStepPdfListWrap');
+            const pdfList = document.getElementById('completeStepPdfList');
+            const confirmBtn = document.getElementById('btnConfirmCompleteStep');
+
+            if (titleEl) {
+                const span = titleEl.querySelector('span');
+                if (span) span.textContent = hasTemplate ? 'Nộp văn bản PDF & Hoàn thành bước' : 'Xác nhận hoàn thành công việc';
+            }
+            if (pkgNameEl) pkgNameEl.textContent = p.name || '';
+            if (stepNameEl) stepNameEl.textContent = `Bước ${stepIndex + 1}: ${step.name || ''}`;
+            if (confirmBtn) confirmBtn.disabled = Boolean(isUploadingCompletePdf);
+
+            if (!hasTemplate) {
+                if (simpleSec) simpleSec.classList.remove('hidden');
+                if (pdfSec) pdfSec.classList.add('hidden');
+                window.setCompleteStepPdfError('');
+                return;
+            }
+
+            if (simpleSec) simpleSec.classList.add('hidden');
+            if (pdfSec) pdfSec.classList.remove('hidden');
+            if (tmplBadge) {
+                tmplBadge.innerHTML = `<i class="fas fa-file-word text-blue-600 dark:text-blue-400" aria-hidden="true"></i><span>Biểu mẫu quy định: ${escapeHtml(step.templateForm.name || 'Biểu mẫu chuẩn')}</span>`;
+            }
+
+            if (statusBanner) {
+                if (hasPdf) {
+                    statusBanner.className = 'p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/70 text-emerald-900 dark:text-emerald-200';
+                    statusBanner.innerHTML = '<i class="fas fa-check-circle text-emerald-600 dark:text-emerald-400 text-base mt-0.5 shrink-0" aria-hidden="true"></i><div><b>Đã đính kèm văn bản PDF hoàn thành.</b> Bấm <b>"Xác nhận hoàn thành"</b> để chốt bước công việc (hoặc tải bổ sung thêm tệp PDF khác nếu cần).</div>';
+                    window.setCompleteStepPdfError('');
+                } else {
+                    statusBanner.className = 'p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/70 text-amber-900 dark:text-amber-200';
+                    statusBanner.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-600 dark:text-amber-400 text-base mt-0.5 shrink-0" aria-hidden="true"></i><div>Bước này có biểu mẫu chuẩn. Vui lòng <b>đính kèm file văn bản đã hoàn thành dạng PDF (.pdf)</b> bên dưới thì mới có thể hoàn thành công việc.</div>';
+                }
+            }
+
+            const pdfLinks = Array.isArray(step.links) ? step.links.filter(l => window.isPdfFileLink(l)) : [];
+            if (pdfListWrap && pdfList) {
+                if (pdfLinks.length > 0) {
+                    pdfListWrap.classList.remove('hidden');
+                    pdfList.innerHTML = pdfLinks.map(l => `
+                        <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-800 text-xs">
+                            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-blue-700 dark:text-blue-400 hover:underline font-semibold min-w-0 truncate">
+                                <i class="fas fa-file-pdf text-red-500 shrink-0" aria-hidden="true"></i>
+                                <span class="truncate">${escapeHtml(l.name)}</span>
+                            </a>
+                            <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">Hợp lệ</span>
+                        </div>
+                    `).join('');
+                } else {
+                    pdfListWrap.classList.add('hidden');
+                    pdfList.innerHTML = '';
+                }
+            }
+        };
+
+        window.openCompleteStepDialog = function(mIndex, pkgIndex, stepIndex) {
+            const dlg = document.getElementById('completeStepDialog');
+            const m = db.missions[mIndex];
+            const p = m ? m.packages[pkgIndex] : null;
+            const step = p && Array.isArray(p.steps) ? p.steps[stepIndex] : null;
+            if (!dlg || !step || !window.canEditPackage(m, p, currentUser)) return;
+
+            pendingCompleteStepTarget = { mIndex, pkgIndex, stepIndex };
+            isUploadingCompletePdf = false;
+            const pdfInput = document.getElementById('completeStepPdfInput');
+            const uploadIndicator = document.getElementById('completeStepPdfUploading');
+            if (pdfInput) pdfInput.value = '';
+            if (uploadIndicator) {
+                uploadIndicator.classList.add('hidden');
+                uploadIndicator.classList.remove('flex');
+            }
+            window.setCompleteStepPdfError('');
+            window.renderCompleteStepDialogState();
+
+            if (!dlg.open && typeof dlg.showModal === 'function') {
+                dlg.showModal();
+            }
+
+            const needsPdf = window.stepHasTemplateForm(step) && !window.stepHasCompletedPdf(step);
+            const focusEl = needsPdf ? document.getElementById('completeStepPdfInput') : document.getElementById('btnConfirmCompleteStep');
+            if (focusEl) focusEl.focus();
+        };
+
+        window.closeCompleteStepDialog = function() {
+            const dlg = document.getElementById('completeStepDialog');
+            if (dlg && dlg.open) {
+                dlg.close('cancel');
+            }
+        };
+
+        window.handleCompleteStepPdfSelected = async function(inputElem) {
+            if (!pendingCompleteStepTarget || !inputElem || !inputElem.files || inputElem.files.length === 0) return;
+            const { mIndex, pkgIndex, stepIndex } = pendingCompleteStepTarget;
+            const m = db.missions[mIndex];
+            const pkg = m ? m.packages[pkgIndex] : null;
+            const step = pkg && Array.isArray(pkg.steps) ? pkg.steps[stepIndex] : null;
+            if (!step || !window.canEditPackage(m, pkg, currentUser)) return;
+
+            const file = inputElem.files[0];
+            if (!window.isPdfUploadFile(file)) {
+                window.setCompleteStepPdfError('Tệp không hợp lệ. Vui lòng chọn đúng văn bản định dạng PDF (.pdf).');
+                inputElem.value = '';
+                inputElem.focus();
+                return;
+            }
+            if (file.size > 25 * 1024 * 1024) {
+                window.setCompleteStepPdfError('Dung lượng tệp PDF vượt quá giới hạn tối đa 25MB.');
+                inputElem.value = '';
+                inputElem.focus();
+                return;
+            }
+
+            window.setCompleteStepPdfError('');
+            isUploadingCompletePdf = true;
+            const uploadIndicator = document.getElementById('completeStepPdfUploading');
+            const confirmBtn = document.getElementById('btnConfirmCompleteStep');
+            if (confirmBtn) confirmBtn.disabled = true;
+            if (uploadIndicator) {
+                uploadIndicator.classList.remove('hidden');
+                uploadIndicator.classList.add('flex');
+            }
+
+            try {
+                const fileUrl = await window.SCE_NAS.uploadFile(file);
+                if (!Array.isArray(step.links)) step.links = [];
+                step.links.push({ name: file.name, url: fileUrl });
+                window.logActivity(mIndex, pkgIndex, `Tải văn bản hoàn thành PDF lên Máy chủ NAS: ${file.name}`);
+                window.renderMissions();
+                window.saveDataToGAS(false);
+
+                isUploadingCompletePdf = false;
+                if (uploadIndicator) {
+                    uploadIndicator.classList.add('hidden');
+                    uploadIndicator.classList.remove('flex');
+                }
+                inputElem.value = '';
+                const dlg = document.getElementById('completeStepDialog');
+                if (dlg && dlg.open && pendingCompleteStepTarget) {
+                    window.renderCompleteStepDialogState();
+                    if (confirmBtn) confirmBtn.focus();
+                }
+            } catch (err) {
+                console.error(err);
+                isUploadingCompletePdf = false;
+                if (confirmBtn) confirmBtn.disabled = false;
+                if (uploadIndicator) {
+                    uploadIndicator.classList.add('hidden');
+                    uploadIndicator.classList.remove('flex');
+                }
+                inputElem.value = '';
+                window.setCompleteStepPdfError('Không thể tải tệp PDF lên máy chủ NAS. Vui lòng thử lại.');
+                inputElem.focus();
+            }
+        };
+
+        window.submitCompleteStepDialog = function(e) {
+            if (e) e.preventDefault();
+            if (isUploadingCompletePdf || !pendingCompleteStepTarget) return;
+            const { mIndex, pkgIndex, stepIndex } = pendingCompleteStepTarget;
+            const m = db.missions[mIndex];
+            const pkg = m ? m.packages[pkgIndex] : null;
+            const step = pkg && Array.isArray(pkg.steps) ? pkg.steps[stepIndex] : null;
+            if (!step) return window.closeCompleteStepDialog();
+
+            if (!window.canEditPackage(m, pkg, currentUser)) {
+                window.closeCompleteStepDialog();
+                return Swal.fire('Lỗi', 'Bạn không có quyền thao tác trên nhiệm vụ cụ thể này!', 'error');
+            }
+            if (pkg.steps.slice(0, stepIndex).some(s => s && !s.completed)) {
+                window.closeCompleteStepDialog();
+                return Swal.fire('Cảnh báo', 'Phải hoàn thành các bước trước đó mới được hoàn thành bước này!', 'warning');
+            }
+
+            if (window.stepHasTemplateForm(step) && !window.stepHasCompletedPdf(step)) {
+                window.setCompleteStepPdfError('Vui lòng tải lên tệp văn bản hoàn thành định dạng PDF (.pdf) trước khi xác nhận hoàn thành bước này.');
+                const pdfInput = document.getElementById('completeStepPdfInput');
+                if (pdfInput) pdfInput.focus();
+                return;
+            }
+
+            const confirmBtn = document.getElementById('btnConfirmCompleteStep');
+            if (confirmBtn) confirmBtn.disabled = true;
+
+            step.completed = true;
+            step.completedBy = currentUser ? currentUser.fullname : "";
+            window.logActivity(mIndex, pkgIndex, `Hoàn thành bước: ${step.name}`);
+
+            const dlg = document.getElementById('completeStepDialog');
+            if (dlg && dlg.open) dlg.close('confirmed');
+            if (confirmBtn) confirmBtn.disabled = false;
+
+            window.renderMissions();
+            window.saveDataToGAS(false);
+            if (window.toast) window.toast.fire({ icon: 'success', title: 'Đã hoàn thành bước công việc!' });
         };
 
         window.addProjStep = function(mIndex, pkgIndex) { 
@@ -7279,8 +7643,9 @@ const defaultDocs = [
             if (!inputElem.files || inputElem.files.length === 0) return;
             let file = inputElem.files[0];
             
-            if (file.size > 10 * 1024 * 1024) {
-                return Swal.fire('Lỗi', 'Dung lượng file vượt quá giới hạn 10MB', 'error');
+            if (file.size > 25 * 1024 * 1024) {
+                inputElem.value = "";
+                return Swal.fire('Lỗi', 'Dung lượng file vượt quá giới hạn 25MB', 'error');
             }
 
             const lText = document.getElementById('loaderText');
@@ -7853,7 +8218,7 @@ const defaultDocs = [
             });
         });
 
-        // Xử lý đóng hộp thoại <dialog id="syncProcessDialog"> & fallback closedby="any" cho Safari
+        // Xử lý đóng hộp thoại <dialog> (#syncProcessDialog, #completeStepDialog) & fallback closedby="any" cho Safari
         (function initSyncProcessDialog() {
             const syncDlg = document.getElementById('syncProcessDialog');
             if (syncDlg) {
@@ -7865,6 +8230,38 @@ const defaultDocs = [
                     }
                 });
             }
+
+            const completeDlg = document.getElementById('completeStepDialog');
+            const completeForm = document.getElementById('completeStepForm');
+            const completePdfInput = document.getElementById('completeStepPdfInput');
+            const btnCloseComplete = document.getElementById('btnCloseCompleteStepDialog');
+            const btnCancelComplete = document.getElementById('btnCancelCompleteStep');
+            if (completeDlg) {
+                completeDlg.addEventListener('close', function() {
+                    const rv = completeDlg.returnValue;
+                    completeDlg.returnValue = '';
+                    void rv;
+                    pendingCompleteStepTarget = null;
+                    isUploadingCompletePdf = false;
+                    if (completePdfInput) completePdfInput.value = '';
+                    window.setCompleteStepPdfError('');
+                });
+            }
+            if (completeForm) {
+                completeForm.addEventListener('submit', window.submitCompleteStepDialog);
+            }
+            if (completePdfInput) {
+                completePdfInput.addEventListener('change', function() {
+                    window.handleCompleteStepPdfSelected(this);
+                });
+            }
+            if (btnCloseComplete) {
+                btnCloseComplete.addEventListener('click', window.closeCompleteStepDialog);
+            }
+            if (btnCancelComplete) {
+                btnCancelComplete.addEventListener('click', window.closeCompleteStepDialog);
+            }
+
             if (typeof HTMLDialogElement !== 'undefined' && !('closedBy' in HTMLDialogElement.prototype)) {
                 const outside = (e, dialog) => {
                     const r = dialog.getBoundingClientRect();
