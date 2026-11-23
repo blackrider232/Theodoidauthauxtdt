@@ -11,3 +11,4 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 backend/pgdata/
 bieu_mau_goc/_backup_*/
+~$*
