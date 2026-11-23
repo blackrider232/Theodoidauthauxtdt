@@ -4,33 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản trị Đấu thầu SCE</title>
-            <!-- NAS Synology Connector -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <!-- NAS Synology Connector -->
     <script src="nas-connector.js"></script>
-    <script>
-        // Khởi tạo sớm hàm chuẩn hóa vai trò ngay từ đầu trang để chống lỗi cache
-        window.normalizeRole = function(role) {
-            const r = String(role || 'user').toLowerCase().trim();
-            if (r === 'admin') return 'admin';
-            if (r === 'leader') return 'leader';
-            if (r === 'dept_leader' || r === 'team_lead') return 'dept_leader';
-            return 'user';
-        };
-    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- SortableJS -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- html2pdf for PDF Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<!-- SheetJS (XLSX) for Native Excel Export -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- PizZip for Smart DOCX Auto-Fill Template Merging -->
-    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
+    <!-- SortableJS (deferred) -->
+    <script defer fetchpriority="low" src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <!-- SheetJS (XLSX) for Native Excel Export (deferred) -->
+    <script defer fetchpriority="low" src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- PizZip for Smart DOCX Auto-Fill Template Merging (deferred) -->
+    <script defer fetchpriority="low" src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
     <!-- PWA Manifest & iOS Standalone App Meta -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -50,7 +41,6 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        .kanban-col { min-height: 500px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @media (min-width: 769px) {
@@ -134,14 +124,7 @@
     </style>
 <style id="mobile-ux">
 @media (max-width: 768px) {
-    /* 1. Tự động ẩn nút Nhật ký cũ (mà không cần xóa code) */
-    button[onclick*="openActivityLogModal"] { display: none !important; }
-
-    /* Đổi vị trí Dashboard: Việc quá hạn lên đầu */
-    #tab-dashboard { display: flex; flex-direction: column; }
-    #tab-dashboard > div:nth-child(3) { order: -1; margin-bottom: 15px; }
-
-    /* 2. Chống tràn ngang tuyệt đối cho container các bước */
+    /* 1. Chống tràn ngang tuyệt đối cho container các bước */
     div[id^="steps_container_"] {
         overflow-x: hidden !important;
         width: 100% !important;
@@ -329,7 +312,7 @@
     <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4 py-8 transition-colors">
         <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm border-t-4 border-blue-600">
             <div class="text-center mb-6">
-                <img src="logo-192.png" alt="Logo SCE" class="h-16 w-auto mx-auto mb-3 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
+                <img src="logo-192.png" alt="Logo SCE" width="167" height="64" fetchpriority="high" class="h-16 w-auto mx-auto mb-3 object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
                 <h2 class="text-xl font-bold text-blue-900 dark:text-blue-400 uppercase tracking-tight">QUẢN TRỊ ĐẤU THẦU SCE</h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Trung tâm Xúc tiến đầu tư và Hỗ trợ doanh nghiệp Hà Nội</p>
             </div>
@@ -354,13 +337,6 @@
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
-                </div>
-
-                <!-- Khung nhập mã 2FA -->
-                <div id="mfaVerifyBox" class="hidden p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl space-y-2">
-                    <label class="block text-xs font-bold text-amber-800 dark:text-amber-300">Mã xác thực 2 lớp (6 số)</label>
-                    <input type="text" id="loginMfaCode" maxlength="6" inputmode="numeric" class="w-full border border-amber-400 bg-white dark:bg-gray-800 rounded-lg p-2 text-center text-lg font-mono tracking-widest font-bold outline-none dark:text-white" placeholder="000000" onkeypress="if(event.key === 'Enter') window.verifyMfaAndProceed()">
-                    <button type="button" onclick="window.verifyMfaAndProceed()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Xác nhận</button>
                 </div>
 
                 <div class="flex items-center">
@@ -425,7 +401,7 @@
                 <!-- GÓC TRÁI: LOGO SCE NỀN TRẮNG LÀM NÚT HOME -->
                 <div class="flex items-center gap-2.5 sm:gap-3.5 w-full md:w-auto">
                     <a href="javascript:void(0)" onclick="window.switchTab('projects')" class="shrink-0 group flex items-center justify-center p-1.5 bg-white rounded-xl shadow-lg border border-white hover:scale-105 transition-all cursor-pointer" title="Trang chủ / Về danh sách Dự án (Home)">
-                        <img src="logo-192.png" alt="SCE" class="h-8 sm:h-9 w-auto object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
+                        <img src="logo-192.png" alt="SCE" width="94" height="36" decoding="async" class="h-8 sm:h-9 w-auto object-contain" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Emblem_of_Vietnam.svg/120px-Emblem_of_Vietnam.svg.png';">
                     </a>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
@@ -531,7 +507,7 @@
                     <div class="flex flex-col sm:flex-row gap-2.5 w-full items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
                             <i class="fas fa-search absolute left-3.5 top-2.5 text-gray-400"></i>
-                            <input type="text" id="searchInput" onkeyup="window.renderMissions()" placeholder="Tìm kiếm tất cả (Nhiệm vụ chính, nhiệm vụ cụ thể, nhà thầu, bước công việc, ghi chú)..." class="w-full pl-9 pr-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition">
+                            <input type="text" id="searchInput" oninput="window.debouncedRenderMissions()" placeholder="Tìm kiếm tất cả (Nhiệm vụ chính, nhiệm vụ cụ thể, nhà thầu, bước công việc, ghi chú)..." class="w-full pl-9 pr-3 py-1.5 border dark:border-gray-600 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white transition">
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <button type="button" id="btnAdvancedSearch" onclick="window.toggleAdvancedSearch()" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-blue-700 dark:text-blue-300 rounded-lg text-xs sm:text-sm font-semibold border border-blue-200 dark:border-gray-600 flex items-center gap-1.5 shadow-sm transition whitespace-nowrap" title="Mở rộng các bộ lọc tìm kiếm nâng cao">
@@ -802,19 +778,6 @@
         </div><!-- End of #appScreen -->
 
     <!-- ==================== MODALS ==================== -->
-    <!-- Modal Nhật ký Hoạt động -->
-    <div id="activityLogModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700">
-                <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-history mr-2 text-blue-600"></i>Nhật ký thao tác Gói thầu</h2>
-                <button onclick="window.closeActivityLogModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div>
-                <div id="activityLogs" class="bg-gray-100 dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-700 h-64 overflow-y-auto text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Sửa Nhiệm vụ -->
     <div id="editMissionModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-indigo-500 transform transition-all">
@@ -1153,23 +1116,6 @@
         </form>
     </dialog>
 
-    <!-- Modal Bình luận -->
-    <div id="commentsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-blue-500 flex flex-col max-h-[90vh]">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 pb-2 border-b dark:border-gray-700 flex justify-between items-center">
-                <span><i class="fas fa-comments text-blue-500 mr-2"></i>Trao đổi: <span id="commentStepName" class="text-blue-600 dark:text-blue-400 text-sm font-normal"></span></span>
-                <button onclick="window.closeCommentsModal()" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
-            </h2>
-            <div id="commentsList" class="flex-1 overflow-y-auto space-y-3 mb-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-lg min-h-[250px] max-h-[400px]">
-                <!-- Comments will be injected here -->
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="newCommentText" placeholder="Nhập nội dung trao đổi, báo cáo..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-white" onkeypress="if(event.key === 'Enter') window.saveComment()">
-                <button onclick="window.saveComment()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium shadow-md whitespace-nowrap"><i class="fas fa-paper-plane mr-1"></i>Gửi</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Tạo Nhiệm vụ mới -->
     <div id="createMissionModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-emerald-500">
@@ -1337,18 +1283,7 @@
             });
         };
         initIDB();
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycby/exec';
-        var supabaseClient = null;
 
-        window.refreshSupabaseSessionNow = async function() { return null; };
-        window.sceSupabaseFetch = async function(url, options = {}) { return fetch(url, options); };
-        window.completeAuthenticatedSession = async function(authUser) {
-            currentUser = authUser;
-            resetInactivityTimer();
-            window.openAppScreen();
-        };
-
-        
         const VN_HOLIDAYS = ['01/01', '30/04', '01/05', '02/09'];
 // Các ngày nghỉ lễ Âm lịch (Tết Nguyên Đán, Giỗ Tổ Hùng Vương) 2024-2030 (Dự kiến)
 const LUNAR_HOLIDAYS = [
@@ -3226,31 +3161,6 @@ const defaultDocs = [
             }
         };
 
-        window.toggleAllPackages = function() {
-            let allKeys = [];
-            if (db.missions) {
-                db.missions.forEach((m, mIdx) => {
-                    if (m.packages) {
-                        m.packages.forEach((p, pIdx) => {
-                            allKeys.push(`${mIdx}_${pIdx}`);
-                        });
-                    }
-                });
-            }
-            
-            const shouldOpen = window.expandedOverviewPackages.size < allKeys.length || window.expandedPackages.size < allKeys.length;
-            if (shouldOpen) {
-                allKeys.forEach(k => {
-                    window.expandedOverviewPackages.add(k);
-                    window.expandedPackages.add(k);
-                });
-            } else {
-                window.expandedOverviewPackages.clear();
-                window.expandedPackages.clear();
-            }
-            window.renderMissions();
-        };
-
         // Bật/Tắt chế độ đổi thứ tự bước công việc cho 1 gói thầu (Phương án 3 Hybrid)
         window.toggleReorderMode = function(mIndex, pkgIndex) {
             const key = `${mIndex}_${pkgIndex}`;
@@ -3371,15 +3281,24 @@ const defaultDocs = [
         let isDataSynchronized = false; 
         let isSaving = false; 
         let lastSaveTime = 0;
+        let lastBackupTime = 0;
+        let lastSyncCheckTime = 0;
+        let searchDebounceTimer = null;
+        let renderPostTimer = null;
         let currentMissionIndexForNewPackage = -1; 
         let configSortableInstance = null; 
         let sortableInstancesList = [];
         let currentEditUserIndex = -1; 
-        let globalOverdueTasksList = [];
         let cEditM = -1; 
         let cEditP = -1; 
         let cEditS = -1; 
-        let chartStatusIns = null;
+
+        window.debouncedRenderMissions = function() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                window.renderMissions();
+            }, 150);
+        };
 
         // Tiện ích Toast
         window.toast = Swal.mixin({ 
@@ -3418,7 +3337,6 @@ const defaultDocs = [
                 icon.classList.add('fa-moon'); 
                 icon.classList.replace('text-white', 'text-indigo-200'); 
             }
-            const vDash = document.getElementById('view-dashboard'); if (vDash && !vDash.classList.contains('hidden') && typeof window.renderCharts === 'function') { window.renderCharts(); }
         };
 
         function sanitizeDbUsers(usersArr) {
@@ -3861,8 +3779,10 @@ const defaultDocs = [
 
             try {
                 if (window.SCE_NAS) {
-                    await window.SCE_NAS.saveData(db);
+                    const shouldCreateBackup = Boolean(alertSuccess) || (Date.now() - lastBackupTime >= 10 * 60 * 1000);
+                    await window.SCE_NAS.saveData(db, shouldCreateBackup);
                     lastSaveTime = Date.now();
+                    if (shouldCreateBackup) lastBackupTime = lastSaveTime;
                     if (syncIcon) syncIcon.className = 'fas fa-check-circle text-green-400';
                     if (syncText) syncText.innerText = 'Đã lưu (NAS)';
                     clearTimeout(syncTimeout);
@@ -3974,10 +3894,6 @@ const defaultDocs = [
             } else {
                 showDeadlinePopup();
             }
-
-            // Start auto-refresh
-            if (window.bgSyncTimer) clearInterval(window.bgSyncTimer);
-            window.bgSyncTimer = setInterval(backgroundSync, 3 * 60 * 1000); // 3 minutes
         };
 
         
@@ -4013,15 +3929,14 @@ const defaultDocs = [
             try {
                 const backupsData = await window.SCE_NAS.getBackups();
                 const tbody = document.getElementById('backupsTableBody');
-                tbody.innerHTML = '';
                 if (!backupsData || backupsData.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500 italic">Chưa có bản sao lưu nào trên NAS.</td></tr>';
                 } else {
-                    backupsData.forEach(b => {
+                    const rows = backupsData.map(b => {
                         const dt = new Date(b.created_at);
                         const timeFormatted = dt.toLocaleString('vi-VN');
                         const safeId = String(b.id);
-                        tbody.innerHTML += `
+                        return `
                             <tr class="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                                 <td class="p-3 text-center font-bold text-gray-500 dark:text-gray-400">#${escapeHtml(safeId)}</td>
                                 <td class="p-3 text-sm">${escapeHtml(timeFormatted)}</td>
@@ -4032,6 +3947,7 @@ const defaultDocs = [
                                 </td>
                             </tr>`;
                     });
+                    tbody.innerHTML = rows.join('');
                 }
             } catch (err) {
                 Swal.fire('Thông báo', 'Không thể tải danh sách sao lưu từ NAS: ' + err.message, 'info');
@@ -4081,7 +3997,9 @@ const defaultDocs = [
 
         // Đồng bộ định kỳ với NAS Synology
         async function backgroundSync() {
+            if (document.visibilityState === 'hidden') return;
             if (!isDataSynchronized || !currentUser || isSaving || (Date.now() - lastSaveTime < 15000)) return;
+            lastSyncCheckTime = Date.now();
             const syncIcon = document.querySelector('#syncStatus i');
             const syncText = document.getElementById('syncText');
             try {
@@ -4093,7 +4011,6 @@ const defaultDocs = [
                     const templatesChanged = JSON.stringify(db.processTemplates) !== JSON.stringify(serverDb.processTemplates);
                     if (missionsChanged || templatesChanged) {
                         db = serverDb;
-                        applyDefaultsIfMissing();
                         autoCleanArchivedData();
                         const vProj = document.getElementById('view-projects');
                         if (vProj && !vProj.classList.contains('hidden')) window.renderMissions();
@@ -4113,6 +4030,12 @@ const defaultDocs = [
                 if (syncText) syncText.innerText = "Chế độ cục bộ";
             }
         }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && Date.now() - lastSyncCheckTime >= 30000) {
+                backgroundSync();
+            }
+        });
 
         window.switchAuthMode = function(mode) {
             const err = document.getElementById('loginError');
@@ -4170,19 +4093,6 @@ const defaultDocs = [
                 if (loader) loader.style.display = 'none';
                 showLoginError(error.message || 'Lỗi đăng nhập');
             }
-        };
-
-        window.handleGoogleLogin = function() {
-            Swal.fire({
-                icon: 'info',
-                title: 'Máy chủ nội bộ NAS Synology',
-                text: 'Hệ thống đã chuyển sang sử dụng máy chủ nội bộ an toàn trên NAS Synology DS224+. Vui lòng đăng nhập bằng Email và Mật khẩu nội bộ của đơn vị!',
-                confirmButtonColor: '#2563eb'
-            });
-        };
-
-        window.verifyMfaAndProceed = function() {
-            document.getElementById('mfaVerifyBox').classList.add('hidden');
         };
 
         // Đăng ký tài khoản mới trên NAS Synology
@@ -4245,7 +4155,10 @@ const defaultDocs = [
             localStorage.removeItem('bidAppUser');
             localStorage.removeItem('sce_nas_logged_user');
             if (window.SCE_NAS) window.SCE_NAS.setToken('');
-            if (autoSyncInterval) clearInterval(autoSyncInterval);
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+                autoSyncInterval = null;
+            }
             if (inactivityTimer) clearTimeout(inactivityTimer);
             
             document.getElementById('appScreen').classList.add('hidden');
@@ -4377,294 +4290,12 @@ const defaultDocs = [
             if (tab === 'projects') window.renderMissions();
         };
 
-        window.renderCalendar = function() {
-            const calendarEl = document.getElementById('calendar');
-            if (!calendarEl) return;
-            
-            let events = [];
-            const now = new Date();
-            
-            if (db.missions && Array.isArray(db.missions)) {
-                db.missions.forEach(m => {
-                    if (m.archived || m.completed) return;
-                    if (m.packages && Array.isArray(m.packages)) {
-                        m.packages.forEach(p => {
-                            if (p.archived || p.completed) return;
-                            if (!window.canViewPackage(m, p, currentUser)) return;
-                            
-                            if (p.steps && Array.isArray(p.steps)) {
-                                p.steps.forEach(s => {
-                                    if (s.completed) return;
-                                    let deadline = new Date(s.deadline);
-                                    let diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-                                    
-                                    let color = '#3b82f6'; // blue
-                                    if (diffDays < 0) color = '#ef4444'; // red (overdue)
-                                    else if (diffDays <= 3) color = '#f97316'; // orange (approaching)
-                                    
-                                    events.push({
-                                        title: s.name + ' (' + p.name + ')',
-                                        start: deadline.toISOString().split('T')[0],
-                                        color: color,
-                                        allDay: true
-                                    });
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-            
-            let isDark = document.documentElement.classList.contains('dark');
-            if (window.calendarInstance) {
-                window.calendarInstance.destroy();
-            }
-            
-            window.calendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'vi',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                },
-                buttonText: {
-                    today: 'Hôm nay',
-                    month: 'Tháng',
-                    week: 'Tuần'
-                },
-                events: events,
-                height: 600
-            });
-            window.calendarInstance.render();
-        };
-
-        window.renderCharts = function() {
-            let sTodo = 0, sDoing = 0, sLate = 0, sDone = 0; 
-            const now = new Date(new Date().setHours(0,0,0,0));
-            if (db.missions) {
-                db.missions.forEach(m => {
-                    if (m.archived) return; 
-                    if (m.packages) {
-                        m.packages.forEach(p => {
-                            if (p.archived) return; 
-                            if (!window.canViewPackage(m, p, currentUser)) return;
-                            if (p.completed || m.completed) { 
-                                sDone++; 
-                            } else {
-                                let hasSteps = p.steps && p.steps.length > 0; 
-                                let anyDone = false; 
-                                let anyLate = false;
-                                if (hasSteps) { 
-                                    p.steps.forEach(s => { 
-                                        if (s.completed) anyDone = true; 
-                                        else if (new Date(s.deadline) < now) anyLate = true; 
-                                    }); 
-                                }
-                                if (anyLate) sLate++; 
-                                else if (anyDone) sDoing++; 
-                                else sTodo++;
-                            }
-                        });
-                    }
-                });
-            }
-            let isDark = document.documentElement.classList.contains('dark'); 
-            let textColor = isDark ? '#e5e7eb' : '#374151';
-            const ctx1 = document.getElementById('chartStatus'); 
-            if (chartStatusIns) chartStatusIns.destroy();
-            if (ctx1) { 
-                chartStatusIns = new Chart(ctx1, { 
-                    type: 'doughnut', 
-                    data: { 
-                        labels: ['Chưa bắt đầu', 'Đang thực hiện', 'Trễ hạn', 'Đã xong'], 
-                        datasets: [{ 
-                            data: [sTodo, sDoing, sLate, sDone], 
-                            backgroundColor: ['#cbd5e1', '#3b82f6', '#ef4444', '#10b981'], 
-                            borderWidth: 0 
-                        }] 
-                    }, 
-                    options: { 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { color: textColor } 
-                            } 
-                        } 
-                    } 
-                }); 
-            }
-        };
-
-        window.renderDashboard = function() {
-            try {
-                let activeMs = 0, overdue = 0, completedPkgs = 0; 
-                const now = new Date(new Date().setHours(0,0,0,0)); 
-                globalOverdueTasksList = []; 
-                let missionsHTML = ""; 
-                let overdueHTML = "";
-                const role = window.normalizeRole(currentUser.role);
-                
-                if (role === 'user') { 
-                    document.getElementById('dashTitle').innerHTML = `Bảng điều khiển Tiến độ Của Bạn`; 
-                } else if (role === 'dept_leader') {
-                    document.getElementById('dashTitle').innerHTML = `Báo cáo Tiến độ ${escapeHtml(currentUser.department || 'Phòng chuyên môn')}`;
-                } else { 
-                    document.getElementById('dashTitle').innerHTML = `Báo cáo Giao ban Tổng thể Trung tâm`; 
-                }
-                
-                if (db.missions && Array.isArray(db.missions)) {
-                    db.missions.forEach((m) => {
-                        if (m.archived) return; 
-                        let visiblePackages = [];
-                        if (m.packages && Array.isArray(m.packages)) {
-                            m.packages.forEach(p => { 
-                                if (p.archived) return; 
-                                if (window.canViewPackage(m, p, currentUser)) { 
-                                    visiblePackages.push(p); 
-                                } 
-                            });
-                        }
-                        if (!window.canViewMission(m, currentUser) && visiblePackages.length === 0) return; 
-                        if (!m.completed) activeMs++; 
-                        let mTotalSteps = 0; 
-                        let mCompletedSteps = 0;
-                        
-                        visiblePackages.forEach(p => {
-                            if (p.steps && Array.isArray(p.steps)) {
-                                p.steps.forEach(s => {
-                                    mTotalSteps++; 
-                                    if (s.completed) { 
-                                        mCompletedSteps++; 
-                                    } else {
-                                        if (!p.completed && !m.completed) {
-                                            let sDate = new Date(s.deadline);
-                                            if (sDate < now) { 
-                                                overdue++; 
-                                                let diffDays = Math.ceil((now - sDate) / (1000 * 60 * 60 * 24)); 
-                                                let tOwner = p.owner || m.owner || "Không rõ"; 
-                                                let mNameSafe = m.name || "Nhiệm vụ"; 
-                                                let pNameSafe = p.name || "Nhiệm vụ cụ thể"; 
-                                                let sNameSafe = s.name || "Công việc"; 
-                                                globalOverdueTasksList.push({ mName: mNameSafe, pName: pNameSafe, sName: sNameSafe, owner: tOwner, days: diffDays }); 
-                                                overdueHTML += `
-                                                    <tr class="border-b dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition">
-                                                        <td class="p-3">
-                                                            <div class="font-medium text-red-700 dark:text-red-400">${escapeHtml(sNameSafe)}</div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate w-48" title="${escapeHtml(pNameSafe)}">Gói: ${escapeHtml(pNameSafe)}</div>
-                                                        </td>
-                                                        <td class="p-3 text-gray-700 dark:text-gray-300 font-medium">${escapeHtml(tOwner)}</td>
-                                                        <td class="p-3 text-center"><span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded font-bold">${diffDays}</span></td>
-                                                    </tr>`; 
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                            if (p.completed) completedPkgs++;
-                        });
-                        
-                        let progress = mTotalSteps > 0 ? Math.round((mCompletedSteps / mTotalSteps) * 100) : 0; 
-                        if (m.completed) progress = 100; 
-                        let colorClass = progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'; 
-                        let statusBadge = m.completed ? `<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Hoàn thành</span>` : ''; 
-                        let mNameFinal = m.name || "Nhiệm vụ"; 
-                        let mOwnerFinal = m.owner || "Không rõ";
-                        
-                        missionsHTML += `
-                            <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                                <td class="p-3">
-                                    <div class="font-bold text-gray-800 dark:text-gray-200">${escapeHtml(mNameFinal)} ${statusBadge}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">Hạn chót: ${window.formatDate(m.deadline)}</div>
-                                </td>
-                                <td class="p-3 text-gray-700 dark:text-gray-300">${escapeHtml(mOwnerFinal)}</td>
-                                <td class="p-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div class="${colorClass} h-2 rounded-full" style="width: ${progress}%"></div>
-                                        </div>
-                                        <span class="text-xs font-bold w-8 text-right dark:text-gray-300">${progress}%</span>
-                                    </div>
-                                </td>
-                            </tr>`;
-                    });
-                }
-                document.getElementById('dashActiveMissions').innerText = activeMs; 
-                document.getElementById('dashOverdue').innerText = overdue; 
-                document.getElementById('dashCompletedPkgs').innerText = completedPkgs; 
-                document.getElementById('dashMissionsTable').innerHTML = missionsHTML || `<tr><td colspan="3" class="p-6 text-center text-gray-400 italic">Chưa có nhiệm vụ đang thực hiện.</td></tr>`; 
-                document.getElementById('dashOverdueTable').innerHTML = overdueHTML || `<tr><td colspan="3" class="p-6 text-center text-emerald-600 dark:text-emerald-500 font-medium italic"><i class="fas fa-check-circle mr-1"></i>Không có công việc nào trễ hạn.</td></tr>`;
-                window.renderCharts();
-            } catch (error) { 
-                console.error("Lỗi Render Dashboard:", error); 
-                Swal.fire('Lỗi', 'Lỗi khi vẽ Tổng quan: ' + error.message, 'error'); 
-            }
-        };
-
-        window.renderKanban = function() {
-            try {
-                let htmlTodo = "", htmlDoing = "", htmlLate = "", htmlDone = ""; 
-                let cTodo = 0, cDoing = 0, cLate = 0, cDone = 0; 
-                const now = new Date(new Date().setHours(0,0,0,0));
-                
-                if (db.missions && Array.isArray(db.missions)) {
-                    db.missions.forEach((m) => {
-                        if (m.archived) return; 
-                        if (m.packages && Array.isArray(m.packages)) {
-                            m.packages.forEach((p) => {
-                                if (p.archived) return; 
-                                if (!window.canViewPackage(m, p, currentUser)) return;
-                                
-                                let safePkgName = p.name || 'Nhiệm vụ cụ thể'; 
-                                let ownerName = p.owner || m.owner; 
-                                let totalSteps = 0, completedSteps = 0; 
-                                let isLate = false;
-                                
-                                if (p.steps && Array.isArray(p.steps)) { 
-                                    totalSteps = p.steps.length; 
-                                    p.steps.forEach(s => { 
-                                        if (s.completed) completedSteps++; 
-                                        else if (!p.completed && !m.completed && new Date(s.deadline) < now) isLate = true; 
-                                    }); 
-                                }
-                                let progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0; 
-                                if (p.completed || m.completed) progress = 100;
-                                
-                                let cardHtml = `
-                                    <div class="group bg-white dark:bg-gray-800 p-3 rounded shadow-sm border-l-4 ${p.completed||m.completed ? 'border-emerald-500' : (isLate ? 'border-red-500' : 'border-blue-500')} border border-gray-200 dark:border-gray-700 hover:shadow-md transition cursor-pointer" onclick="window.switchTab('projects'); setTimeout(()=>{ const sInput = document.getElementById('searchInput'); if(sInput) { sInput.value='${escapeHtml(safePkgName)}'; window.renderMissions(); } }, 200);">
-                                        <div class="text-[13px] font-bold text-gray-800 dark:text-gray-200 leading-tight mb-1 group-hover:whitespace-normal break-words">${escapeHtml(safePkgName)}</div>
-                                        <div class="text-[10px] text-gray-500 dark:text-gray-400 mb-2 truncate group-hover:whitespace-normal group-hover:overflow-visible transition-all">${escapeHtml(m.name)}</div>
-                                        <div class="flex justify-between items-center text-[10px]">
-                                            <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded truncate max-w-[90px] group-hover:max-w-none group-hover:whitespace-normal inline-block transition-all"><i class="fas fa-user mr-1"></i>${escapeHtml(ownerName)}</span>
-                                            <span class="font-bold ${progress===100?'text-emerald-600':(isLate?'text-red-600':'text-blue-600')}">${progress}%</span>
-                                        </div>
-                                    </div>`;
-                                
-                                if (progress === 100) { htmlDone += cardHtml; cDone++; } 
-                                else if (isLate) { htmlLate += cardHtml; cLate++; } 
-                                else if (progress > 0) { htmlDoing += cardHtml; cDoing++; } 
-                                else { htmlTodo += cardHtml; cTodo++; }
-                            });
-                        }
-                    });
-                }
-                document.getElementById('kb-todo').innerHTML = htmlTodo || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; 
-                document.getElementById('kb-doing').innerHTML = htmlDoing || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; 
-                document.getElementById('kb-late').innerHTML = htmlLate || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; 
-                document.getElementById('kb-done').innerHTML = htmlDone || `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 italic">Trống</div>`; 
-                document.getElementById('kb-todo-count').innerText = cTodo; 
-                document.getElementById('kb-doing-count').innerText = cDoing; 
-                document.getElementById('kb-late-count').innerText = cLate; 
-                document.getElementById('kb-done-count').innerText = cDone;
-            } catch (error) { console.error('Loi:', error); const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none'; showLoginError('Loi: ' + error.message); }
-        };
-
         window.renderMissions = function() {
             try {
                 const container = document.getElementById('projectList'); 
                 if (!container) return; 
-                container.innerHTML = '';
+                clearTimeout(searchDebounceTimer);
+                const missionHtmlChunks = [];
                 
                 const searchKw = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
                 const sq = searchKw;
@@ -5284,7 +4915,7 @@ const defaultDocs = [
                         const isAutoOpenedBySearch = Boolean(searchKw && (mNameSafe.toLowerCase().includes(searchKw) || visiblePackages.length > 0));
                         const isMissionOpen = (window.expandedMissions && window.expandedMissions.has(missionKey)) || isAutoOpenedBySearch;
 
-                        container.innerHTML += `
+                        missionHtmlChunks.push(`
                             <div class="mission-block border ${mBorderColor} rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm mb-5 transition-all duration-200">
                                 <div onclick="window.toggleMissionCollapse(${mIndex})" class="${mBgColor} p-3 sm:p-4 border-b border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 cursor-pointer hover:brightness-95 dark:hover:brightness-110 transition select-none">
                                     <div class="flex items-start gap-2.5 flex-1 min-w-0">
@@ -5313,7 +4944,7 @@ const defaultDocs = [
                                     </div>
                                 </div>
                                 <div class="p-2 sm:p-4 bg-gray-50/50 dark:bg-gray-900/50 ${isMissionOpen ? '' : 'hidden'}">${packagesHtml}</div>
-                            </div>`;
+                            </div>`);
                     });
                 }
 
@@ -5352,15 +4983,16 @@ const defaultDocs = [
                     }
                 });
 
-                if (visibleCount === 0) {
-                    container.innerHTML = `<div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"><i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-5xl mb-4"></i><p class="text-gray-500 dark:text-gray-400 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp bộ lọc.</p></div>`;
-                }
+                container.innerHTML = visibleCount === 0
+                    ? `<div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"><i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-5xl mb-4"></i><p class="text-gray-500 dark:text-gray-400 font-medium">Không có Nhiệm vụ/Gói thầu nào phù hợp bộ lọc.</p></div>`
+                    : missionHtmlChunks.join('');
 
                 // Dọn dẹp và khởi tạo SortableJS cho các bước
                 sortableInstancesList.forEach(inst => { try { inst.destroy(); } catch(e){} });
                 sortableInstancesList = [];
 
-                setTimeout(() => {
+                if (renderPostTimer) clearTimeout(renderPostTimer);
+                renderPostTimer = setTimeout(() => {
                     const btnViewModeText = document.getElementById('btnViewModeText');
                     if (btnViewModeText) {
                         let totalMissions = (db.missions || []).length;
@@ -5380,7 +5012,7 @@ const defaultDocs = [
                         }
                     }
 
-                if (!window.isReadOnlySupervisor(currentUser)) {
+                    if (!window.isReadOnlySupervisor(currentUser) && typeof Sortable !== 'undefined') {
                     document.querySelectorAll('.step-list-tbody').forEach(tbody => {
                         let mIdx = parseInt(tbody.getAttribute('data-mindex')); 
                         let pIdx = parseInt(tbody.getAttribute('data-pindex'));
@@ -6444,70 +6076,6 @@ const defaultDocs = [
                     });
                 }
             });
-        };
-
-        window.openCommentsModal = function(mIndex, pIndex, sIndex) {
-            if (!window.canViewPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
-            cEditM = mIndex;
-            cEditP = pIndex;
-            cEditS = sIndex;
-            const step = db.missions[mIndex].packages[pIndex].steps[sIndex];
-            document.getElementById('commentStepName').innerText = step.name;
-            document.getElementById('newCommentText').value = "";
-            window.renderCommentsList();
-            document.getElementById('commentsModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('newCommentText').focus(), 100);
-        };
-
-        window.closeCommentsModal = function() {
-            document.getElementById('commentsModal').classList.add('hidden');
-        };
-
-        window.renderCommentsList = function() {
-            const step = db.missions[cEditM].packages[cEditP].steps[cEditS];
-            const listEl = document.getElementById('commentsList');
-            listEl.innerHTML = "";
-            if (!step.comments || step.comments.length === 0) {
-                listEl.innerHTML = `<div class="text-center text-gray-500 italic mt-10">Chưa có trao đổi nào. Hãy là người đầu tiên!</div>`;
-                return;
-            }
-            step.comments.forEach(c => {
-                let isMe = c.author === currentUser.fullname;
-                let align = isMe ? "justify-end" : "justify-start";
-                let bg = isMe ? "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700";
-                let timeStr = window.formatDate(c.timestamp) + " " + new Date(c.timestamp).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-                
-                listEl.innerHTML += `
-                    <div class="flex ${align} mb-3">
-                        <div class="max-w-[85%] border ${bg} rounded-lg p-3 shadow-sm">
-                            <div class="flex justify-between items-baseline mb-1 gap-4">
-                                <span class="font-bold text-xs ${isMe ? 'text-blue-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}">${escapeHtml(c.author)}</span>
-                                <span class="text-[10px] text-gray-500">${timeStr}</span>
-                            </div>
-                            <div class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">${escapeHtml(c.text)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            setTimeout(() => { listEl.scrollTop = listEl.scrollHeight; }, 50);
-        };
-
-        window.saveComment = function() {
-            if (!window.canViewPackage(db.missions[cEditM], db.missions[cEditM].packages[cEditP], currentUser)) return;
-            const txt = document.getElementById('newCommentText').value.trim();
-            if (!txt) return;
-            const step = db.missions[cEditM].packages[cEditP].steps[cEditS];
-            if (!step.comments) step.comments = [];
-            step.comments.push({
-                author: currentUser.fullname,
-                text: txt,
-                timestamp: new Date().toISOString()
-            });
-            document.getElementById('newCommentText').value = "";
-            window.logActivity(cEditM, cEditP, `Bình luận vào công việc: ${step.name}`);
-            window.renderCommentsList();
-            window.renderMissions();
-            window.saveDataToGAS(false);
         };
 
         // --- CÁC HÀM XÓA, LƯU TRỮ VÀ HOÀN THÀNH ---
@@ -7697,22 +7265,6 @@ const defaultDocs = [
         };
 
         // --- CÁC HÀM CÀI ĐẶT & THÊM MỚI ---
-        window.openActivityLogModal = function(mIndex, pIndex) { 
-            const pkg = db.missions[mIndex].packages[pIndex]; 
-            const logBox = document.getElementById('activityLogs'); 
-            logBox.innerHTML = ''; 
-            if (pkg.logs && pkg.logs.length > 0) { 
-                pkg.logs.forEach(l => logBox.innerHTML += `<div>${escapeHtml(l)}</div>`); 
-            } else { 
-                logBox.innerHTML = '<div class="italic text-gray-400">Chưa có lịch sử.</div>'; 
-            } 
-            document.getElementById('activityLogModal').classList.remove('hidden'); 
-        };
-        window.closeActivityLogModal = function() { 
-            document.getElementById('activityLogModal').classList.add('hidden'); 
-        };
-
-        let enrollingFactorId = null;
         window.openProfileModal = function() {
             document.getElementById('profileEmail').value = currentUser.email || currentUser.username || '';
             const roleDeptInfoEl = document.getElementById('profileRoleDeptInfo');
@@ -8085,22 +7637,24 @@ const defaultDocs = [
             });
             c.innerHTML = rowsHtml;
 
-            configSortableInstance = Sortable.create(c, {
-                handle: '.drag-handle',
-                animation: 150,
-                ghostClass: 'opacity-50',
-                onEnd: function(evt) {
-                    if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
-                        const arr = db.processTemplates[type] ? db.processTemplates[type].steps : null;
-                        if (!Array.isArray(arr)) return;
-                        const [movedItem] = arr.splice(evt.oldIndex, 1);
-                        arr.splice(evt.newIndex, 0, movedItem);
-                        window.markProcessUnsynced(type);
-                        window.renderConfig();
-                        window.saveDataToGAS(false);
+            if (typeof Sortable !== 'undefined') {
+                configSortableInstance = Sortable.create(c, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'opacity-50',
+                    onEnd: function(evt) {
+                        if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+                            const arr = db.processTemplates[type] ? db.processTemplates[type].steps : null;
+                            if (!Array.isArray(arr)) return;
+                            const [movedItem] = arr.splice(evt.oldIndex, 1);
+                            arr.splice(evt.newIndex, 0, movedItem);
+                            window.markProcessUnsynced(type);
+                            window.renderConfig();
+                            window.saveDataToGAS(false);
+                        }
                     }
-                }
-            });
+                });
+            }
         };
 
         window.addNewProcessTemplate = function() {
@@ -8294,25 +7848,6 @@ const defaultDocs = [
                 }
             }
         })();
-        
-        window.addDocLink = function(docIndex) {
-    let url = prompt("Nhập đường dẫn (Link) của văn bản/phụ lục (Bắt đầu bằng http:// hoặc https://):");
-    if (!url) return;
-    if (!url.startsWith('http')) url = 'https://' + url;
-    let name = prompt("Nhập tên hiển thị (Ví dụ: 'Văn bản chính', 'Phụ lục 1'):", "Phụ lục");
-    if (!name) name = "Văn bản";
-    if (!db.regulatoryDocs[docIndex].links) db.regulatoryDocs[docIndex].links = [];
-    db.regulatoryDocs[docIndex].links.push({name: name, url: url});
-    window.renderDocs();
-    window.saveDataToGAS(false);
-};
-window.removeDocLink = function(docIndex, linkIndex) {
-    if (confirm("Xóa link này?")) {
-        db.regulatoryDocs[docIndex].links.splice(linkIndex, 1);
-        window.renderDocs();
-        window.saveDataToGAS(false);
-    }
-};
 
 window.addDocLink = function(docIndex) {
     if (currentUser.role !== 'admin') return;
@@ -8797,226 +8332,6 @@ window.updateDoc = function(i, f, v) {
         };
 
         // --- IN ẤN VĂN BẢN CHUẨN THỂ THỨC HÀNH CHÍNH ---
-        
-        window.exportPDF = function() {
-            try {
-                Swal.fire({
-                    title: 'Đang tạo báo cáo PDF...',
-                    html: 'Vui lòng chờ trong giây lát',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading() }
-                });
-                const today = new Date();
-                const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
-                
-                let txtActive = 0, txtDone = 0, txtLate = 0;
-                const nowTime = new Date();
-                if (db && db.missions) {
-                    db.missions.forEach(m => {
-                        if (m.archived) return;
-                        if (!window.canViewMission(m, currentUser)) return;
-                        let hasVisiblePkg = false;
-                        if (m.packages && m.packages.length > 0) {
-                            m.packages.forEach(p => {
-                                if (!window.canViewPackage(m, p, currentUser)) return;
-                                hasVisiblePkg = true;
-                                let pAllDone = true;
-                                if (p.steps && p.steps.length > 0) {
-                                    p.steps.forEach(s => {
-                                        if (!s.completed) {
-                                            pAllDone = false;
-                                            if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
-                                        }
-                                    });
-                                }
-                                if (p.completed || pAllDone) txtDone++;
-                            });
-                        }
-                        if (hasVisiblePkg && !m.completed) txtActive++;
-                    });
-                }
-
-                let reportHtml = `<div id="pdfPrintArea" style="font-family: 'Times New Roman', Times, serif; padding: 30px 40px; color: #000; line-height: 1.5; background: #fff;">`;
-                reportHtml += `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center;">
-                    <div style="font-size: 14px;">SỞ TÀI CHÍNH HÀ NỘI<br><span style="font-weight: bold; text-decoration: underline;">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div>
-                    <div><span style="font-size: 14px; font-weight: bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span style="font-size: 14px; font-weight: bold; text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></div>
-                </div>`;
-                reportHtml += `<div style="text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px;">${dateStr}</div>`;
-                reportHtml += `<h1 style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
-                reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">I. KẾT QUẢ TỔNG QUAN</h2>`;
-                reportHtml += `<ul style="margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px;">
-                    <li>Tổng số nhiệm vụ đang triển khai: <b>${txtActive}</b></li>
-                    <li>Tổng số nhiệm vụ cụ thể đã hoàn thành: <b>${txtDone}</b></li>
-                    <li>Số lượng công việc đang trễ hạn: <b>${txtLate}</b></li>
-                </ul>`;
-                reportHtml += `<h2 style="font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">II. CHI TIẾT TÌNH HÌNH THỰC HIỆN DỰ ÁN</h2>`;
-                
-                if (db.missions && db.missions.length > 0) {
-                    let visibleMIdx = 0;
-                    db.missions.forEach((m) => {
-                        if (!window.canViewMission(m, currentUser)) return;
-                        const visiblePkgs = (m.packages || []).filter(p => window.canViewPackage(m, p, currentUser));
-                        if (visiblePkgs.length === 0 && window.normalizeRole(currentUser.role) === 'user' && m.owner !== currentUser.fullname) return;
-                        visibleMIdx++;
-                        let mName = m.name || "Chưa có tên";
-                        let mOwner = m.owner || "Không rõ";
-                        let mDept = window.getMissionDepartment(m);
-                        reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${visibleMIdx}. Dự án: ${mName} (Phụ trách: ${mOwner}${mDept ? ' - ' + mDept : ''})</h3>`;
-                        if (visiblePkgs.length > 0) {
-                            reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
-                            reportHtml += `<tr>
-                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 5%;">STT</th>
-                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 30%;">Tên nhiệm vụ cụ thể</th>
-                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 25%;">Trạng thái / Bước hiện tại</th>
-                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ngân sách / Trúng thầu</th>
-                                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%;">Ghi chú</th>
-                            </tr>`;
-                            visiblePkgs.forEach((pkg, pIndex) => {
-                                let pkgName = pkg.name || "";
-                                let budgetInfo = ``;
-                                if (pkg.budget) budgetInfo += `Dự toán: ${window.formatMoney(pkg.budget)}<br>`;
-                                if (pkg.winningBid) budgetInfo += `Trúng: ${window.formatMoney(pkg.winningBid)}`;
-                                let currentStep = "Đã hoàn thành";
-                                let note = "";
-                                if (!pkg.completed && pkg.steps) {
-                                    let activeStep = pkg.steps.find(s => !s.completed);
-                                    if (activeStep) {
-                                        currentStep = `Đang làm: ${activeStep.name || ""}`;
-                                        note = activeStep.note || "";
-                                    }
-                                }
-                                reportHtml += `<tr>
-                                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${pIndex + 1}</td>
-                                    <td style="border: 1px solid #000; padding: 6px;">${pkgName}</td>
-                                    <td style="border: 1px solid #000; padding: 6px;">${currentStep}</td>
-                                    <td style="border: 1px solid #000; padding: 6px;">${budgetInfo}</td>
-                                    <td style="border: 1px solid #000; padding: 6px;">${note}</td>
-                                </tr>`;
-                            });
-                            reportHtml += `</table>`;
-                        } else {
-                            reportHtml += `<p style="font-size: 13px; font-style: italic;">Chưa có gói thầu nào.</p>`;
-                        }
-                    });
-                } else {
-                    reportHtml += `<p style="font-size: 14px; font-style: italic;">Chưa có dữ liệu dự án.</p>`;
-                }
-                
-                reportHtml += `<div style="margin-top: 40px; display: flex; justify-content: flex-end;">
-                    <div style="text-align: center; width: 300px;">
-                        <span style="font-weight: bold; font-size: 14px;">NGƯỜI LẬP BÁO CÁO</span><br><br><br><br>
-                        <span style="font-size: 14px;">${currentUser.fullname}</span>
-                    </div>
-                </div>`;
-                reportHtml += `</div>`;
-
-                let container = document.createElement('div');
-                container.innerHTML = reportHtml;
-                document.body.appendChild(container);
-                container.style.position = 'absolute';
-                container.style.left = '-9999px';
-
-                let opt = {
-                    margin:       10,
-                    filename:     'Bao_Cao_Tien_Do_Dau_Thau.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(container.firstElementChild).save().then(() => {
-                    document.body.removeChild(container);
-                    Swal.fire('Thành công', 'Đã tải xuống báo cáo PDF', 'success');
-                });
-            } catch (e) {
-                console.error(e);
-                Swal.fire('Lỗi', 'Không thể tạo file PDF', 'error');
-            }
-        };
-
-        window.printDashboard = function() {
-            try {
-                const today = new Date(); 
-                const dateStr = `Hà Nội, ngày ${("0" + today.getDate()).slice(-2)} tháng ${("0" + (today.getMonth()+1)).slice(-2)} năm ${today.getFullYear()}`;
-                let html = `<html><head><title>Báo Cáo Giao Ban Đấu Thầu</title><style>body { font-family: 'Times New Roman', Times, serif; padding: 20px 40px; color: #000; line-height: 1.5; } .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; text-align: center; } .agency-name { font-size: 14px; } .agency-name-bold { font-weight: bold; text-decoration: underline; } .quoc-hieu { font-size: 14px; font-weight: bold; } .tieu-ngu { font-size: 14px; font-weight: bold; text-decoration: underline; } .report-date { text-align: right; font-size: 14px; font-style: italic; margin-top: -10px; margin-bottom: 20px; } h1 { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;} h2 { font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; } table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; } th, td { border: 1px solid #000; padding: 6px 10px; text-align: left; vertical-align: top; } th { font-weight: bold; text-align: center; } .text-center { text-align: center; } ul { margin: 5px 0 15px 0; padding-left: 30px; font-size: 14px; } .footer { margin-top: 40px; display: flex; justify-content: flex-end; } .signature { text-align: center; }</style></head><body>`;
-                
-                let txtActive = 0, txtDone = 0, txtLate = 0;
-                const nowTime = new Date();
-                if (db && db.missions) {
-                    db.missions.forEach(m => {
-                        if (m.archived) return;
-                        if (!window.canViewMission(m, currentUser)) return;
-                        let hasVisiblePkg = false;
-                        if (m.packages && m.packages.length > 0) {
-                            m.packages.forEach(p => {
-                                if (!window.canViewPackage(m, p, currentUser)) return;
-                                hasVisiblePkg = true;
-                                let pAllDone = true;
-                                if (p.steps && p.steps.length > 0) {
-                                    p.steps.forEach(s => {
-                                        if (!s.completed) {
-                                            pAllDone = false;
-                                            if (s.deadline && new Date(s.deadline) < nowTime) txtLate++;
-                                        }
-                                    });
-                                }
-                                if (p.completed || pAllDone) txtDone++;
-                            });
-                        }
-                        if (hasVisiblePkg && !m.completed) txtActive++;
-                    });
-                }
-
-                html += `<div class="header-flex"><div class="agency-name">SỞ TÀI CHÍNH HÀ NỘI<br><span class="agency-name-bold">TRUNG TÂM XÚC TIẾN ĐẦU TƯ<br>VÀ HỖ TRỢ DOANH NGHIỆP HÀ NỘI</span></div><div><span class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</span><br><span class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</span></div></div><div class="report-date">${dateStr}</div><h1>BÁO CÁO TÌNH HÌNH THỰC HIỆN CÔNG TÁC ĐẤU THẦU</h1>`;
-                html += `<h2>1. Số liệu tổng quan</h2><ul><li>Tổng số Nhiệm vụ đang triển khai: <b>${txtActive}</b></li><li>Tổng số Gói thầu đã hoàn thành: <b>${txtDone}</b></li><li>Số lượng công việc đang chậm tiến độ: <b>${txtLate}</b></li></ul>`;
-                html += `<h2>2. Tiến độ chi tiết các Nhiệm vụ đang thực hiện</h2><table><thead><tr><th style="width: 40px">STT</th><th>Tên Nhiệm vụ</th><th style="width: 150px">Chuyên viên Phụ trách</th><th style="width: 100px">Hạn chót</th><th style="width: 80px">Tiến độ</th></tr></thead><tbody>`;
-                
-                let stt = 1;
-                if (db.missions) {
-                    db.missions.forEach(m => {
-                        if (!window.canViewMission(m, currentUser)) return;
-                        let mTotalSteps = 0, mCompletedSteps = 0, hasActive = false;
-                        if (m.packages) {
-                            m.packages.forEach(p => {
-                                if (p.archived) return;
-                                if (!window.canViewPackage(m, p, currentUser)) return;
-                                hasActive = true; 
-                                if (p.steps) p.steps.forEach(s => { mTotalSteps++; if(s.completed) mCompletedSteps++; });
-                            });
-                        }
-                        if (hasActive) {
-                            let progress = mTotalSteps > 0 ? Math.round((mCompletedSteps / mTotalSteps) * 100) : 0; 
-                            if (m.completed) progress = 100;
-                            html += `<tr><td class="text-center">${stt++}</td><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.owner)}</td><td class="text-center">${window.formatDate(m.deadline)}</td><td class="text-center">${progress}%</td></tr>`;
-                        }
-                    });
-                }
-                if (stt === 1) html += `<tr><td colspan="5" class="text-center" style="font-style:italic">Không có nhiệm vụ nào đang thực hiện</td></tr>`;
-                html += `</tbody></table><h2>3. Danh sách công việc cần đôn đốc (Quá hạn)</h2>`;
-                if (globalOverdueTasksList.length === 0) { 
-                    html += `<p style="font-style:italic">Hiện không có công việc nào bị quá hạn.</p>`; 
-                } else {
-                    html += `<table><thead><tr><th style="width: 40px">STT</th><th>Nội dung công việc (Thuộc Gói thầu)</th><th>Thuộc Nhiệm vụ</th><th style="width: 150px">Chuyên viên Phụ trách</th><th style="width: 80px">Trễ (Ngày)</th></tr></thead><tbody>`;
-                    globalOverdueTasksList.forEach((task, idx) => { 
-                        html += `<tr><td class="text-center">${idx + 1}</td><td><b>${escapeHtml(task.sName)}</b><br><span style="font-size:12px;color:#555">(Gói: ${escapeHtml(task.pName)})</span></td><td>${escapeHtml(task.mName)}</td><td>${escapeHtml(task.owner)}</td><td class="text-center" style="color:red; font-weight:bold">${task.days}</td></tr>`; 
-                    });
-                    html += `</tbody></table>`;
-                }
-                html += `<div class="footer"><div class="signature"><p style="font-weight:bold; margin-bottom: 80px;">NGƯỜI LẬP BÁO CÁO</p><p style="font-weight:bold">${escapeHtml(currentUser.fullname)}</p></div></div>
-
-
-</body></html>`;
-                
-                const printWindow = window.open('', '_blank');
-                if (!printWindow) return alert("Vui lòng cho phép Pop-up trên trình duyệt để sử dụng chức năng In!");
-                printWindow.document.write(html); 
-                printWindow.document.close(); 
-                printWindow.focus(); 
-                setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
-            } catch(e) { 
-                Swal.fire('Lỗi', "Lỗi khi In Báo Cáo: " + e.message, 'error'); 
-            }
-        };
 
         window.printMission = function(mIndex) {
             try {
@@ -9129,45 +8444,6 @@ window.updateDoc = function(i, f, v) {
             }
             return false;
         };
-
-        // Đăng ký Service Worker cho PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => {
-                    console.log('SW registration failed: ', err);
-                });
-            });
-        }
-    
-        window.exportToExcel = function() {
-            if (!db.missions || db.missions.length === 0) return Swal.fire('Thông báo', 'Không có dữ liệu để xuất.', 'info');
-            let data = [];
-            db.missions.forEach(m => {
-                if (!window.canViewMission(m, currentUser)) return;
-                if(m.packages) m.packages.forEach(p => {
-                    if (!window.canViewPackage(m, p, currentUser)) return;
-                    let pkgDept = window.getPackageDepartment(m, p) || '';
-                    if(p.steps) p.steps.forEach((s, idx) => {
-                        data.push({
-                            'Dự án': m.name,
-                            'Nhiệm vụ cụ thể': p.name,
-                            'Phòng chuyên môn': pkgDept,
-                            'Chủ trì': p.owner || m.owner,
-                            'Bước': idx + 1,
-                            'Tên công việc': s.name,
-                            'Hạn hoàn thành': s.deadline || '',
-                            'Trạng thái': s.completed ? 'Hoàn thành' : 'Đang xử lý',
-                            'Người hoàn thành': s.completedBy || '',
-                            'Ghi chú': s.note || ''
-                        });
-                    });
-                });
-            });
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Tien do');
-            XLSX.writeFile(wb, 'Tien_Do_Dau_Thau.xlsx');
-        };
 </script>
 
 <!-- Modal Chỉnh sửa Báo cáo -->
@@ -9248,7 +8524,7 @@ window.printDashboard = function() {
             let mName = m.name || "Chưa có tên";
             let mOwner = m.owner || "Không rõ";
             let mDept = window.getMissionDepartment(m);
-            reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${visibleMIdx}. Dự án: ${mName} (Phụ trách: ${mOwner}${mDept ? ' - ' + mDept : ''})</h3>`;
+            reportHtml += `<h3 style="font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase;">${visibleMIdx}. Dự án: ${escapeHtml(mName)} (Phụ trách: ${escapeHtml(mOwner)}${mDept ? ' - ' + escapeHtml(mDept) : ''})</h3>`;
             if (visiblePkgs.length > 0) {
                 reportHtml += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">`;
                 reportHtml += `<tr>
@@ -9274,10 +8550,10 @@ window.printDashboard = function() {
                     }
                     reportHtml += `<tr>
                         <td style="border: 1px solid #000; padding: 6px; text-align: center;">${pIndex + 1}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${pkgName}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${currentStep}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${escapeHtml(pkgName)}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${escapeHtml(currentStep)}</td>
                         <td style="border: 1px solid #000; padding: 6px;">${budgetInfo}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${note}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">${escapeHtml(note)}</td>
                     </tr>`;
                 });
                 reportHtml += `</table>`;
@@ -9292,7 +8568,7 @@ window.printDashboard = function() {
     reportHtml += `<div style="margin-top: 40px; display: flex; justify-content: flex-end;">
         <div style="text-align: center; width: 300px;">
             <span style="font-weight: bold; font-size: 14px;">NGƯỜI LẬP BÁO CÁO</span><br><br><br><br>
-            <span style="font-size: 14px;">${currentUser.fullname}</span>
+            <span style="font-size: 14px;">${escapeHtml(currentUser.fullname)}</span>
         </div>
     </div>`;
 
@@ -9367,29 +8643,26 @@ window.openAuditLogModal = function(mIndex, pIndex) {
     document.getElementById('auditLogPkgName').innerText = "Nhiệm vụ cụ thể: " + (pkg.name || "");
     
     let container = document.getElementById('auditLogContent');
-    container.innerHTML = "";
-    
     if (!pkg.logs || pkg.logs.length === 0) {
         container.innerHTML = `<div class="text-center text-gray-400 text-sm italic py-4">Chưa có lịch sử hoạt động nào được ghi nhận.</div>`;
     } else {
-        pkg.logs.forEach(log => {
+        container.innerHTML = pkg.logs.map(log => {
             let match = log.match(/^(\[.*?\])\s+(.*?):\s+(.*)$/);
             if (match) {
                 let time = match[1];
                 let author = match[2];
                 let action = match[3];
-                container.innerHTML += `
+                return `
                     <div class="bg-gray-50 dark:bg-gray-900 border-l-2 border-slate-400 p-2 rounded text-[13px] shadow-sm">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fas fa-user-edit text-[10px] mr-1"></i>${escapeHtml(author)}</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">${time}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${escapeHtml(time)}</span>
                         </div>
                         <div class="text-gray-600 dark:text-gray-400">${escapeHtml(action)}</div>
                     </div>`;
-            } else {
-                container.innerHTML += `<div class="bg-gray-50 dark:bg-gray-900 border-l-2 border-slate-400 p-2 rounded text-[13px] text-gray-600 dark:text-gray-400 shadow-sm">${escapeHtml(log)}</div>`;
             }
-        });
+            return `<div class="bg-gray-50 dark:bg-gray-900 border-l-2 border-slate-400 p-2 rounded text-[13px] text-gray-600 dark:text-gray-400 shadow-sm">${escapeHtml(log)}</div>`;
+        }).join('');
     }
     
     document.getElementById('auditLogModal').classList.remove('hidden');
@@ -9486,10 +8759,8 @@ window.openAuditLogModal = function(mIndex, pIndex) {
       });
     }
   };
-</script>
 
-<script>
-// Tự động kiểm tra bản cập nhật mới bỏ qua Cache của trình duyệt và GitHub
+  // Tự động kiểm tra bản cập nhật mới bỏ qua Cache của trình duyệt và GitHub
 async function checkForUpdates() {
     try {
         const checkUrl = window.location.href.split('?')[0] + '?t=' + new Date().getTime();

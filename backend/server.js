@@ -104,6 +104,8 @@ async function initDatabase() {
                     summary TEXT,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
                 );
+
+                CREATE INDEX IF NOT EXISTS idx_sce_v2_backups_id_desc ON sce_v2_backups (id DESC);
             `);
             console.log('✅ Cơ sở dữ liệu PostgreSQL đã sẵn sàng.');
             break;
@@ -209,6 +211,7 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
 // 4. Lấy dữ liệu đấu thầu (sce_v2_app_data)
 app.get('/api/data', async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store');
         const dataRes = await pool.query('SELECT data, updated_at FROM sce_v2_app_data WHERE id = 1');
         if (dataRes.rows.length === 0) {
             return res.json({ data: null, updated_at: null });
@@ -238,12 +241,19 @@ app.post('/api/data', authenticateToken, async (req, res) => {
             SET data = $1, updated_at = now(), updated_by_email = $2
         `, [data, userEmail]);
 
-        // Tạo bản sao lưu định kỳ nếu có yêu cầu hoặc mặc định
+        // Tạo bản sao lưu định kỳ nếu có yêu cầu hoặc mặc định, đồng thời giữ tối đa 100 bản mới nhất
         if (createBackup !== false) {
             pool.query(`
                 INSERT INTO sce_v2_backups (data, note, created_by_email)
                 VALUES ($1, 'Auto-backup from NAS API', $2)
-            `, [data, userEmail]).catch(e => console.warn('Lỗi lưu backup ngầm:', e));
+            `, [data, userEmail])
+                .then(() => pool.query(`
+                    DELETE FROM sce_v2_backups
+                    WHERE id <= COALESCE((
+                        SELECT id FROM sce_v2_backups ORDER BY id DESC OFFSET 100 LIMIT 1
+                    ), 0)
+                `))
+                .catch(e => console.warn('Lỗi lưu/dọn backup ngầm:', e));
         }
 
         res.json({ success: true, updated_at: new Date().toISOString() });
@@ -387,7 +397,7 @@ app.post('/api/storage/upload', authenticateToken, upload.single('file'), (req, 
 });
 
 // 12. Tải về / Mở file từ NAS
-app.use('/api/storage/files', express.static(UPLOADS_DIR));
+app.use('/api/storage/files', express.static(UPLOADS_DIR, { maxAge: '7d' }));
 
 // 13. Healthcheck
 app.get('/api/health', (req, res) => {

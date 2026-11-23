@@ -1,11 +1,10 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise-v23';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v24';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './nas-connector.js',
     './manifest.json',
     './logo-192.png',
-    './logo-512.png',
     './apple-touch-icon.png',
     './app-icon-192.png',
     './app-icon-512.png'

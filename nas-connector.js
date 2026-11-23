@@ -54,7 +54,8 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 4000);
                 const res = await fetch(`${targetUrl}/api/health`, {
-                    signal: controller.signal
+                    signal: controller.signal,
+                    cache: 'no-store'
                 });
                 clearTimeout(timeoutId);
                 if (res.ok) {
@@ -98,7 +99,7 @@
         // 4. Lấy dữ liệu đấu thầu từ NAS
         loadData: async function() {
             const targetUrl = this.getUrl();
-            const res = await fetch(`${targetUrl}/api/data`);
+            const res = await fetch(`${targetUrl}/api/data`, { cache: 'no-store' });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const json = await res.json();
             return json.data;
@@ -128,7 +129,8 @@
             const targetUrl = this.getUrl();
             const token = this.getToken();
             const res = await fetch(`${targetUrl}/api/profiles`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
@@ -173,7 +175,8 @@
             const targetUrl = this.getUrl();
             const token = this.getToken();
             const res = await fetch(`${targetUrl}/api/backups`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             return await res.json();
