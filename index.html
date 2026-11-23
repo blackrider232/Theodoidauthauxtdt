@@ -913,7 +913,7 @@
 
                     <div class="text-[11px] text-gray-600 dark:text-gray-400 italic bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-teal-100 dark:border-gray-700 leading-relaxed">
                         <i class="fas fa-lightbulb text-amber-500 mr-1" aria-hidden="true"></i>
-                        <strong>Hướng dẫn cán bộ:</strong> Bấm <strong>"Tải Biểu mẫu Đã Điền Sẵn"</strong> để phần mềm tự động điền sẵn thông tin gói thầu vào các vị trí có biến, chỗ để trống bạn tự hoàn thiện nốt trên Word rồi dùng nút <strong>"Tải file lên"</strong> hoặc <strong>"Link web"</strong> tại bước công việc.
+                        <strong>Hướng dẫn cán bộ:</strong> Bấm <strong>"Tải Biểu mẫu Đã Điền Sẵn"</strong> để phần mềm tự động điền sẵn thông tin gói thầu vào các vị trí có biến, chỗ để trống bạn tự hoàn thiện nốt trên Word rồi dùng nút <strong>"Tải file lên"</strong> tại bước công việc.
                     </div>
                 </div>
 
@@ -1020,7 +1020,7 @@
                 <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-start gap-2">
                     <i class="fas fa-shield-halved text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" aria-hidden="true"></i>
                     <div>
-                        <b>Bảo toàn tiến độ thực tế:</b> Mọi bước <b>Đã hoàn thành</b> (cùng hạn chót thực tế, người hoàn thành, tài liệu đính kèm, việc nhỏ) luôn được giữ nguyên 100%. Có thể nhấn <b>Ctrl+Z</b> để hoàn tác nếu cần.
+                        <b>Bảo toàn tiến độ thực tế:</b> Mọi bước <b>Đã hoàn thành</b> (cùng hạn chót thực tế, người hoàn thành, tài liệu đính kèm) luôn được giữ nguyên 100%. Có thể nhấn <b>Ctrl+Z</b> để hoàn tác nếu cần.
                     </div>
                 </div>
 
@@ -1089,19 +1089,6 @@
         </div>
     </div>
 
-    <!-- Modal Việc nhỏ (Sub-Task) -->
-    <div id="subTaskModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-orange-500">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b dark:border-gray-700"><i class="fas fa-list-ul text-orange-500 mr-2"></i>Thêm Việc nhỏ</h2>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nội dung</label>
-            <input type="text" id="subTaskName" placeholder="VD: Gửi mail báo giá..." class="w-full border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 rounded text-sm mb-5 focus:ring-2 focus:ring-orange-500 outline-none dark:text-white" onkeypress="if(event.key === 'Enter') window.saveSubTask()">
-            <div class="flex justify-end gap-3">
-                <button onclick="window.closeSubTaskModal()" class="px-4 py-2 border dark:border-gray-600 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200">Hủy</button>
-                <button onclick="window.saveSubTask()" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-medium shadow-md">Thêm</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Modal Tạo Nhiệm vụ mới -->
     <div id="createMissionModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg border-t-4 border-emerald-500">
@@ -4809,12 +4796,6 @@ const defaultDocs = [
                                         statusLabel = `<span class="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ml-1">Sắp đến hạn</span>`;
                                     }
 
-                                    let subTaskInfo = "";
-                                    if (currentStep.subTasks && currentStep.subTasks.length > 0) {
-                                        const doneSub = currentStep.subTasks.filter(s => s.completed).length;
-                                        subTaskInfo = `<span class="text-[11px] text-gray-500 dark:text-gray-400 ml-1">(${doneSub}/${currentStep.subTasks.length} việc nhỏ)</span>`;
-                                    }
-
                                     currentStepHtml = `
                                         <div class="w-full flex flex-col gap-1.5">
                                             <div class="flex items-center justify-between gap-2 flex-wrap w-full">
@@ -4827,7 +4808,7 @@ const defaultDocs = [
                                                 </span>
                                             </div>
                                             <div class="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 break-words leading-snug">
-                                                ${escapeHtml(currentStep.name)} ${subTaskInfo}
+                                                ${escapeHtml(currentStep.name)}
                                             </div>
                                         </div>`;
                                 } else if (totalStepsCount > 0) {
@@ -4872,19 +4853,6 @@ const defaultDocs = [
                                         let safeStepName = escapeHtml(step.name || ''); 
                                         let nameHtml = `<div class="${step.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'font-bold text-gray-900 dark:text-gray-100'} text-[13.5px] leading-snug break-words">${safeStepName}</div>`;
                                         
-                                        let subTasksHtml = "";
-                                        if (step.subTasks && Array.isArray(step.subTasks) && step.subTasks.length > 0) {
-                                            subTasksHtml = `<div class="mt-1.5 ml-1 border-l-2 border-gray-200 dark:border-gray-600 pl-2 space-y-1">`;
-                                            step.subTasks.forEach((sub, subIdx) => {
-                                                let safeSubName = escapeHtml(sub.name || ''); 
-                                                let subClass = sub.completed ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400"; 
-                                                let delSubBtn = canEditPkg ? `<button onclick="window.deleteSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx})" class="text-gray-300 dark:text-gray-500 hover:text-red-500 ml-2"><i class="fas fa-times"></i></button>` : '';
-                                                let lockSub = !canEditPkg || anyPrevIncomplete;
-                                                subTasksHtml += `<div class="flex items-start gap-1.5 text-[12px]"><input type="checkbox" class="mt-0.5 ${!lockSub?'cursor-pointer':'cursor-not-allowed'}" ${sub.completed ? 'checked' : ''} ${lockSub?'disabled':''} onchange="window.toggleSubTask(${mIndex}, ${pkgIndex}, ${sIndex}, ${subIdx}, this.checked)"><span class="${subClass} leading-tight flex-1">${safeSubName}</span>${delSubBtn}</div>`;
-                                            });
-                                            subTasksHtml += `</div>`;
-                                        }
-                                        
                                         let dateHtml = `<span class="text-[13px] font-semibold ${dateColor} whitespace-nowrap">${window.formatDate(step.deadline)}</span>`; 
                                         let timeBudget = (step.originalDays > 0) ? `<span class="bg-blue-50/70 dark:bg-gray-800 text-blue-700 dark:text-blue-400 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200 dark:border-gray-600 shadow-sm whitespace-nowrap">${step.originalDays} ${step.originalDayType === 'workday' ? 'LV' : 'Lịch'}</span>` : ""; 
                                         let completedByHtml = step.completedBy ? `<span class="text-[11.5px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 whitespace-nowrap"><i class="fas fa-check text-[10px]"></i> ${escapeHtml(step.completedBy)}</span>` : "";
@@ -4917,22 +4885,12 @@ const defaultDocs = [
                                         }
                                         
                                         const linkButtonsHtml = canEditPkg ? `
-                                            <button onclick="window.toggleLinkForm(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1 rounded-md border border-indigo-100 dark:border-indigo-800 inline-flex items-center gap-1 transition whitespace-nowrap"><i class="fas fa-link text-[10px]"></i> Link web</button>
                                             <button onclick="document.getElementById('uploadFile_${mIndex}_${pkgIndex}_${sIndex}').click()" class="text-[11px] text-teal-600 dark:text-teal-400 font-medium bg-teal-50 hover:bg-teal-100 dark:bg-teal-900/30 px-2 py-1 rounded-md border border-teal-100 dark:border-teal-800 inline-flex items-center gap-1 transition whitespace-nowrap" title="Tải file đính kèm"><i class="fas fa-cloud-upload-alt text-[10px]"></i> Tải file lên</button>
                                             <input type="file" id="uploadFile_${mIndex}_${pkgIndex}_${sIndex}" class="hidden" onchange="window.uploadFileDrive(this, ${mIndex}, ${pkgIndex}, ${sIndex})">
-                                        ` : '';
-
-                                        const linkFormPopupHtml = canEditPkg ? `
-                                            <div id="link_form_${mIndex}_${pkgIndex}_${sIndex}" class="hidden mt-2 p-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-md w-full sm:w-64 border border-indigo-200 dark:border-gray-700">
-                                                <input type="text" id="link_label_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Tên file / tài liệu" class="w-full mb-1.5 p-1.5 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
-                                                <input type="url" id="link_url_${mIndex}_${pkgIndex}_${sIndex}" placeholder="Đường dẫn (URL)" class="w-full mb-1.5 p-1.5 border dark:border-gray-600 dark:bg-gray-700 rounded text-xs outline-none dark:text-white">
-                                                <button onclick="window.addLink(${mIndex}, ${pkgIndex}, ${sIndex})" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-semibold w-full">Lưu đính kèm</button>
-                                            </div>
                                         ` : '';
                                             
                                         let dragHandle = "";
                                         let actionIconsHtml = "";
-                                        const calLinkHtml = `<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(step.name || '')}&dates=${step.deadline ? step.deadline.replace(/-/g,'') : ''}T000000Z/${step.deadline ? step.deadline.replace(/-/g,'') : ''}T235959Z&details=${encodeURIComponent((mission.name || '') + ' - ' + (pkg.name || ''))}" target="_blank" class="text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Thêm vào Lịch"><i class="far fa-calendar-plus"></i></a>`;
                                         if (canEditPkg) {
                                             if (isReorderActive) {
                                                 const isFirstStep = (sIndex === 0);
@@ -4947,12 +4905,8 @@ const defaultDocs = [
                                             }
                                             actionIconsHtml = `
                                                 <button onclick="window.openEditStepModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Sửa chi tiết công việc"><i class="fas fa-edit"></i></button>
-                                                <button onclick="window.openSubTaskModal(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-1.5 rounded transition inline-flex items-center justify-center" title="Thêm việc nhỏ (Sub-task)"><i class="fas fa-list-ul"></i></button>
-                                                ${calLinkHtml}
                                                 <button onclick="window.deleteProjStep(${mIndex}, ${pkgIndex}, ${sIndex})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded transition inline-flex items-center justify-center" title="Xóa"><i class="fas fa-trash"></i></button>
                                             `;
-                                        } else {
-                                            actionIconsHtml = calLinkHtml;
                                         }
                                         
                                         let lockMain = !canEditPkg || anyPrevIncomplete;
@@ -4964,7 +4918,7 @@ const defaultDocs = [
                                             <tr class="step-row uniform-step-row ${bgRow} ${reorderRowHighlight}">
                                                 <td colspan="7" class="align-middle">
                                                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 lg:gap-4 w-full">
-                                                        <!-- KHỐI 1: TÊN CÔNG VIỆC + DÒNG THỜI HẠN, ĐỊNH MỨC + VIỆC NHỎ + ĐÍNH KÈM -->
+                                                        <!-- KHỐI 1: TÊN CÔNG VIỆC + DÒNG THỜI HẠN, ĐỊNH MỨC + ĐÍNH KÈM -->
                                                         <div class="flex items-start gap-2 flex-1 min-w-0">
                                                             ${dragHandle}
                                                             <div class="flex-1 min-w-0">
@@ -4975,12 +4929,11 @@ const defaultDocs = [
                                                                     ${completedByHtml}
                                                                 </div>
                                                                 ${templateFormHtml}
-                                                                ${subTasksHtml}
                                                                 ${linksDisplayHtml}
                                                             </div>
                                                         </div>
 
-                                                        <!-- KHỐI 2: THANH CÔNG CỤ (ICON THAO TÁC + LINK WEB + TẢI FILE BÊN TRÁI, CHECKBOX BÊN PHẢI) -->
+                                                        <!-- KHỐI 2: THANH CÔNG CỤ (ICON THAO TÁC + TẢI FILE BÊN TRÁI, CHECKBOX BÊN PHẢI) -->
                                                         <div class="w-full lg:w-auto shrink-0 pt-1.5 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-700/70">
                                                             <div class="flex items-center justify-between lg:justify-end gap-2 w-full">
                                                                 <div class="flex items-center gap-1 flex-wrap">
@@ -4991,7 +4944,6 @@ const defaultDocs = [
                                                                     ${checkboxHtml}
                                                                 </div>
                                                             </div>
-                                                            ${linkFormPopupHtml}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -6446,53 +6398,6 @@ const defaultDocs = [
             window.saveDataToGAS(false);
         };
 
-        window.openSubTaskModal = function(mIndex, pIndex, sIndex) { 
-            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
-            cEditM = mIndex; 
-            cEditP = pIndex; 
-            cEditS = sIndex; 
-            document.getElementById('subTaskName').value = ""; 
-            document.getElementById('subTaskModal').classList.remove('hidden'); 
-            setTimeout(() => document.getElementById('subTaskName').focus(), 100); 
-        };
-        window.closeSubTaskModal = function() { 
-            document.getElementById('subTaskModal').classList.add('hidden'); 
-        };
-        window.saveSubTask = function() {
-            if (!window.canEditPackage(db.missions[cEditM], db.missions[cEditM].packages[cEditP], currentUser)) return;
-            let name = document.getElementById('subTaskName').value.trim(); 
-            if(!name) return;
-            let step = db.missions[cEditM].packages[cEditP].steps[cEditS]; 
-            if(!step.subTasks) step.subTasks = [];
-            step.subTasks.push({ id: Date.now(), name: name, completed: false });
-            window.closeSubTaskModal(); 
-            window.renderMissions(); 
-            window.saveDataToGAS(false);
-        };
-        window.deleteSubTask = function(mIndex, pIndex, sIndex, subIndex) { 
-            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
-            Swal.fire({ 
-                title: 'Xóa việc nhỏ?', 
-                icon: 'warning', 
-                showCancelButton: true, 
-                confirmButtonColor: '#d33', 
-                cancelButtonColor: '#3085d6', 
-                confirmButtonText: 'Xóa' 
-            }).then((result) => { 
-                if (result.isConfirmed) { 
-                    db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks.splice(subIndex, 1); 
-                    window.renderMissions(); 
-                    window.saveDataToGAS(false); 
-                } 
-            }); 
-        };
-        window.toggleSubTask = function(mIndex, pIndex, sIndex, subIndex, checked) { 
-            if (!window.canEditPackage(db.missions[mIndex], db.missions[mIndex].packages[pIndex], currentUser)) return;
-            db.missions[mIndex].packages[pIndex].steps[sIndex].subTasks[subIndex].completed = checked; 
-            window.renderMissions(); 
-            window.saveDataToGAS(false); 
-        };
-
         // --- CÁC HÀM XÓA, LƯU TRỮ VÀ HOÀN THÀNH ---
         window.deleteMission = function(mIndex) { 
             if (window.isReadOnlySupervisor(currentUser)) return Swal.fire('Cảnh báo', 'Tài khoản Lãnh đạo chỉ có quyền giám sát và bình luận chỉ đạo!', 'warning'); 
@@ -6895,10 +6800,9 @@ const defaultDocs = [
                     const ps = oldSteps[pi];
                     const hasLinks = Array.isArray(ps.links) && ps.links.length > 0;
                     const hasNote = Boolean(String(ps.note || '').trim());
-                    const hasSubTasks = Array.isArray(ps.subTasks) && ps.subTasks.length > 0;
                     const isAdhocStep = Boolean(ps.isCustomStep) || (!ps.templateStepUid && (parseInt(ps.originalDays, 10) || 0) === 0 && norm(ps.name) === 'công việc phát sinh');
 
-                    if (ps.completed || !optRemoveExtra || hasLinks || hasNote || hasSubTasks || isAdhocStep) {
+                    if (ps.completed || !optRemoveExtra || hasLinks || hasNote || isAdhocStep) {
                         keptUnmatchedIdxSet.add(pi);
                     } else {
                         totalRemovedSteps++;
@@ -6945,7 +6849,6 @@ const defaultDocs = [
                         name: ts.name,
                         deadline: new Date().toISOString(),
                         note: "",
-                        subTasks: [],
                         completed: false,
                         links: [],
                         completedBy: "",
@@ -7356,7 +7259,6 @@ const defaultDocs = [
                 name: "Công việc phát sinh", 
                 deadline: newDeadline.toISOString(), 
                 note: "", 
-                subTasks: [], 
                 completed: false, 
                 links: [], 
                 completedBy: "", 
@@ -7367,11 +7269,6 @@ const defaultDocs = [
             window.logActivity(mIndex, pkgIndex, `Thêm bước phát sinh`); 
             window.renderMissions(); 
             window.saveDataToGAS(false); 
-        };
-
-        window.toggleLinkForm = function(mIndex, pkgIndex, sIndex) { 
-            let el = document.getElementById(`link_form_${mIndex}_${pkgIndex}_${sIndex}`); 
-            if (el) el.classList.toggle('hidden'); 
         };
 
         window.uploadFileDrive = async function(inputElem, mIndex, pkgIndex, sIndex) {
@@ -7412,20 +7309,6 @@ const defaultDocs = [
             } finally {
                 if (loader) loader.style.display = 'none';
             }
-        };
-window.addLink = function(mIndex, pkgIndex, sIndex) { 
-            let m = db.missions[mIndex]; 
-            let pkg = m.packages[pkgIndex]; 
-            if (!window.canEditPackage(m, pkg, currentUser)) return; 
-            const n = document.getElementById(`link_label_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); 
-            const u = document.getElementById(`link_url_${mIndex}_${pkgIndex}_${sIndex}`).value.trim(); 
-            if (!u) return Swal.fire('Lỗi', 'Vui lòng nhập đường dẫn hợp lệ!', 'warning'); 
-            let step = pkg.steps[sIndex]; 
-            if (!step.links) step.links = []; 
-            step.links.push({ name: n || "Tài liệu", url: u }); 
-            window.logActivity(mIndex, pkgIndex, `Gắn tài liệu vào bước ${sIndex+1}`); 
-            window.renderMissions(); 
-            window.saveDataToGAS(false); 
         };
 
         // --- CÁC HÀM CÀI ĐẶT & THÊM MỚI ---
@@ -7587,7 +7470,6 @@ window.addLink = function(mIndex, pkgIndex, sIndex) {
                         name: tmpl.name,
                         deadline: currentDt.toISOString(),
                         note: "",
-                        subTasks: [],
                         completed: false,
                         links: [],
                         completedBy: "",
@@ -8453,7 +8335,7 @@ window.updateDoc = function(i, f, v) {
                     aoa.push([]);
                 }
 
-                aoa.push(["STT", "Nội dung công việc (bao gồm việc nhỏ)", "Định mức", "Hạn chót", "Trạng thái", "Người hoàn thành", "Ghi chú", "Văn bản đính kèm"]);
+                aoa.push(["STT", "Nội dung công việc", "Định mức", "Hạn chót", "Trạng thái", "Người hoàn thành", "Ghi chú", "Văn bản đính kèm"]);
 
                 if (pkg.steps) {
                     pkg.steps.forEach((step, idx) => {
@@ -8461,11 +8343,6 @@ window.updateDoc = function(i, f, v) {
                         const status = step.completed ? 'Đã hoàn thành' : 'Chưa hoàn thành';
                         let linkText = (step.links && step.links.length > 0) ? step.links.map(l => `${l.name} (${l.url})`).join(" \n ") : "";
                         let nameTxt = step.name || "";
-                        if(step.subTasks && step.subTasks.length > 0) { 
-                            step.subTasks.forEach(sub => { 
-                                nameTxt += `\n   - ${sub.name} [${sub.completed ? 'Xong' : 'Chưa'}]`; 
-                            }); 
-                        }
                         aoa.push([
                             idx + 1,
                             nameTxt,
@@ -8750,11 +8627,6 @@ window.updateDoc = function(i, f, v) {
                                 let timeBudget = (step.originalDays !== undefined && step.originalDays > 0) ? `${step.originalDays} ${step.originalDayType === 'workday' ? 'ngày LV' : 'ngày lịch'}` : "-";
                                 const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${escapeHtml(step.completedBy)})</span>` : 'Chưa xong';
                                 let nameTxt = escapeHtml(step.name || '');
-                                if(step.subTasks && step.subTasks.length > 0) { 
-                                    step.subTasks.forEach(sub => { 
-                                        nameTxt += `<br><span style="color:#666; font-size:12px;">- ${escapeHtml(sub.name)} (${sub.completed ? 'Xong' : 'Chưa'})</span>`; 
-                                    }); 
-                                }
                                 html += `<tr><td class="text-center">${sIdx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${escapeHtml(step.note || '')}</td></tr>`;
                             });
                         } else { 
@@ -8809,11 +8681,6 @@ window.updateDoc = function(i, f, v) {
                         const status = step.completed ? `<span class="status-done">Xong</span><br><span style="font-size:11px">(${escapeHtml(step.completedBy)})</span>` : 'Chưa xong';
                         let linkText = (step.links && step.links.length > 0) ? step.links.map(l => `- ${escapeHtml(l.name)}`).join("<br>") : "";
                         let nameTxt = escapeHtml(step.name || '');
-                        if(step.subTasks && step.subTasks.length > 0) { 
-                            step.subTasks.forEach(sub => { 
-                                nameTxt += `<br><span style="color:#666; font-size:12px;">- ${escapeHtml(sub.name)} (${sub.completed ? 'Xong' : 'Chưa'})</span>`; 
-                            }); 
-                        }
                         html += `<tr><td class="text-center">${idx + 1}</td><td>${nameTxt}</td><td class="text-center">${timeBudget}</td><td class="text-center">${window.formatDate(step.deadline)}</td><td class="text-center">${status}</td><td>${escapeHtml(step.note || "")}</td><td>${linkText}</td></tr>`;
                     });
                 }
