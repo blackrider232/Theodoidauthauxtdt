@@ -405,6 +405,7 @@ const TUNNEL_FILE_PATH = path.join(__dirname, 'current_tunnel_url.txt');
 const LOCAL_ENV_PATH = path.join(__dirname, '.env');
 let currentTunnelUrl = null;
 let currentTunnelUpdatedAt = null;
+let lastTunnelDetectError = null;
 let lastGithubSyncedUrl = null;
 let lastGithubSyncAt = null;
 let lastGithubSyncError = null;
@@ -442,49 +443,68 @@ function readLocalEnv() {
 
 async function detectCurrentTunnelUrl() {
     const envCfg = readLocalEnv();
-    const metricsBase = String(envCfg.TUNNEL_METRICS_URL || 'http://tunnel:2000').replace(/\/+$/, '');
+    const metricsBases = Array.from(new Set(
+        [envCfg.TUNNEL_METRICS_URL, 'http://tunnel:2000', 'http://sce_dauthau_tunnel:2000']
+            .filter(Boolean)
+            .map(u => String(u).trim().replace(/\/+$/, ''))
+    ));
     const tryCloudflareRe = /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i;
 
     let detected = null;
-    try {
-        const res = await fetch(`${metricsBase}/quicktunnel`, { signal: AbortSignal.timeout(3000) });
-        if (res.ok) {
-            const json = await res.json();
-            if (json && json.hostname) {
-                const candidate = 'https://' + String(json.hostname).trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
-                if (tryCloudflareRe.test(candidate)) {
-                    detected = candidate;
-                }
-            }
-        }
-    } catch (e) {
-        // Bỏ qua nếu container tunnel đang khởi tạo
-    }
+    const errors = [];
 
-    if (!detected) {
+    for (const metricsBase of metricsBases) {
         try {
-            const mRes = await fetch(`${metricsBase}/metrics`, { signal: AbortSignal.timeout(3000) });
-            if (mRes.ok) {
-                const text = await mRes.text();
-                const match = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/i);
-                if (match && tryCloudflareRe.test(match[0])) {
-                    detected = match[0];
+            const res = await fetch(`${metricsBase}/quicktunnel`, { signal: AbortSignal.timeout(3000) });
+            if (res.ok) {
+                const json = await res.json();
+                if (json && json.hostname) {
+                    const candidate = 'https://' + String(json.hostname).trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+                    if (tryCloudflareRe.test(candidate)) {
+                        detected = candidate;
+                        break;
+                    }
                 }
+            } else {
+                errors.push(`${metricsBase}/quicktunnel -> HTTP ${res.status}`);
             }
         } catch (e) {
-            // Bỏ qua
+            errors.push(`${metricsBase}/quicktunnel -> ${e.cause ? (e.cause.code || e.cause.message) : e.message}`);
+        }
+
+        if (!detected) {
+            try {
+                const mRes = await fetch(`${metricsBase}/metrics`, { signal: AbortSignal.timeout(3000) });
+                if (mRes.ok) {
+                    const text = await mRes.text();
+                    const match = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/i);
+                    if (match && tryCloudflareRe.test(match[0])) {
+                        detected = match[0];
+                        break;
+                    }
+                } else {
+                    errors.push(`${metricsBase}/metrics -> HTTP ${mRes.status}`);
+                }
+            } catch (e) {
+                errors.push(`${metricsBase}/metrics -> ${e.cause ? (e.cause.code || e.cause.message) : e.message}`);
+            }
         }
     }
 
-    if (detected && detected !== currentTunnelUrl) {
-        currentTunnelUrl = detected;
-        currentTunnelUpdatedAt = new Date().toISOString();
-        try {
-            fs.writeFileSync(TUNNEL_FILE_PATH, detected + '\n', 'utf8');
-        } catch (writeErr) {
-            console.warn('Không thể ghi current_tunnel_url.txt:', writeErr.message);
+    if (detected) {
+        lastTunnelDetectError = null;
+        if (detected !== currentTunnelUrl) {
+            currentTunnelUrl = detected;
+            currentTunnelUpdatedAt = new Date().toISOString();
+            try {
+                fs.writeFileSync(TUNNEL_FILE_PATH, detected + '\n', 'utf8');
+            } catch (writeErr) {
+                console.warn('Không thể ghi current_tunnel_url.txt:', writeErr.message);
+            }
+            console.log(`🌐 Phát hiện Cloudflare Quick Tunnel mới: ${detected}`);
         }
-        console.log(`🌐 Phát hiện Cloudflare Quick Tunnel mới: ${detected}`);
+    } else if (errors.length > 0) {
+        lastTunnelDetectError = errors[0];
     }
 
     return currentTunnelUrl;
@@ -596,6 +616,7 @@ app.get('/api/tunnel-url', (req, res) => {
     res.json({
         url: currentTunnelUrl,
         updated_at: currentTunnelUpdatedAt,
+        tunnel_detect_error: lastTunnelDetectError,
         github_token_configured: Boolean(String(envCfg.GITHUB_TOKEN || '').trim()),
         github_synced_url: lastGithubSyncedUrl,
         github_synced_at: lastGithubSyncAt,
