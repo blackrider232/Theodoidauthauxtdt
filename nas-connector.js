@@ -5,10 +5,11 @@
  */
 
 (function() {
-    const DEFAULT_NAS_URL = 'https://favor-opponents-tiles-same.trycloudflare.com';
+    const DEFAULT_NAS_URL = 'https://bali-scientific-throughout-girls.trycloudflare.com';
     const LEGACY_URL_KEY = 'sce_nas_backend_url';
     const CUSTOM_URL_KEY = 'sce_nas_custom_url';
     const AUTO_URL_KEY = 'sce_nas_auto_url';
+    const GITHUB_API_TUNNEL_URL = 'https://api.github.com/repos/blackrider232/Theodoidauthauxtdt/contents/tunnel-url.json?ref=main';
     const RAW_TUNNEL_JSON_URL = 'https://raw.githubusercontent.com/blackrider232/Theodoidauthauxtdt/main/tunnel-url.json';
     const LOCAL_TUNNEL_JSON_URL = './tunnel-url.json';
     const FRIENDLY_TUNNEL_ERROR = 'Không thể kết nối máy chủ NAS Synology (đường truyền HTTPS Tunnel chưa đồng bộ hoặc đang khởi động lại). Vui lòng thử lại sau ít giây!';
@@ -18,6 +19,35 @@
     function normalizeBaseUrl(url) {
         const clean = String(url || '').trim().replace(/\/+$/, '');
         return clean.startsWith('https://') && clean.length > 8 ? clean : '';
+    }
+
+    function decodeBase64Utf8(b64) {
+        const cleaned = String(b64 || '').replace(/\s+/g, '');
+        if (!cleaned || typeof atob !== 'function') return '';
+        const binStr = atob(cleaned);
+        if (typeof TextDecoder !== 'undefined' && typeof Uint8Array !== 'undefined') {
+            const bytes = new Uint8Array(binStr.length);
+            for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
+        }
+        return binStr;
+    }
+
+    function extractTunnelUrlFromPayload(data) {
+        if (!data || typeof data !== 'object') return '';
+        if (typeof data.url === 'string') {
+            return normalizeBaseUrl(data.url);
+        }
+        if (typeof data.content === 'string') {
+            try {
+                const decodedText = decodeBase64Utf8(data.content);
+                const parsed = JSON.parse(decodedText);
+                return normalizeBaseUrl(parsed && parsed.url);
+            } catch (e) {
+                return '';
+            }
+        }
+        return '';
     }
 
     function clearStaleLegacyUrl() {
@@ -109,18 +139,28 @@
             }
 
             const run = async () => {
-                const sources = [
-                    `${RAW_TUNNEL_JSON_URL}?t=${Date.now()}`,
-                    `${LOCAL_TUNNEL_JSON_URL}?t=${Date.now()}`
-                ];
+                const rawSrc = `${RAW_TUNNEL_JSON_URL}?t=${Date.now()}`;
+                const localSrc = `${LOCAL_TUNNEL_JSON_URL}?t=${Date.now()}`;
+                const apiSrc = `${GITHUB_API_TUNNEL_URL}&t=${Date.now()}`;
+                const sources = force
+                    ? [
+                        { url: apiSrc, opts: {} },
+                        { url: rawSrc, opts: { cache: 'no-store' } },
+                        { url: localSrc, opts: { cache: 'no-store' } }
+                      ]
+                    : [
+                        { url: rawSrc, opts: { cache: 'no-store' } },
+                        { url: localSrc, opts: { cache: 'no-store' } },
+                        { url: apiSrc, opts: {} }
+                      ];
                 let fallbackCandidate = null;
 
-                for (const srcUrl of sources) {
+                for (const src of sources) {
                     try {
-                        const res = await fetchWithTimeout(srcUrl, { cache: 'no-store' }, 4500);
+                        const res = await fetchWithTimeout(src.url, src.opts, 4500);
                         if (!res || !res.ok) continue;
                         const data = await res.json();
-                        const candidate = normalizeBaseUrl(data && data.url);
+                        const candidate = extractTunnelUrlFromPayload(data);
                         if (!candidate) continue;
 
                         if (!_avoidUrl || candidate !== _avoidUrl) {

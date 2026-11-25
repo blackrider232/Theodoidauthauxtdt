@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sce-dauthau-v2-enterprise-v26';
+const CACHE_NAME = 'sce-dauthau-v2-enterprise-v27';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -41,6 +41,7 @@ self.addEventListener('fetch', (event) => {
         event.request.method !== 'GET' ||
         reqUrl.includes('tunnel-url.json') ||
         reqUrl.includes('raw.githubusercontent.com') ||
+        reqUrl.includes('api.github.com') ||
         reqUrl.includes('/bieu_mau_goc/') ||
         reqUrl.includes('.docx') ||
         reqUrl.includes('/api/') ||
