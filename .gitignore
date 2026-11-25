@@ -12,3 +12,6 @@ backend/uploads/*
 backend/pgdata/
 bieu_mau_goc/_backup_*/
 ~$*
+.env
+backend/.env
+backend/current_tunnel_url.txt

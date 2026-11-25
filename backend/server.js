@@ -399,14 +399,226 @@ app.post('/api/storage/upload', authenticateToken, upload.single('file'), (req, 
 // 12. Tải về / Mở file từ NAS
 app.use('/api/storage/files', express.static(UPLOADS_DIR, { maxAge: '7d' }));
 
-// 13. Healthcheck
+// ====================== CLOUDFLARE QUICK TUNNEL AUTO-SYNC ======================
+
+const TUNNEL_FILE_PATH = path.join(__dirname, 'current_tunnel_url.txt');
+const LOCAL_ENV_PATH = path.join(__dirname, '.env');
+let currentTunnelUrl = null;
+let currentTunnelUpdatedAt = null;
+let lastGithubSyncedUrl = null;
+let lastGithubSyncAt = null;
+let lastGithubSyncError = null;
+let isSyncingGithub = false;
+
+function readLocalEnv() {
+    const out = {};
+    try {
+        if (fs.existsSync(LOCAL_ENV_PATH)) {
+            const raw = fs.readFileSync(LOCAL_ENV_PATH, 'utf8');
+            for (const line of raw.split(/\r?\n/)) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#')) continue;
+                const cleanLine = trimmed.startsWith('export ') ? trimmed.slice(7).trim() : trimmed;
+                const eqIdx = cleanLine.indexOf('=');
+                if (eqIdx === -1) continue;
+                const key = cleanLine.slice(0, eqIdx).trim();
+                let val = cleanLine.slice(eqIdx + 1).trim();
+                if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                    val = val.slice(1, -1).trim();
+                }
+                if (key) out[key] = val;
+            }
+        }
+    } catch (err) {
+        console.warn('Không thể đọc file .env cục bộ:', err.message);
+    }
+    return {
+        GITHUB_TOKEN: out.GITHUB_TOKEN || process.env.GITHUB_TOKEN || '',
+        GITHUB_REPO: out.GITHUB_REPO || process.env.GITHUB_REPO || 'blackrider232/Theodoidauthauxtdt',
+        GITHUB_BRANCH: out.GITHUB_BRANCH || process.env.GITHUB_BRANCH || 'main',
+        TUNNEL_METRICS_URL: out.TUNNEL_METRICS_URL || process.env.TUNNEL_METRICS_URL || 'http://tunnel:2000'
+    };
+}
+
+async function detectCurrentTunnelUrl() {
+    const envCfg = readLocalEnv();
+    const metricsBase = String(envCfg.TUNNEL_METRICS_URL || 'http://tunnel:2000').replace(/\/+$/, '');
+    const tryCloudflareRe = /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i;
+
+    let detected = null;
+    try {
+        const res = await fetch(`${metricsBase}/quicktunnel`, { signal: AbortSignal.timeout(3000) });
+        if (res.ok) {
+            const json = await res.json();
+            if (json && json.hostname) {
+                const candidate = 'https://' + String(json.hostname).trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+                if (tryCloudflareRe.test(candidate)) {
+                    detected = candidate;
+                }
+            }
+        }
+    } catch (e) {
+        // Bỏ qua nếu container tunnel đang khởi tạo
+    }
+
+    if (!detected) {
+        try {
+            const mRes = await fetch(`${metricsBase}/metrics`, { signal: AbortSignal.timeout(3000) });
+            if (mRes.ok) {
+                const text = await mRes.text();
+                const match = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/i);
+                if (match && tryCloudflareRe.test(match[0])) {
+                    detected = match[0];
+                }
+            }
+        } catch (e) {
+            // Bỏ qua
+        }
+    }
+
+    if (detected && detected !== currentTunnelUrl) {
+        currentTunnelUrl = detected;
+        currentTunnelUpdatedAt = new Date().toISOString();
+        try {
+            fs.writeFileSync(TUNNEL_FILE_PATH, detected + '\n', 'utf8');
+        } catch (writeErr) {
+            console.warn('Không thể ghi current_tunnel_url.txt:', writeErr.message);
+        }
+        console.log(`🌐 Phát hiện Cloudflare Quick Tunnel mới: ${detected}`);
+    }
+
+    return currentTunnelUrl;
+}
+
+async function syncTunnelUrlToGithub(url) {
+    if (isSyncingGithub || !url) return;
+    const envCfg = readLocalEnv();
+    const githubToken = String(envCfg.GITHUB_TOKEN || '').trim();
+    if (!githubToken || url === lastGithubSyncedUrl) return;
+
+    const githubRepo = String(envCfg.GITHUB_REPO || 'blackrider232/Theodoidauthauxtdt').trim();
+    const githubBranch = String(envCfg.GITHUB_BRANCH || 'main').trim();
+    const apiUrl = `https://api.github.com/repos/${githubRepo}/contents/tunnel-url.json`;
+    const commonHeaders = {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'SCE-NAS-Tunnel-Sync'
+    };
+
+    isSyncingGithub = true;
+    try {
+        let existingSha = null;
+        const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(githubBranch)}`, {
+            headers: commonHeaders,
+            signal: AbortSignal.timeout(8000)
+        });
+
+        if (getRes.status === 200) {
+            const fileMeta = await getRes.json();
+            existingSha = fileMeta.sha || null;
+            if (fileMeta.content) {
+                try {
+                    const decoded = Buffer.from(String(fileMeta.content).replace(/\n/g, ''), 'base64').toString('utf8');
+                    const parsed = JSON.parse(decoded);
+                    if (parsed && parsed.url === url) {
+                        lastGithubSyncedUrl = url;
+                        if (!lastGithubSyncAt) lastGithubSyncAt = new Date().toISOString();
+                        lastGithubSyncError = null;
+                        return;
+                    }
+                } catch (parseErr) {
+                    // File trên repo chưa đúng JSON chuẩn -> tiếp tục ghi đè
+                }
+            }
+        } else if (getRes.status !== 404) {
+            const errTxt = await getRes.text().catch(() => '');
+            lastGithubSyncError = `GitHub GET HTTP ${getRes.status}: ${errTxt.slice(0, 200)}`;
+            console.warn('⚠️ Lỗi đọc tunnel-url.json trên GitHub:', lastGithubSyncError);
+            return;
+        }
+
+        const payload = {
+            url,
+            updated_at: new Date().toISOString(),
+            source: 'sce_dauthau_nas'
+        };
+        const putBody = {
+            message: 'chore(tunnel): auto-update NAS tunnel URL [skip ci]',
+            branch: githubBranch,
+            content: Buffer.from(JSON.stringify(payload, null, 2) + '\n', 'utf8').toString('base64')
+        };
+        if (existingSha) putBody.sha = existingSha;
+
+        const putRes = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+                ...commonHeaders,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putBody),
+            signal: AbortSignal.timeout(10000)
+        });
+
+        if (putRes.status === 200 || putRes.status === 201) {
+            lastGithubSyncedUrl = url;
+            lastGithubSyncAt = new Date().toISOString();
+            lastGithubSyncError = null;
+            console.log(`✅ Đã tự động đồng bộ Tunnel URL lên GitHub (${githubRepo}): ${url}`);
+        } else {
+            const errTxt = await putRes.text().catch(() => '');
+            lastGithubSyncError = `GitHub PUT HTTP ${putRes.status}: ${errTxt.slice(0, 200)}`;
+            console.warn('⚠️ Lỗi đẩy tunnel-url.json lên GitHub:', lastGithubSyncError);
+        }
+    } catch (err) {
+        lastGithubSyncError = err.message || 'Unknown GitHub sync error';
+        console.warn('⚠️ Không thể kết nối GitHub API để đồng bộ Tunnel URL:', lastGithubSyncError);
+    } finally {
+        isSyncingGithub = false;
+    }
+}
+
+async function checkAndSyncTunnel() {
+    try {
+        const url = await detectCurrentTunnelUrl();
+        if (url) {
+            await syncTunnelUrlToGithub(url);
+        }
+    } catch (err) {
+        console.warn('⚠️ Lỗi kiểm tra Tunnel định kỳ:', err.message);
+    }
+}
+
+// 13. Endpoint chẩn đoán địa chỉ Quick Tunnel hiện tại
+app.get('/api/tunnel-url', (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const envCfg = readLocalEnv();
+    res.json({
+        url: currentTunnelUrl,
+        updated_at: currentTunnelUpdatedAt,
+        github_token_configured: Boolean(String(envCfg.GITHUB_TOKEN || '').trim()),
+        github_synced_url: lastGithubSyncedUrl,
+        github_synced_at: lastGithubSyncAt,
+        github_sync_error: lastGithubSyncError
+    });
+});
+
+// 14. Healthcheck
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', service: 'SCE Procurement NAS Backend', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'ok',
+        service: 'SCE Procurement NAS Backend',
+        timestamp: new Date().toISOString(),
+        tunnel_url: currentTunnelUrl
+    });
 });
 
 // Khởi chạy server
 initDatabase().then(() => {
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 SCE Procurement NAS Backend đang chạy tại http://0.0.0.0:${PORT}`);
+        setTimeout(checkAndSyncTunnel, 5000);
+        setTimeout(checkAndSyncTunnel, 15000);
+        setInterval(checkAndSyncTunnel, 30000);
     });
 });

@@ -29,6 +29,8 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://sce_admin:SceDauthau2026!@db:5432/sce_dauthau
       JWT_SECRET: sce_dauthau_nas_secret_key_2026
+      GITHUB_REPO: blackrider232/Theodoidauthauxtdt
+      TUNNEL_METRICS_URL: http://tunnel:2000
     depends_on:
       - db
 
@@ -37,7 +39,7 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: sce_dauthau_tunnel
     restart: always
-    command: tunnel --no-autoupdate --url http://api:3000
+    command: tunnel --no-autoupdate --metrics 0.0.0.0:2000 --url http://api:3000
     depends_on:
       - api
 
